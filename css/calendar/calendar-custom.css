@@ -1,0 +1,161 @@
+ /* Calendar */
+ .white-popup-block {
+    background: #fff;
+    padding: 20px 30px;
+    text-align: left;
+    max-width: 650px;
+    margin: 40px auto;
+    position: relative;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.white-popup-block h2 {
+    margin-top: 0;
+}
+
+.white-popup-block form {
+    margin-bottom: 20px;
+}
+
+.white-popup-block form input[type="text"],
+.white-popup-block form select,
+.white-popup-block form textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    font-size: 16px;
+}
+
+.white-popup-block form textarea {
+    height: 100px;
+}
+
+.white-popup-block form button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.white-popup-block form button:hover {
+    background-color: #45a049;
+}
+
+.white-popup-block p {
+    margin: 0;
+    padding: 10px 0;
+}
+
+.white-popup-block p a {
+    color: #337ab7;
+    text-decoration: none;
+}
+
+.white-popup-block p a:hover {
+    text-decoration: underline;
+}
+
+/* Additional Styling */
+
+/* Form Fields */
+.white-popup-block form input[type="date"],
+.white-popup-block form input[type="time"],
+.white-popup-block form select {
+    background-color: #f5f5f5;
+}
+
+/* Save Button */
+.white-popup-block form #save-event {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.white-popup-block form #save-event:hover {
+    background-color: #45a049;
+}
+
+/* Error Message */
+#error-message {
+    color: red;
+    display: none;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+/* Sezione Checkbox */
+.custom-checkbox {
+    display: inline-block;
+    position: relative;
+    padding-left: 25px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.custom-checkbox input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.checkmark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 18px;
+    width: 18px;
+    background-color: #eee;
+    border-radius: 3px;
+}
+
+
+.custom-checkbox:hover input~.checkmark {
+    background-color: #ccc;
+}
+
+.custom-checkbox input:checked~.checkmark {
+    background-color: #2196F3;
+}
+
+.checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+}
+
+.custom-checkbox input:checked~.checkmark:after {
+    display: block;
+}
+
+.custom-checkbox .checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Sezione Giorni cliccabili */
+.fc-day-number {
+    color: black;
+    text-decoration: none;
+}
+
+.fc-day-number:hover {
+    text-underline-position: below;
+}
