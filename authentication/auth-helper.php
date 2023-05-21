@@ -3,7 +3,7 @@
 /**
  *  Accetta una stringa $textValue come input e la valida per assicurarsi che non sia vuota. 
  *  Se la stringa non è vuota, viene effettuata una pulizia dei caratteri illegali tramite la funzione 
- *  filter_var() con l'opzione FILTER_SANITIZE_STRING. 
+ *  filter_var() con l'opzione FILTER_UNSAFE_RAW. 
  *  Infine, la stringa pulita viene restituita come output. Se la stringa è vuota, viene restituita una stringa vuota.
  *  @param string $textValue Il testo da validare.
  *  @return string Il testo validato o una stringa vuota se il testo è vuoto
@@ -13,7 +13,7 @@ function validate_input_text($textValue)
     if (!empty($textValue)) {
         $trim_text = trim($textValue);
         // rimuove caratteri illegali
-        $sanitize_str = filter_var($trim_text, FILTER_SANITIZE_STRING);
+        $sanitize_str = filter_var($trim_text, FILTER_UNSAFE_RAW);
         return $sanitize_str;
     }
     return '';

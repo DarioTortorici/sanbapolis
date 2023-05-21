@@ -14,12 +14,12 @@ if (empty($password)){
     $error[] = "You forgot to enter your password";
 }
 
-if(empty($error)){
+if (empty($error)) {
     // Preparazione SQL query e PDO statement 
     $query = "SELECT userID, firstName, lastName, email, password, profileImage FROM user WHERE email=:email";
     $stmt = $con->prepare($query);
 
-    //Imposta parametro email
+    // Imposta parametro email
     $stmt->bindParam(':email', $email);
 
     // Esegue query
@@ -27,16 +27,29 @@ if(empty($error)){
 
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!empty($row)){
+    if (!empty($row)) {
         // Verifica password
-        if(password_verify($password, $row['password'])){
-            header("location: ../profile/user-dashboard.php");
+        if (password_verify($password, $row['password'])) {
+            // Credenziali corrette, reindirizza l'utente alla pagina successiva
+            $response = array('success' => true);
+            echo json_encode($response);
+            exit();
+        } else {
+            // Credenziali errate
+            $response = array('success' => false);
+            echo json_encode($response);
             exit();
         }
-    }else{
-        echo "Non sei ancora nostro utente, registrati!";
+    } else {
+        // Utente non trovato
+        $response = array('success' => false);
+        echo json_encode($response);
+        exit();
     }
-
-}else{
-    echo "Riempi tutti i campi per effettuare l'accesso";
+} else {
+    // Non sono stati compilati tutti i campi
+    $response = array('success' => false);
+    echo json_encode($response);
+    exit();
 }
+

@@ -56,12 +56,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <button type="submit" class="btn btn-warning rounded-pill text-dark px-5">Login</button>
                     </div>
 
+                    <div id="mismatch-credentials" class="alert alert-danger" role="alert" style="display: none;">
+                        Le credenziali di accesso non sono corrette. Riprova.
+                    </div>
+
+
                 </form>
             </div>
         </div>
     </div>
 </section>
 <!-- #Area di registrazione -->
+
+<script src="../js/authentication/auth.js"></script>
 
 
 <?php
