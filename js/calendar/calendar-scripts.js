@@ -62,7 +62,7 @@
 
         // Verifica se i campi richiesti sono stati compilati prima di inviare la richiesta
         if (validateForm()) {
-            $.ajax({
+            jQuery.ajax({
                 url: 'calendar-helper.php?action=save-event',
                 type: 'POST',
                 data: formData,
@@ -97,9 +97,6 @@
     }
 
 
-    var calendar = null;
-
-
     // Funzione per ottenere gli eventi dal server
     function fetchEvents() {
         jQuery.ajax({
@@ -120,44 +117,49 @@
         fetchEvents();
     });
 
+    //creazione Oggetto globale calendar
+    var calendar = null;
+
+    //Carica il calendario e lo fa visualizzare
     function loadCalendar(data) {
         var calendarEl = document.getElementById('calendar');
-        var calendar;
-
+    
         if (calendar) {
-            calendar.destroy();
+            calendar.destroy(); // Se esiste già un calendario, distruggilo
         }
-
+    
         calendar = new FullCalendar.Calendar(calendarEl, {
-            events: data,
-            plugins: ['interaction', 'dayGrid', 'timeGrid', 'list'],
+            events: data, // Eventi da visualizzare nel calendario
+            plugins: ['interaction', 'dayGrid', 'timeGrid', 'list'], // Plugin aggiuntivi da utilizzare
             header: {
-                left: 'prev,next today',
-                center: 'title',
-                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                left: 'prev,next today', // Elementi del header a sinistra
+                center: 'title', // Elemento del header al centro
+                right: 'dayGridMonth,timeGridWeek,timeGridDay' // Elementi del header a destra
             },
-            navLinks: true,
-            dateClick: function(info) {
-                createGoal(info.dateStr);
-                handleDateClick(info);
+            navLinks: true, // Abilita la navigazione ai giorni/settimane/mesi
+            dateClick: function(info) { 
+                // Gestisce il click su una data nel calendario
+                createGoal(info.dateStr); // Triggera modal nuovo evento
+                handleDateClick(info); //Aggiunge automaticamente la data cliccata nel form
             },
-
             eventClick: function(info) {
                 var currentEvent = info.event.id;
-                showGoal(currentEvent);
+                showGoal(currentEvent); // Triggera modal per visualizzare informazioni evento
             },
-            dayMaxEventRows: true, // for all non-TimeGrid views
+            dayMaxEventRows: true, // Numero massimo di righe per evento nei calendari non basati su TimeGrid
             views: {
                 timeGrid: {
-                    dayMaxEventRows: 6 // adjust to 6 only for timeGridWeek/timeGridDay
+                    dayMaxEventRows: 6 // Numero massimo di righe per evento nei calendari basati su TimeGrid (timeGridWeek/timeGridDay)
                 }
             }
         });
-
-        calendar.render();
-
+    
+        calendar.render(); // Rende visibile il calendario
+    
     }
+    
 
+    // Apre modal nuovo evento
     function createGoal(currentDate) {
         $('#save-form').trigger('reset');
         $('#save-form input[name=id]').val("");
@@ -173,14 +175,14 @@
 
 
     function showGoal(id) {
-        // get event from server
-        $.get('calendar-helper.php?action=get-event', {
+        // get evento dal server
+        jQuery.get('calendar-helper.php?action=get-event', {
             id: id
         }, function(event) {
 
             updateEventModal(event.start, event.startTime, event.endTime, event.title, event.url)
 
-            // then we open the modal
+            // Apre il modal
             $.magnificPopup.open({
                 items: {
                     src: "#show-event-modal"
