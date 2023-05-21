@@ -15,7 +15,7 @@ function toggleWeeklyRepeat(checkbox) {
 }
 
 // Funzione per modificare i valori del event-modal
-function updateEventModal(date, startTime, endTime, title, url) {
+function updateEventModal(date, startTime, endTime, title, url, id) {
     // Formatta la data (giorno mese anno)
     var formattedDate = formatDate(date);
 
@@ -33,6 +33,9 @@ function updateEventModal(date, startTime, endTime, title, url) {
     // Aggiorna il titolo e l'URL dell'evento
     document.getElementById("event-name").innerText = title;
     document.getElementById("event-url").innerText = url;
+
+    // Aggiorna l'id dell'evento
+    document.getElementById("event-id").value = id;
 }
 
 // Funzione formattare DD-MM-YYYY
@@ -154,6 +157,7 @@ function loadCalendar(data) {
             var currentEvent = info.event.id;
             showGoal(currentEvent); // Triggera modal per visualizzare informazioni evento
         },
+
     });
 
     calendar.render(); // Rende visibile il calendario
@@ -182,7 +186,7 @@ function showGoal(id) {
         id: id
     }, function (event) {
 
-        updateEventModal(event.start, event.startTime, event.endTime, event.title, event.url)
+        updateEventModal(event.start, event.startTime, event.endTime, event.title, event.url, event.id)
 
         // Apre il modal
         $.magnificPopup.open({
@@ -195,6 +199,29 @@ function showGoal(id) {
     });
 }
 
+
+function deleteEvent() {
+    var eventId = document.getElementById('event-id').value;
+
+    // Remove the event from the calendar
+    calendar.getEventById(eventId).remove();
+
+    jQuery.ajax({
+        url: 'calendar-helper.php?action=delete-event',
+        type: 'POST',
+        data: { id: eventId },
+        dataType: 'json',
+        success: function (response) {
+            if (response == 'success') {
+                $.magnificPopup.close()
+            }
+        },
+        error: function (xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+
+}
 
 // Funzione per gestire il click su una data nel calendario
 function handleDateClick(date) {

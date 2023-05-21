@@ -79,9 +79,12 @@ $user = array();
     <div style="min-height: 250px;">
         <h3 id="event-name">Titolo</h3>
         <p id="event-url">This is my goal description</p>
+        <p id="event-id" style="display: none;"> id </p>
     </div>
-    <p style="height: 5px; background: orangered; width: 100%; margin-top: 10px;"></p>
+
+    <button id="delete-button" class="btn btn-danger" onclick="deleteEvent()">Elimina</button>
 </div>
+
 
 
 <!-- Javascripts per gestire il calendario -->

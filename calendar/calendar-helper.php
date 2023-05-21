@@ -14,6 +14,14 @@ function is_ajax_request()
     return false;
 }
 
+// elimina un evento nel database
+function delete_training($id){
+    $con = get_connection();
+        $query = $con->prepare("DELETE from calendar_events WHERE id=?");
+        $result = $query->execute([$id]);
+        return $result;
+}
+
 // salva o aggiorna un evento nel database gestendo anche parametri di default.
 function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport,$coach,$note, $eventType, $id)
 {
@@ -252,13 +260,17 @@ if (isset($_GET['action'])) {
         $query = $con->prepare($sql);
         $query->execute([$nextDate, $id]);
         echo 'good';
-    } elseif ($action == 'remove-goal') {
+    } elseif ($action == 'delete-event') {
         $id = isset($_POST['id']) ? $_POST['id'] : null;
-        $con = get_connection();
-        $sql = "DELETE from events WHERE id=?";
-        $query = $con->prepare($sql);
-        $query->execute([$id]);
-        echo "good";
+        if (delete_training($id)){
+            $response = array('status' => 'success', 'message' => 'Evento eliminato con successo');   
+        }
+        else{
+            $response = array('status' => 'error', 'message' => 'Richiesta non valida');
+        }
+        
+        echo json_encode($response);
+
     } else {
         // Invalid action
     }
