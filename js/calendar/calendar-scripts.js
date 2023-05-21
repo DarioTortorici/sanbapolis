@@ -212,7 +212,7 @@ function deleteEvent() {
         data: { id: eventId },
         dataType: 'json',
         success: function (response) {
-            if (response == 'success') {
+            if (response.status == 'success') {
                 $.magnificPopup.close()
             }
         },
@@ -220,7 +220,6 @@ function deleteEvent() {
             console.log(xhr.responseText);
         }
     });
-
 }
 
 // Funzione per gestire il click su una data nel calendario

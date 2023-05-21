@@ -1,5 +1,7 @@
 <?php
 
+use JetBrains\PhpStorm\Internal\ReturnTypeContract;
+
 require_once '../authentication/db_connection.php';
 
 // verifica se la richiesta è una chiamata AJAX.
@@ -15,25 +17,41 @@ function is_ajax_request()
 }
 
 // elimina un evento nel database
-function delete_training($id){
+function delete_training($event_id)
+{
     $con = get_connection();
-        $query = $con->prepare("DELETE from calendar_events WHERE id=?");
-        $result = $query->execute([$id]);
-        return $result;
+
+    // Elimina le righe figlie nella tabella "event_info"
+    $sql_delete_event_info = "DELETE FROM event_info WHERE event_id = ?";
+    $query_delete_event_info = $con->prepare($sql_delete_event_info);
+    $query_delete_event_info->execute([$event_id]);
+
+    // Elimina l'evento dalla tabella "calendar_events"
+    $sql_delete_event = "DELETE FROM calendar_events WHERE id = ?";
+    $query_delete_event = $con->prepare($sql_delete_event);
+    $query_delete_event->execute([$event_id]);
+
+    // Verifica se le query di eliminazione hanno avuto successo
+    if ($query_delete_event_info->rowCount() > 0 && $query_delete_event->rowCount() > 0) {
+        return true;
+    } else {
+        // Almeno una delle eliminazioni non è riuscita
+        return false;
+    }
 }
 
 // salva o aggiorna un evento nel database gestendo anche parametri di default.
-function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport,$coach,$note, $eventType, $id)
+function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $id)
 {
     // missing parameter `resourceEditable`=?, `resourceId`=?, `resourceIds`=?
 
     $con = get_connection();
 
-    if ($startRecur = "0000-00-00"){
+    if ($startRecur = "0000-00-00") {
         $startRecur = $startDate;
     }
 
-    if ($endRecur = "0000-00-00"){
+    if ($endRecur = "0000-00-00") {
         // +1 perché altrimenti non prende giorno finale
         $endRecursive = strtotime($endDate . ' +1 day');
         $endRecur =  date('Y-m-d', $endRecursive);
@@ -44,12 +62,11 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
     $daysOfWeek = null;
 
     // allDay settings
-    if ($allDay){
+    if ($allDay) {
         $startTime = null;
         $endTime = null;
         $allDay = 1;
-    }
-    else{
+    } else {
         $allDay = 0;
     }
 
@@ -97,11 +114,11 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
 
         $sql = "UPDATE event_info SET  `society`=?, `sport`=?, `coach`=?, `note`=? , `training`=? , WHERE id=?";
         $query = $con->prepare($sql);
-        $query->execute([$society,$sport,$coach,$note,$eventTypeBoolean,$id]);
+        $query->execute([$society, $sport, $coach, $note, $eventTypeBoolean, $id]);
 
         return $id;
     } else { //se non presente id inseriamo i record delle due tabelle
-        
+
         $sql = "INSERT INTO calendar_events (`groupId`,`allDay`,`start`,`end`,`daysOfWeek`, `startTime`, `endTime`,`startRecur`, `endRecur`, `title`, `url`,
         `interactive`, `className`, `editable`, `startEditable`, `durationEditable`, `display`, `overlap`, `color`, `backgroundColor`, `borderColor`, `textColor`)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -111,12 +128,13 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
             $interactive, $className, $editable, $startEditable, $durationEditable, $display, $overlap, $color, $backgroundColor, $borderColor, $textcolor
         ]);
 
-        $sql = "INSERT INTO event_info (`society`, `sport`, `coach`, `note`, `training`) 
-        VALUES (?,?,?,?,?)";
+        $calendar_id = $con->lastInsertId();
+        $sql = "INSERT INTO event_info (`society`, `sport`, `coach`, `note`, `training`, `event_id`) 
+        VALUES (?,?,?,?,?,?)";
         $query = $con->prepare($sql);
-        $query->execute([$society,$sport,$coach,$note,$eventTypeBoolean]);
+        $query->execute([$society, $sport, $coach, $note, $eventTypeBoolean, $calendar_id]);
 
-        return $con->lastInsertId();
+        return $calendar_id;
     }
 }
 
@@ -205,17 +223,17 @@ if (isset($_GET['action'])) {
         $startRecur = isset($_POST['startRecur']) ? $_POST['startRecur'] : null;
         $endRecur = isset($_POST['endRecur']) ? $_POST['endRecur'] : null;
         $url = isset($_POST['url']) ? $_POST['url'] : null;
-        
+
         //tabella event-info 
         $society = isset($_POST['society']) ? $_POST['society'] : null;
         $sport = isset($_POST['sport']) ? $_POST['sport'] : null;
         $coach = isset($_POST['coach']) ? $_POST['coach'] : null;
         $note = isset($_POST['description']) ? $_POST['description'] : null;
         $eventType = isset($_POST['event_type']) ? $_POST['event_type'] : null;
-        
+
         //Sono obbligatori society e startdate ed effettuiamo il controllo che esistano
         if ($society && $startDate) {
-            $id = save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport,$coach,$note, $eventType, $id);
+            $id = save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $id);
             echo json_encode(array('status' => 'success', 'id' => $id));
         } else {
             echo json_encode(array('status' => 'error', 'message' => 'Missing required fields'));
@@ -240,11 +258,11 @@ if (isset($_GET['action'])) {
         echo json_encode([
             'description' => nl2br($description)
         ]);
-    } elseif ($action == 'next-date') { 
+    } elseif ($action == 'next-date') {
         $id = isset($_POST['id']) ? $_POST['id'] : null;
         $next = isset($_POST['next']) ? $_POST['next'] : null;
         $goal = get_one_training($id);
-        $currentDate = $goal['startdate']; 
+        $currentDate = $goal['startdate'];
         $nextDate = null;
         if ($next == 'day') {
             $nextDate = date("Y-m-d", strtotime($currentDate . " +1 day"));
@@ -262,15 +280,13 @@ if (isset($_GET['action'])) {
         echo 'good';
     } elseif ($action == 'delete-event') {
         $id = isset($_POST['id']) ? $_POST['id'] : null;
-        if (delete_training($id)){
-            $response = array('status' => 'success', 'message' => 'Evento eliminato con successo');   
-        }
-        else{
+        if (delete_training($id)) {
+            $response = array('status' => 'success', 'message' => 'Evento eliminato con successo');
+        } else {
             $response = array('status' => 'error', 'message' => 'Richiesta non valida');
         }
-        
-        echo json_encode($response);
 
+        echo json_encode($response);
     } else {
         // Invalid action
     }
