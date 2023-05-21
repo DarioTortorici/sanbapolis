@@ -35,8 +35,15 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
     // al momento non capisco come si usa
     $daysOfWeek = null;
 
-    // Non fa funzionare le view
-    $allDay = null;
+    // allDay settings
+    if ($allDay){
+        $startTime = null;
+        $endTime = null;
+        $allDay = 1;
+    }
+    else{
+        $allDay = 0;
+    }
 
 
     $interactive = true;
