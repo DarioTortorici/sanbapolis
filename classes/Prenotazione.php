@@ -1,8 +1,11 @@
 <?php
 
 class Prenotazione{
-    private $dataOra;
+    private $dataOraInizio;
+    private $dataOraFine;
     private $sport;
+    private $autore;
+    private $persona;
 
     public function __construct(){}
 }

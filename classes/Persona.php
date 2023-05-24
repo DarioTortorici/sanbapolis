@@ -10,12 +10,9 @@ class Persona{
     protected $telefono;
     protected $utente;
 
-    public function __construct(){
-        
-    }
+    
 
-
-
+    
 }
 
 ?>
