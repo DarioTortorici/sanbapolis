@@ -85,6 +85,14 @@ function saveEvent() {
     }
 }
 
+
+
+    // Aggiungi un listener per l'evento di cambio stato dei checkbox
+    var checkboxes = document.getElementsByName("daysOfWeek[]");
+    for (var i = 0; i < checkboxes.length; i++) {
+        checkboxes[i].addEventListener("change", saveSelectedDays);
+    }
+
 // Funzione che controlla che tutti i campi fondamentali siano stati compilati
 function validateForm() {
     var requiredFields = ['society', 'start-date', 'coach'];
@@ -107,6 +115,7 @@ function fetchEvents() {
         type: 'GET',
         dataType: 'json',
         success: function (response) {
+            response.daysOfWeek = JSON.parse(response.daysOfWeek)
             loadCalendar(response);
         },
         error: function (xhr, status, error) {
@@ -114,6 +123,8 @@ function fetchEvents() {
         }
     });
 }
+
+
 
 // Inizializza il calendario quando il documento è pronto
 $(document).ready(function () {

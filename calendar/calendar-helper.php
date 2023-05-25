@@ -43,23 +43,19 @@ function delete_training($event_id)
 // salva o aggiorna un evento nel database gestendo anche parametri di default.
 function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $id)
 {
-    // missing parameter `resourceEditable`=?, `resourceId`=?, `resourceIds`=?
+    // missing premium parameter `resourceEditable`=?, `resourceId`=?, `resourceIds`=?
 
     $con = get_connection();
 
-    if ($startRecur = "0000-00-00") {
+    if ($startRecur == "0000-00-00") {
         $startRecur = $startDate;
     }
 
-    if ($endRecur = "0000-00-00") {
+    if ($endRecur == "0000-00-00") {
         // +1 perché altrimenti non prende giorno finale
         $endRecursive = strtotime($endDate . ' +1 day');
         $endRecur =  date('Y-m-d', $endRecursive);
     }
-
-
-    // al momento non capisco come si usa
-    $daysOfWeek = null;
 
     // allDay settings
     if ($allDay) {
@@ -217,12 +213,14 @@ if (isset($_GET['action'])) {
         $allDay = isset($_POST['allDay']) ? $_POST['allDay'] : null;
         $startDate = isset($_POST['start-date']) ? $_POST['start-date'] : null;
         $endDate = isset($_POST['end-date']) ? $_POST['end-date'] : null;
-        $daysOfWeek[] = isset($_POST['daysOfWeek[]']) ? $_POST['daysOfWeek[]'] : null;
+        $daysOfWeek = isset($_POST['daysOfWeek']) ? $_POST['daysOfWeek'] : null;
         $startTime = isset($_POST['startTime']) ? $_POST['startTime'] : null;
         $endTime = isset($_POST['endTime']) ? $_POST['endTime'] : null;
         $startRecur = isset($_POST['startRecur']) ? $_POST['startRecur'] : null;
         $endRecur = isset($_POST['endRecur']) ? $_POST['endRecur'] : null;
         $url = isset($_POST['url']) ? $_POST['url'] : null;
+
+        $daysOfWeek = json_encode($daysOfWeek);
 
         //tabella event-info 
         $society = isset($_POST['society']) ? $_POST['society'] : null;

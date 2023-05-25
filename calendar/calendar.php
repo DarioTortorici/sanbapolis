@@ -35,20 +35,20 @@ $user = array();
                 <option value="pallavolo">Pallavolo</option>
                 <option value="basket">Basket</option>
             </select><br>
-            Data di inizio ripetizione: <input id="startRecur" type="date" name="startRecur" placeholder="Data di inizio ripetizione" autocomplete="off"><br>
-            Data di fine ripetizione: <input id="endRecur" type="date" name="endRecur" placeholder="Data di fine ripetizione" autocomplete="off"><br>
             <!-- Ripetizione settimanale -->
             Ripetizione settimanale:<br>
-            <input type="checkbox" name="repeatWeekly" onchange="toggleWeeklyRepeat(this)"> Ripeti ogni settimana<br>
+            <input type="checkbox" name="repeatWeekly" onchange="toggleWeeklyRepeat(this)"> Si ripete ogni:<br>
             <div id="weeklyRepeat" style="display: none;">
+                Data di inizio ripetizione: <input id="startRecur" type="date" name="startRecur" placeholder="Data di inizio ripetizione" autocomplete="off"><br>
+                Data di fine ripetizione: <input id="endRecur" type="date" name="endRecur" placeholder="Data di fine ripetizione" autocomplete="off"><br>
                 Giorni della settimana:<br>
-                <input type="checkbox" name="daysOfWeek[]" value="monday"> Lunedì<br>
-                <input type="checkbox" name="daysOfWeek[]" value="tuesday"> Martedì<br>
-                <input type="checkbox" name="daysOfWeek[]" value="wednesday"> Mercoledì<br>
-                <input type="checkbox" name="daysOfWeek[]" value="thursday"> Giovedì<br>
-                <input type="checkbox" name="daysOfWeek[]" value="friday"> Venerdì<br>
-                <input type="checkbox" name="daysOfWeek[]" value="saturday"> Sabato<br>
-                <input type="checkbox" name="daysOfWeek[]" value="sunday"> Domenica<br>
+                <input type="checkbox" name="daysOfWeek[]" value="1"> Lunedì<br>
+                <input type="checkbox" name="daysOfWeek[]" value="2"> Martedì<br>
+                <input type="checkbox" name="daysOfWeek[]" value="3"> Mercoledì<br>
+                <input type="checkbox" name="daysOfWeek[]" value="4"> Giovedì<br>
+                <input type="checkbox" name="daysOfWeek[]" value="5"> Venerdì<br>
+                <input type="checkbox" name="daysOfWeek[]" value="6"> Sabato<br>
+                <input type="checkbox" name="daysOfWeek[]" value="0"> Domenica<br>
             </div>
 
             <!-- Altre opzioni -->
