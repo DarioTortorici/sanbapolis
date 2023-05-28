@@ -8,11 +8,11 @@ $user = array();
 
 <!-- Calendario "FullCalendar" caricato da JavaScript -->
 <div class="container">
-    <div id="calendar"></div>
+    <div id="calendar-video"></div>
 </div>
 
 <!-- Modale per visualizzare le informazioni dell'evento-->
-<div id="show-event-modal" class="white-popup-block mfp-hide">
+<div id="show-video-modal" class="white-popup-block mfp-hide">
     <p style="height: 30px; background: orangered; width: 100%;"></p>
     <div style="display: flex;">
         <h2 id="event-date" style="flex: 1;">Giorno Mese Anno</h2>
@@ -32,7 +32,7 @@ $user = array();
 
 
 <!-- Javascripts per gestire il calendario -->
-<script src="../js/calendar/calendar-scripts.js"></script>
+<script src="../js/cameras/calendar-scripts.js"></script>
 
 <?php
 

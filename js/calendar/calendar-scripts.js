@@ -86,13 +86,6 @@ function saveEvent() {
 }
 
 
-
-    // Aggiungi un listener per l'evento di cambio stato dei checkbox
-    var checkboxes = document.getElementsByName("daysOfWeek[]");
-    for (var i = 0; i < checkboxes.length; i++) {
-        checkboxes[i].addEventListener("change", saveSelectedDays);
-    }
-
 // Funzione che controlla che tutti i campi fondamentali siano stati compilati
 function validateForm() {
     var requiredFields = ['society', 'start-date', 'coach'];
@@ -115,7 +108,6 @@ function fetchEvents() {
         type: 'GET',
         dataType: 'json',
         success: function (response) {
-            response.daysOfWeek = JSON.parse(response.daysOfWeek)
             loadCalendar(response);
         },
         error: function (xhr, status, error) {
@@ -165,6 +157,7 @@ function loadCalendar(data) {
             handleDateClick(info); //Aggiunge automaticamente la data cliccata nel form
         },
         eventClick: function (info) {
+            info.jsEvent.preventDefault();
             var currentEvent = info.event.id;
             showGoal(currentEvent); // Triggera modal per visualizzare informazioni evento
         },
@@ -242,4 +235,7 @@ function handleDateClick(date) {
     // Aggiorna il form con la data selezionata
     $('#save-form input[name="start-date"]').val(clickedDate);
     $('#save-form input[name="end-date"]').val(clickedDate);
+    $('#save-form input[name="startRecur"]').val(clickedDate);
+    // $('#save-form input[name="endRecur"]').val(clickedDate);
+
 }
