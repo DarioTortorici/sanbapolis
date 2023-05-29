@@ -108,7 +108,7 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
     $className = null;
 
     //disabilitata per aggiungere la gestione della chiamata al db per modificare i valori
-    $editable = false;
+    $editable = true;
     $startEditable = false;
     $durationEditable = false;
 
@@ -172,30 +172,6 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
 }
 
 /**
- * Ottiene le informazioni di un singolo training dalla tabella "calendar_events" in base all'ID fornito.
- *
- * @param int $id L'ID del training da recuperare.
- * @return array Un array contenente le informazioni del training. Se il training non viene trovato, l'array sarà vuoto.
- */
-function get_one_training($id)
-{
-    $results = [];
-    try {
-        $con = get_connection();
-        $query = $con->prepare("SELECT * from calendar_events WHERE id=? LIMIT 1");
-        $query->execute([$id]);
-        $results = $query->fetchAll();
-        if (isset($results[0])) {
-            $results = $results[0];
-        } else {
-            $results = [];
-        }
-    } catch (Exception $e) {
-    }
-    return $results;
-}
- 
-/**
  * Recupera tutti gli eventi dalla tabella "calendar_events" del database e li restituisce come JSON.
  *
  * @return string Una stringa JSON che rappresenta gli eventi. Se non ci sono eventi, la stringa JSON sarà vuota.
@@ -227,21 +203,19 @@ function getEvent($id)
 }
 
 /**
- * Recupera tutti i training dalla tabella "calendar_events" del database.
- *
- * @return array Un array contenente le informazioni di tutti i training. Se non ci sono training, l'array sarà vuoto.
+ * Recupera gli eventi per un allenatore specifico dal database.
+ * @param string $coach Il nome o l'identificatore dell'allenatore.
+ * @return string Stringa JSON contenente gli eventi dell'allenatore.
  */
-function getTrainings()
+function getCoachEvents($coach)
 {
-    $results = [];
-    try {
-        $con = get_connection();
-        $query = $con->prepare("SELECT * from calendar_events");
-        $query->execute([]);
-        $results = $query->fetchAll();
-    } catch (Exception $e) {
-    }
-    return $results;
+    $con = get_connection();
+    $query = "SELECT ce.* FROM calendar_events ce INNER JOIN event_info ei ON ce.id = ei.event_id WHERE ei.coach = :coach";
+    $statement = $con->prepare($query);
+    $statement->bindParam(':coach', $coach);
+    $statement->execute();
+    $events = $statement->fetchAll(PDO::FETCH_ASSOC);
+    return json_encode($events);
 }
 
 /**
@@ -261,7 +235,6 @@ function getNote($id)
     return $note;
 }
 
-// Restituisce il colore dell'evento in base allo sport specificato.
 /**
  * Ottiene il colore associato a uno specifico sport.
  *
@@ -280,8 +253,10 @@ function getEventColor($sport)
     return '#378006';
 }
 
+///////////////////////////
+// GET e POST Management //
+///////////////////////////
 
-// Gestione GET e POST
 if (isset($_GET['action'])) {
     $action = $_GET['action'];
 
@@ -328,45 +303,19 @@ if (isset($_GET['action'])) {
         $id = isset($_GET['id']) ? $_GET['id'] : null;
         if ($id) {
             $note = getNote($id);
-            if ($note){
+            if ($note) {
                 echo $note['note'];
-            }
-            else {
+            } else {
                 return " ";
             }
         }
-    } elseif ($action == 'save-description') { //salvataggio descrizione
-        $id = isset($_POST['id']) ? $_POST['id'] : null;
-        $description = isset($_POST['description']) ? $_POST['description'] : null;
-        $con = get_connection();
-        $sql = "UPDATE events SET `description`=? WHERE id=?";
-        $query = $con->prepare($sql);
-        $query->execute([$description, $id]);
-        header('Content-Type: application/json');
-        echo json_encode([
-            'description' => nl2br($description)
-        ]);
-    } elseif ($action == 'next-date') {
-        $id = isset($_POST['id']) ? $_POST['id'] : null;
-        $next = isset($_POST['next']) ? $_POST['next'] : null;
-        $goal = get_one_training($id);
-        $currentDate = $goal['startdate'];
-        $nextDate = null;
-        if ($next == 'day') {
-            $nextDate = date("Y-m-d", strtotime($currentDate . " +1 day"));
-        } else if ($next == 'week') {
-            $nextDate = date("Y-m-d", strtotime($currentDate . " +1 week"));
-        } else if ($next == 'month') {
-            $nextDate = date("Y-m-d", strtotime($currentDate . " +1 month"));
-        } else if ($next == 'year') {
-            $nextDate = date("Y-m-d", strtotime($currentDate . " +1 year"));
+    } elseif ($action == 'get-coach-event') { //recupero tutti gli eventi da calendar_event dove allena coach
+        $coach = isset($_GET['coach']) ? $_GET['coach'] : null;
+        if ($coach) {
+            header('Content-Type: application/json');
+            echo getCoachEvents($coach);
         }
-        $con = get_connection();
-        $sql = "UPDATE events SET `startdate`=? WHERE id=?";
-        $query = $con->prepare($sql);
-        $query->execute([$nextDate, $id]);
-        echo 'good';
-    } elseif ($action == 'delete-event') {
+    } elseif ($action == 'delete-event') { // Elimino evento con quell'id
         $id = isset($_POST['id']) ? $_POST['id'] : null;
         if (delete_training($id)) {
             $response = array('status' => 'success', 'message' => 'Evento eliminato con successo');
