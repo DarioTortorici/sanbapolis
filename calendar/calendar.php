@@ -78,7 +78,7 @@ $user = array();
     </div>
     <div style="min-height: 250px;">
         <h3 id="event-name">Titolo</h3>
-        <p id="event-url">This is my goal description</p>
+        <p id="event-note">Note evento</p>
         <p id="event-id" style="display: none;"> id </p>
     </div>
 

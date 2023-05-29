@@ -15,7 +15,7 @@ function toggleWeeklyRepeat(checkbox) {
 }
 
 // Funzione per modificare i valori del event-modal
-function updateEventModal(date, startTime, endTime, title, url, id) {
+function updateEventModal(date, startTime, endTime, title, note, id) {
     // Formatta la data (giorno mese anno)
     var formattedDate = formatDate(date);
 
@@ -32,7 +32,7 @@ function updateEventModal(date, startTime, endTime, title, url, id) {
 
     // Aggiorna il titolo e l'URL dell'evento
     document.getElementById("event-name").innerText = title;
-    document.getElementById("event-url").innerText = url;
+    document.getElementById("event-note").innerText = note;
 
     // Aggiorna l'id dell'evento
     document.getElementById("event-id").value = id;
@@ -189,20 +189,24 @@ function showGoal(id) {
     jQuery.get('calendar-helper.php?action=get-event', {
         id: id
     }, function (event) {
+        // Effettua la richiesta per ottenere la nota
+        jQuery.get('calendar-helper.php?action=get-note', {
+            id: id
+        }, function (note) {
+            updateEventModal(event.start, event.startTime, event.endTime, event.title, note, event.id);
+            console.log(note);
 
-        updateEventModal(event.start, event.startTime, event.endTime, event.title, event.url, event.id)
-
-        // Apre il modal
-        $.magnificPopup.open({
-            items: {
-                src: "#show-event-modal"
-            },
-            type: 'inline',
-            enableEscapekey: false
-        }, 0);
+            // Apre il modal
+            $.magnificPopup.open({
+                items: {
+                    src: "#show-event-modal"
+                },
+                type: 'inline',
+                enableEscapekey: false
+            }, 0);
+        });
     });
 }
-
 
 function deleteEvent() {
     var eventId = document.getElementById('event-id').value;
@@ -236,6 +240,5 @@ function handleDateClick(date) {
     $('#save-form input[name="start-date"]').val(clickedDate);
     $('#save-form input[name="end-date"]').val(clickedDate);
     $('#save-form input[name="startRecur"]').val(clickedDate);
-    // $('#save-form input[name="endRecur"]').val(clickedDate);
 
 }

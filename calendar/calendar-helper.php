@@ -4,19 +4,32 @@ use JetBrains\PhpStorm\Internal\ReturnTypeContract;
 
 require_once '../authentication/db_connection.php';
 
-// verifica se la richiesta è una chiamata AJAX.
+/**
+ * Verifica se la richiesta corrente è una richiesta AJAX.
+ *
+ * @return bool True se la richiesta è una richiesta AJAX, altrimenti False.
+ */
 function is_ajax_request()
 {
+    // Verifica se l'intestazione 'HTTP_X_REQUESTED_WITH' è presente e ha il valore 'xmlhttprequest'
     if (
         !empty($_SERVER['HTTP_X_REQUESTED_WITH'])
         && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
     ) {
         return true;
     }
+
+    // La richiesta non è una richiesta AJAX
     return false;
 }
 
-// elimina un evento nel database
+
+/**
+ * Elimina un training specifico dalla tabella "calendar_events" e le righe figlie correlate nella tabella "event_info".
+ *
+ * @param int $event_id L'ID dell'evento da eliminare.
+ * @return bool True se l'eliminazione ha avuto successo per entrambe le tabelle, altrimenti False.
+ */
 function delete_training($event_id)
 {
     $con = get_connection();
@@ -40,7 +53,28 @@ function delete_training($event_id)
     }
 }
 
-// salva o aggiorna un evento nel database gestendo anche parametri di default.
+/**
+ * Salva un training nella tabella "calendar_events" insieme alle informazioni correlate nella tabella "event_info".
+ * Inoltre gestisce i parametri di fullcalendar.io che non sono al momento utilizzati
+ *
+ * @param int $groupId L'ID del gruppo associato all'evento.
+ * @param bool $allDay Indica se l'evento dura per l'intera giornata.
+ * @param string $startDate La data di inizio dell'evento.
+ * @param string $endDate La data di fine del training.
+ * @param string|null $daysOfWeek I giorni della settimana in cui si ripete l'evento.
+ * @param string|null $startTime L'orario di inizio del training.
+ * @param string|null $endTime L'orario di fine del training.
+ * @param string|null $startRecur La data di inizio della ricorrenza del training.
+ * @param string|null $endRecur La data di fine della ricorrenza del training.
+ * @param string $url L'URL associato al training.
+ * @param string $society Il nome dell'associazione/società associata al training.
+ * @param string $sport Lo sport del training.
+ * @param string $coach Il nome dell'allenatore associato al training.
+ * @param string $note La nota relativa al training.
+ * @param string $eventType Il tipo di evento (es. "match" o altro).
+ * @param int|null $id L'ID del training da modificare se operazione di modifica.
+ * @return int L'ID del training salvato.
+ */
 function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $id)
 {
     // missing premium parameter `resourceEditable`=?, `resourceId`=?, `resourceIds`=?
@@ -51,7 +85,7 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
         $startRecur = $startDate;
     }
 
-    if ($endRecur == "0000-00-00" || $endRecur == null ) {
+    if ($endRecur == "0000-00-00" || $endRecur == null) {
         // +1 perché altrimenti non prende giorno finale
         $endRecursive = strtotime($endDate . ' +1 day');
         $endRecur =  date('Y-m-d', $endRecursive);
@@ -66,7 +100,7 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
         $allDay = 0;
     }
 
-    if ($daysOfWeek == "null"){
+    if ($daysOfWeek == "null") {
         $daysOfWeek = null;
     }
 
@@ -137,7 +171,12 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
     }
 }
 
-// recupera un singolo evento dal database utilizzando l'ID dell'evento.
+/**
+ * Ottiene le informazioni di un singolo training dalla tabella "calendar_events" in base all'ID fornito.
+ *
+ * @param int $id L'ID del training da recuperare.
+ * @return array Un array contenente le informazioni del training. Se il training non viene trovato, l'array sarà vuoto.
+ */
 function get_one_training($id)
 {
     $results = [];
@@ -155,8 +194,12 @@ function get_one_training($id)
     }
     return $results;
 }
-
-// Recupera tutti gli eventi dal database e li restituisce come JSON.
+ 
+/**
+ * Recupera tutti gli eventi dalla tabella "calendar_events" del database e li restituisce come JSON.
+ *
+ * @return string Una stringa JSON che rappresenta gli eventi. Se non ci sono eventi, la stringa JSON sarà vuota.
+ */
 function getEvents()
 {
     $con = get_connection();
@@ -166,7 +209,12 @@ function getEvents()
     return json_encode($events);
 }
 
-// Recupera un singolo evento dal database utilizzando l'ID dell'evento e lo restituisce come JSON.
+/**
+ * Ottiene le informazioni di un singolo evento dalla tabella "calendar_events" in base all'ID fornito e lo restituisce come JSON.
+ *
+ * @param int $id L'ID dell'evento da recuperare.
+ * @return string Una stringa JSON che rappresenta l'evento. Se l'evento non viene trovato, la stringa JSON sarà vuota.
+ */
 function getEvent($id)
 {
     $con = get_connection();
@@ -178,7 +226,11 @@ function getEvent($id)
     return json_encode($event);
 }
 
-// Recupera tutti gli eventi dal database e li restituisce come un array.
+/**
+ * Recupera tutti i training dalla tabella "calendar_events" del database.
+ *
+ * @return array Un array contenente le informazioni di tutti i training. Se non ci sono training, l'array sarà vuoto.
+ */
 function getTrainings()
 {
     $results = [];
@@ -192,7 +244,30 @@ function getTrainings()
     return $results;
 }
 
+/**
+ * Recupera la nota associata a un evento dalla tabella "event_info" del database, in base all'ID dell'evento fornito.
+ *
+ * @param int $id L'ID dell'evento per il quale si desidera recuperare la nota.
+ * @return array Un array associativo contenente la nota dell'evento. Se la nota non viene trovata, l'array sarà vuoto.
+ */
+function getNote($id)
+{
+    $con = get_connection();
+    $query = "SELECT note FROM event_info WHERE event_id = :id";
+    $statement = $con->prepare($query);
+    $statement->bindParam(':id', $id);
+    $statement->execute();
+    $note = $statement->fetch(PDO::FETCH_ASSOC);
+    return $note;
+}
+
 // Restituisce il colore dell'evento in base allo sport specificato.
+/**
+ * Ottiene il colore associato a uno specifico sport.
+ *
+ * @param string $sport Lo sport per il quale si desidera ottenere il colore.
+ * @return string Una stringa che rappresenta il colore corrispondente allo sport specificato. Se lo sport non corrisponde a nessuna delle opzioni predefinite, viene restituito il colore di default.
+ */
 function getEventColor($sport)
 {
     if ($sport == 'calcio') {
@@ -204,6 +279,7 @@ function getEventColor($sport)
     }
     return '#378006';
 }
+
 
 // Gestione GET e POST
 if (isset($_GET['action'])) {
@@ -222,7 +298,7 @@ if (isset($_GET['action'])) {
         $startRecur = isset($_POST['startRecur']) ? $_POST['startRecur'] : null;
         $endRecur = isset($_POST['endRecur']) ? $_POST['endRecur'] : null;
         $url = isset($_POST['url']) ? $_POST['url'] : null;
-
+        // parsato daysOfWeek in JSON in modo da salvarlo nel database come stringa
         $daysOfWeek = json_encode($daysOfWeek);
 
         //tabella event-info 
@@ -247,6 +323,17 @@ if (isset($_GET['action'])) {
         header('Content-Type: application/json');
         if ($id) {
             echo getEvent($id);
+        }
+    } elseif ($action == 'get-note') { // recupero descrizione evento (se esiste) da event_info
+        $id = isset($_GET['id']) ? $_GET['id'] : null;
+        if ($id) {
+            $note = getNote($id);
+            if ($note){
+                echo $note['note'];
+            }
+            else {
+                return " ";
+            }
         }
     } elseif ($action == 'save-description') { //salvataggio descrizione
         $id = isset($_POST['id']) ? $_POST['id'] : null;
