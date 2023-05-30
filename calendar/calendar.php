@@ -138,7 +138,7 @@ if ($user['userType'] == "allenatore") {
     <h2 id=nome-evento>Nome Evento</h2>
     <div style="min-height: 250px;">
         <form id="edit-form">
-            <p id="id-edit" style="display: none;"> id </p>
+            <input type="text" id="id-edit" style="display: none;"> id </p>
             <label for="society-edit">Società:</label>
             <input type="text" name="society-edit" id="society-edit" placeholder="Società*" required /><br>
             <label for="start-date-edit">Data inizio:</label>

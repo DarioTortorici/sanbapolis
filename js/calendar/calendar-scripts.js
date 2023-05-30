@@ -5,8 +5,7 @@ var calendar = null;
 // Chiamate al database //
 //////////////////////////
 
-/**
- * Funzione per ottenere gli eventi dal server.
+/** Funzione per ottenere gli eventi dal server.
  * 
  * La funzione invia una richiesta AJAX di tipo GET al file "calendar-helper.php" con il parametro "action" impostato su "get-events".
  * La risposta viene interpretata come JSON, e se la richiesta ha successo, i dati degli eventi vengono passati alla funzione "loadCalendar" per caricare il calendario.
@@ -25,8 +24,8 @@ function fetchEvents() {
         }
     });
 }
-/**
- * Recupera gli incontri dal server e carica il calendario con la risposta.
+
+/** Recupera gli incontri dal server e carica il calendario con la risposta.
  *
  * Effettua una richiesta AJAX di tipo GET al file "calendar-helper.php" con il parametro "action" impostato su "get-matches".
  * Se la richiesta ha successo, la risposta viene passata alla funzione "loadCalendar" per caricare il calendario con gli incontri ottenuti.
@@ -48,8 +47,7 @@ function fetchMatches() {
     });
 }
 
-/**
- * Funzione per ottenere gli eventi di un allenatore dal server.
+/** Funzione per ottenere gli eventi di un allenatore dal server.
  * 
  * La funzione effettua una richiesta AJAX di tipo GET al file "calendar-helper.php" con il parametro "action" impostato su "get-coach-event" e il parametro "coach" impostato con il valore specificato.
  * Se la richiesta ha successo, i dati dell'evento vengono passati alla funzione "loadCalendar" per caricare il calendario.
@@ -73,8 +71,7 @@ function fetchCoachEvents(coach) {
         });
 }
 
-/**
- * Funzione per salvare un evento.
+/** Funzione per salvare un evento.
  * 
  * Serializza i dati del modulo per inviarli al database. 
  * Se i campi sono validi, invia una richiesta AJAX di tipo POST.
@@ -106,8 +103,7 @@ function saveEvent() {
     }
 }
 
-/**
- * Funzione per visualizzare i dettagli di un obiettivo.
+/** Funzione per visualizzare i dettagli di un obiettivo.
  * 
  * La funzione effettua richiesta al server per ottenere i dettagli dell'obiettivo con l'ID specificato.
  * Una volta ottenuti apre una finestra modale utilizzando il plugin Magnific Popup mostrando i dettagli ricevuti.
@@ -138,8 +134,7 @@ function showGoal(id) {
     });
 }
 
-/**
- * Funzione per eliminare un evento.
+/** Funzione per eliminare un evento.
  * 
  * Recupera l'ID dell'evento e lo rimuove dal calendario e dal database".
  */
@@ -165,6 +160,8 @@ function deleteEvent() {
     });
 }
 
+/** Mostra il modal per la modifica di un evento.
+ */
 function ShowForEditEvent() {
     
     var id = document.getElementById('event-id').value;
@@ -191,36 +188,46 @@ function ShowForEditEvent() {
     });
 }
 
-function editEvent(){
+/** Aggiorna un evento tramite una richiesta AJAX.
+ */
+function editEvent() {
     var formData = $('#edit-form').serialize();
-    var eventId = document.getElementById('id-edit').value;
-
     // Verifica se i campi richiesti sono stati compilati prima di inviare la richiesta
+    var eventId = document.getElementById('event-id').value;
 
-        jQuery.ajax({
-            url: 'http://localhost/calendar/calendar-helper.php?action=edit-event',
-            type: 'POST',
-            data: { id: eventId },
-            data: formData,
-            dataType: 'json',
-            success: function (response) {
-                if (response.status == 'success') {
-                    fetchEvents();
-                    $.magnificPopup.close();
-                }
-            },
-            error: function (xhr, status, error) {
-                console.log(xhr.responseText);
+    jQuery.ajax({
+        url: 'http://localhost/calendar/calendar-helper.php?action=edit-event',
+        type: 'POST',
+        data: {
+            id: eventId,
+            groupId: $('#group-id-edit').val(),
+            startDate: $('#start-date-edit').val(),
+            endDate: $('#end-date-edit').val(),
+            startTime: $('#start-time-edit').val(),
+            endTime: $('#end-time-edit').val(),
+            url: $('#url-edit').val(),
+            society: $('#society-edit').val(),
+            coach: $('#coach-edit').val(),
+            note: $('#description-edit').val()
+        },
+        dataType: 'json',
+        success: function (response) {
+            if (response.status == 'success') {
+                fetchEvents();
+                $.magnificPopup.close();
             }
-        });
-    } 
+        },
+        error: function (xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
 
 ////////////////////////
 //    Altri script    //
 ////////////////////////
 
-/**
- * Funzione per visualizzare il calendario con gli eventi forniti.
+/** Funzione per visualizzare il calendario con gli eventi forniti.
  * 
  * La funzione crea un oggetto `calendar` utilizzando il plugin FullCalendar. 
  * Se esiste già un calendario presente, viene distrutto prima di creare il nuovo calendario. 
@@ -271,8 +278,7 @@ function loadCalendar(data) {
 
 }
 
-/**
- * Funzione per aggiornare i valori del modal dell'evento.
+/** Funzione per aggiornare i valori del modal dell'evento.
  * 
  * @param {string} date - La data dell'evento.
  * @param {string} startTime - L'orario di inizio dell'evento.
@@ -304,6 +310,21 @@ function updateEventModal(date, startTime, endTime, title, note, id) {
     document.getElementById("event-id").value = id;
 }
 
+/** Funzione per aggiornare i campi del modal di modifica evento.
+ *
+ * @param {string} title - Il titolo dell'evento.
+ * @param {string} society - La società relativa all'evento.
+ * @param {string} startDate - La data di inizio dell'evento.
+ * @param {string} endDate - La data di fine dell'evento.
+ * @param {string} startTime - L'orario di inizio dell'evento.
+ * @param {string} endTime - L'orario di fine dell'evento.
+ * @param {string} coach - Il nome dell'allenatore relativo all'evento.
+ * @param {string} url - L'URL dell'evento.
+ * @param {string} note - Le note relative all'evento.
+ * @param {string} groupID - L'ID del gruppo dell'evento.
+ * @param {string} id - L'ID dell'evento.
+ * @returns {void}
+ */
 function updateEventEditModal(title,society, startDate, endDate, startTime, endTime, coach,  url, note, groupID,id) {
     
     // Formatta la data per essere presa in input correttamente
@@ -341,8 +362,7 @@ function updateEventEditModal(title,society, startDate, endDate, startTime, endT
     document.getElementById("id-edit").value = id;
 }
 
-/**
- * Funzione per validare il modulo eventi.
+/** Funzione per validare il modulo eventi.
  * 
  * La funzione controlla che tutti i campi fondamentali siano stati compilati.
  * Restituisce true se tutti i campi richiesti hanno un valore non vuoto, altrimenti restituisce false.
@@ -362,8 +382,7 @@ function validateForm() {
     return true;
 }
 
-/**
- * Toggle la visibilità in base alla checkbox.
+/** Toggle la visibilità più opzioni in base alla checkbox.
  * @param {HTMLElement} checkbox - L'elemento della checkbox che attiva la modifica.
  * 
  */
@@ -372,8 +391,7 @@ function toggleMoreOptions(checkbox) {
     moreOptions.style.display = checkbox.checked ? "block" : "none";
 }
 
-/**
- * Modifica la visibilità della sezione di ripetizione settimanale in base allo stato della checkbox.
+/** Modifica la visibilità della sezione di ripetizione settimanale in base allo stato della checkbox.
  * @param {HTMLElement} checkbox - L'elemento della checkbox che attiva la modifica.
  */
 function toggleWeeklyRepeat(checkbox) {
@@ -385,8 +403,7 @@ function toggleWeeklyRepeat(checkbox) {
     }
 }
 
-/**
- * Funzione per formattare una data nel formato "giorno mese anno".
+/** Funzione per formattare una data nel formato "DD mese YYYY".
  * 
  * @param {string} date - La data da formattare (nel formato accettato dal costruttore Date() di JavaScript).
  * @returns {string} La data formattata nel formato "giorno mese anno".
@@ -402,6 +419,11 @@ function formatDate(date) {
     return day + ' ' + month + ' ' + year;
 }
 
+/** Formatta una data nel formato "YYYY-MM-DD".
+ * 
+ * @param {string} dateString - La stringa rappresentante una data.
+ * @returns {string} - La data formattata nel formato "YYYY-MM-DD".
+*/
 function formatDateYYYYMMDD(dateString) {
     var date = new Date(dateString);
     var year = date.getFullYear();
@@ -410,10 +432,8 @@ function formatDateYYYYMMDD(dateString) {
   
     return year + '-' + month + '-' + day;
 }
-  
 
-/**
- * Funzione per formattare un'orario nel formato "ore minuti".
+/** Funzione per formattare un'orario nel formato "ore minuti".
  * 
  * @param {string} date - La data da formattare (nel formato accettato dal costruttore Date() di JavaScript).
  * @returns {string} La data formattata nel formato "ore minuti".
@@ -426,8 +446,7 @@ function formatTime(time) {
     return hours + ':' + minutes;
 }
 
-/**
- * Funzione per creare un nuovo obiettivo.
+/** Funzione per creare un nuovo obiettivo.
  * 
  * La funzione apre una finestra modale utilizzando il plugin Magnific Popup, visualizzando il contenuto con l'ID "add-event-modal".
  * 
@@ -446,8 +465,7 @@ function createGoal(currentDate) {
     }, 0);
 }
 
-/**
- * Funzione per gestire il click su una data nel calendario.
+/** Funzione per gestire il click su una data nel calendario.
  * 
  * La funzione viene chiamata quando l'utente fa clic su una data nel calendario.
  * Prende come parametro l'oggetto `date` che contiene informazioni sulla data clickata.
