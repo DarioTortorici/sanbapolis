@@ -172,6 +172,49 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
 }
 
 /**
+ * Salva un training nella tabella "calendar_events" insieme alle informazioni correlate nella tabella "event_info".
+ * Inoltre gestisce i parametri di fullcalendar.io che non sono al momento utilizzati
+ *
+ * @param int $groupId L'ID del gruppo associato all'evento.
+ * @param string $startDate La data di inizio dell'evento.
+ * @param string $endDate La data di fine del training.
+ * @param string|null $startTime L'orario di inizio del training.
+ * @param string|null $endTime L'orario di fine del training.
+ * @param string|null $startRecur La data di inizio della ricorrenza del training.
+ * @param string|null $endRecur La data di fine della ricorrenza del training.
+ * @param string $url L'URL associato al training.
+ * @param string $society Il nome dell'associazione/società associata al training.
+ * @param string $sport Lo sport del training.
+ * @param string $coach Il nome dell'allenatore associato al training.
+ * @param string $note La nota relativa al training.
+ * @param int|null $id L'ID del training da modificare se operazione di modifica.
+ * @return int L'ID del training modificato.
+ */
+function edit_training($groupId,$startDate, $endDate,$startTime, $endTime, $url, $society, $coach, $note, $id)
+{
+    
+    $con = get_connection();
+
+    //se presente id update delle due tabelle
+    if ($id) {
+        $sql = "UPDATE calendar_events SET `groupId`=?, `start`=?, `end`=?, `startTime`=?, `endTime`=?, `url`=? 
+        WHERE id=?";
+        $query = $con->prepare($sql);
+        $query->execute([
+            $groupId,$startDate, $endDate, $startTime, $endTime, $url, $id
+        ]);
+        $sql = "UPDATE ei FROM calendar_events ce INNER JOIN event_info ei ON ce.id = ei.event_id  
+                SET `society`=?, `coach`=?, `note`=? , WHERE `ce.id` = ?";        
+        $query = $con->prepare($sql);
+        $query->execute([$society, $coach, $note, $id]);
+
+        return $id;
+    } else { 
+        echo ("Errore, non esiste nessun id:". $id);
+    }
+}
+
+/**
  * Recupera tutti gli eventi dalla tabella "calendar_events" del database e li restituisce come JSON.
  *
  * @return string Una stringa JSON che rappresenta gli eventi. Se non ci sono eventi, la stringa JSON sarà vuota.
@@ -195,6 +238,17 @@ function getEvent($id)
 {
     $con = get_connection();
     $query = "SELECT * FROM calendar_events WHERE id = :id";
+    $statement = $con->prepare($query);
+    $statement->bindParam(':id', $id);
+    $statement->execute();
+    $event = $statement->fetch(PDO::FETCH_ASSOC);
+    return json_encode($event);
+}
+
+function getInfoEvent($id)
+{
+    $con = get_connection();
+    $query = "SELECT ei.* FROM calendar_events ce INNER JOIN event_info ei ON ce.id = ei.event_id WHERE ce.id = :id";
     $statement = $con->prepare($query);
     $statement->bindParam(':id', $id);
     $statement->execute();
@@ -340,11 +394,38 @@ if (isset($_GET['action'])) {
     } elseif ($action == 'get-matches') { // recupero tutti gli eventi segnati come match
         header('Content-Type: application/json');
         echo getMatches();
+    } elseif ($action == 'get-event-info') { // recupero evento da event_info con id (di calendar_events) specifico
+        $id = isset($_GET['id']) ? $_GET['id'] : null;
+        header('Content-Type: application/json');
+        if ($id) {
+            echo getInfoEvent($id);
+        }
+        else { // invalid action
+        }
+    } elseif ($action == 'edit-event') { // salvataggio di un evento
+        
+        //tabella calendar_event
+        $id = isset($_POST['id']) ? $_POST['id'] : null;
+        $groupId = isset($_POST['group-id-edit']) ? $_POST['group-id-edit'] : null;
+        $startDate = isset($_POST['start-date-edit']) ? $_POST['start-date-edit'] : null;
+        $endDate = isset($_POST['end-date-edit']) ? $_POST['end-date-edit'] : null;
+        $startTime = isset($_POST['startTime']) ? $_POST['startTime-edit'] : null;
+        $endTime = isset($_POST['endTime-edit']) ? $_POST['endTime-edit'] : null;
+        $url = isset($_POST['url-edit']) ? $_POST['url-edit'] : null;
+
+        //tabella event-info 
+        $society = isset($_POST['society-edit']) ? $_POST['society-edit'] : null;
+        $coach = isset($_POST['coach-edit']) ? $_POST['coach-edit'] : null;
+        $note = isset($_POST['description-edit']) ? $_POST['description-edit'] : null;
+
+        //Sono obbligatori society e startdate ed effettuiamo il controllo che esistano
+        if ($society && $startDate) {
+            $id = edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $url, $society, $coach, $note, $id);
+            echo json_encode(array('status' => 'success', 'id' => $id));
+        } else {
+            echo json_encode(array('status' => 'error', 'message' => 'Missing required fields'));
+        }
     } else {
-        // Invalid action
-    }
-} else {
     // Missing 'action' parameter
 }
-
-?>
+}

@@ -25,6 +25,28 @@ function fetchEvents() {
         }
     });
 }
+/**
+ * Recupera gli incontri dal server e carica il calendario con la risposta.
+ *
+ * Effettua una richiesta AJAX di tipo GET al file "calendar-helper.php" con il parametro "action" impostato su "get-matches".
+ * Se la richiesta ha successo, la risposta viene passata alla funzione "loadCalendar" per caricare il calendario con gli incontri ottenuti.
+ * In caso di errore, viene visualizzato un messaggio di errore nella console.
+ *
+ * @returns {void}
+ */
+function fetchMatches() {
+    jQuery.ajax({
+        url: 'http://localhost/calendar/calendar-helper.php?action=get-matches',
+        type: 'GET',
+        dataType: 'json',
+        success: function (response) {
+            loadCalendar(response);
+        },
+        error: function (xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
 
 /**
  * Funzione per ottenere gli eventi di un allenatore dal server.
@@ -123,7 +145,7 @@ function showGoal(id) {
  */
 function deleteEvent() {
     var eventId = document.getElementById('event-id').value;
-
+    console.log(eventId);
     // Rimuove l'evento (visivamente) dal calendario
     calendar.getEventById(eventId).remove();
 
@@ -142,6 +164,56 @@ function deleteEvent() {
         }
     });
 }
+
+function ShowForEditEvent() {
+    
+    var id = document.getElementById('event-id').value;
+    // get evento dal server
+    jQuery.get('http://localhost/calendar/calendar-helper.php?action=get-event', {
+        id: id
+    }, function (event) {
+        // Effettua la richiesta per ottenere la nota
+        jQuery.get('http://localhost/calendar/calendar-helper.php?action=get-event-info', {
+            id: id
+        }, function (info) {
+            
+            updateEventEditModal(event.title,info.society, event.start, event.end, event.startTime, event.endTime, info.coach, event.url, info.note , event.groupID, event.id);
+
+            // Apre il modal
+            $.magnificPopup.open({
+                items: {
+                    src: "#modify-event-modal"
+                },
+                type: 'inline',
+                enableEscapekey: false
+            }, 0);
+        });
+    });
+}
+
+function editEvent(){
+    var formData = $('#edit-form').serialize();
+    var eventId = document.getElementById('id-edit').value;
+
+    // Verifica se i campi richiesti sono stati compilati prima di inviare la richiesta
+
+        jQuery.ajax({
+            url: 'http://localhost/calendar/calendar-helper.php?action=edit-event',
+            type: 'POST',
+            data: { id: eventId },
+            data: formData,
+            dataType: 'json',
+            success: function (response) {
+                if (response.status == 'success') {
+                    fetchEvents();
+                    $.magnificPopup.close();
+                }
+            },
+            error: function (xhr, status, error) {
+                console.log(xhr.responseText);
+            }
+        });
+    } 
 
 ////////////////////////
 //    Altri script    //
@@ -186,9 +258,11 @@ function loadCalendar(data) {
             handleDateClick(info); //Aggiunge automaticamente la data cliccata nel form
         },
         eventClick: function (info) {
-            info.jsEvent.preventDefault();
-            var currentEvent = info.event.id;
-            showGoal(currentEvent); // Triggera modal per visualizzare informazioni evento
+            if (window.location.href != "http://localhost/cameras/video_storage.php") {
+                info.jsEvent.preventDefault();
+                var currentEvent = info.event.id;
+                showGoal(currentEvent); // Triggera modal per visualizzare informazioni evento
+            }
         },
 
     });
@@ -228,6 +302,43 @@ function updateEventModal(date, startTime, endTime, title, note, id) {
 
     // Aggiorna l'id dell'evento
     document.getElementById("event-id").value = id;
+}
+
+function updateEventEditModal(title,society, startDate, endDate, startTime, endTime, coach,  url, note, groupID,id) {
+    
+    // Formatta la data per essere presa in input correttamente
+    var formattedStartDate = formatDateYYYYMMDD(startDate);
+    var formattedEndDate = formatDateYYYYMMDD(endDate);
+
+
+    // Formatta gli orari di inizio e fine (hh:mm)
+    var formattedStartTime = formatTime(startTime);
+    var formattedEndTime = formatTime(endTime);
+
+
+    // Aggiorna la data dell'evento
+    $('#start-date-edit').val(formattedStartDate);
+    $('#end-date-edit').val(formattedEndDate);
+
+    // Aggiorna gli orari di inizio e fine
+    document.getElementById("start-time-edit").value = formattedStartTime;
+    document.getElementById("end-time-edit").value = formattedEndTime;
+
+    // Aggiorna le informazioni evento
+    document.getElementById("nome-evento").innerText = title;
+    document.getElementById("society-edit").value = society;
+    document.getElementById("coach-edit").value = coach;
+    
+    // Aggiorna il titolo e l'URL dell'evento
+    document.getElementById("url-edit").value = url;
+    document.getElementById("description-edit").value = note;
+
+    // Se presente mostra l'id altrimenti lascia il campo vuoto
+    if (groupID){
+    document.getElementById("group-id-edit").value = groupID;
+    }
+    // Aggiorna l'id dell'evento
+    document.getElementById("id-edit").value = id;
 }
 
 /**
@@ -284,12 +395,22 @@ function formatDate(date) {
     var eventDate = new Date(date);
     var day = eventDate.getDate();
     var month = eventDate.toLocaleString('default', {
-        month: 'long'
+       month: 'long'
     });
     var year = eventDate.getFullYear();
 
     return day + ' ' + month + ' ' + year;
 }
+
+function formatDateYYYYMMDD(dateString) {
+    var date = new Date(dateString);
+    var year = date.getFullYear();
+    var month = ('0' + (date.getMonth() + 1)).slice(-2);
+    var day = ('0' + date.getDate()).slice(-2);
+  
+    return year + '-' + month + '-' + day;
+}
+  
 
 /**
  * Funzione per formattare un'orario nel formato "ore minuti".
