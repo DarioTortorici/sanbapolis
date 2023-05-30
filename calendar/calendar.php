@@ -1,8 +1,39 @@
-<?php
+<!-- Javascripts per gestire il calendario -->
+<script src="../js/calendar/calendar-scripts.js"></script>
 
+<!-- PHP session init -->
+<?php
 session_start();
+
+require('../authentication/db_connection.php');
 include('../modals/calendar-header.php');
+include('../authentication/auth-helper.php');
+
 $user = array();
+
+if (!isset($_SESSION['userID'])) {
+    header("Location: ../authentication/login.php");
+    exit();
+} else {
+    $user = get_user_info($con, $_SESSION['userID']);
+}
+
+if ($user['userType'] == "allenatore") {
+    // Chiamata alla funzione JavaScript per il calendario degli allenatori
+    echo '<script>';
+    echo 'fetchCoachEvents("' . $user['email'] . '");';
+    echo '</script>';
+} elseif ($user['userType'] == "manutentore") {
+    // Chiamata alla funzione JavaScript per il calendario dei manutentori
+    echo '<script>';
+    echo 'fetchEvents();';
+    echo '</script>';
+} else {
+    // Chiamata alla funzione JavaScript per il calendario generale
+    echo '<script>';
+    echo 'fetchMatches();';
+    echo '</script>';
+}
 ?>
 
 
@@ -85,10 +116,6 @@ $user = array();
     <button id="delete-button" class="btn btn-danger" onclick="deleteEvent()">Elimina</button>
 </div>
 
-
-
-<!-- Javascripts per gestire il calendario -->
-<script src="../js/calendar/calendar-scripts.js"></script>
 
 <?php
 

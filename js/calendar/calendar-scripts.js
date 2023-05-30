@@ -1,13 +1,6 @@
 //Creazione Oggetto globale calendar
 var calendar = null;
 
-/**
- * Funzione per inizializzare il calendario quando il documento è pronto.
- */
-$(document).ready(function () {
-    fetchEvents();
-});
-
 //////////////////////////
 // Chiamate al database //
 //////////////////////////
@@ -21,7 +14,7 @@ $(document).ready(function () {
  */
 function fetchEvents() {
     jQuery.ajax({
-        url: 'calendar-helper.php?action=get-events',
+        url: 'http://localhost/calendar/calendar-helper.php?action=get-events',
         type: 'GET',
         dataType: 'json',
         success: function (response) {
@@ -44,7 +37,7 @@ function fetchEvents() {
  */
 function fetchCoachEvents(coach) {
     // Effettua una richiesta AJAX per ottenere gli eventi dell'allenatore
-    jQuery.get('calendar-helper.php?action=get-coach-event', {
+    jQuery.get('http://localhost/calendar/calendar-helper.php?action=get-coach-event', {
         coach: coach
     })
         .done(function (event) {
@@ -72,7 +65,7 @@ function saveEvent() {
     // Verifica se i campi richiesti sono stati compilati prima di inviare la richiesta
     if (validateForm()) {
         jQuery.ajax({
-            url: 'calendar-helper.php?action=save-event',
+            url: 'http://localhost/calendar/calendar-helper.php?action=save-event',
             type: 'POST',
             data: formData,
             dataType: 'json',
@@ -101,11 +94,11 @@ function saveEvent() {
  */
 function showGoal(id) {
     // get evento dal server
-    jQuery.get('calendar-helper.php?action=get-event', {
+    jQuery.get('http://localhost/calendar/calendar-helper.php?action=get-event', {
         id: id
     }, function (event) {
         // Effettua la richiesta per ottenere la nota
-        jQuery.get('calendar-helper.php?action=get-note', {
+        jQuery.get('http://localhost/calendar/calendar-helper.php?action=get-note', {
             id: id
         }, function (note) {
             // Aggiorna con i dettagli appena ricevuti il modal show-event-modal
@@ -135,7 +128,7 @@ function deleteEvent() {
     calendar.getEventById(eventId).remove();
 
     jQuery.ajax({
-        url: 'calendar-helper.php?action=delete-event',
+        url: 'http://localhost/calendar/calendar-helper.php?action=delete-event',
         type: 'POST',
         data: { id: eventId },
         dataType: 'json',
@@ -176,7 +169,7 @@ function loadCalendar(data) {
         header: {
             left: 'prev,next today', // Elementi del header a sinistra
             center: 'title', // Elemento del header al centro
-            right: 'dayGridMonth,timeGridWeek,timeGridDay' // Elementi del header a destra
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth' // Elementi del header a destra
         },
         eventTimeFormat: { // Formattazione orario
             hour: '2-digit',

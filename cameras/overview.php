@@ -1,15 +1,15 @@
 <?php
+
 session_start();
 include('../modals/header.php');
+include('../authentication/auth-helper.php');
 $user = array();
 
-?>
-
-<?php
-$user = array();
-require('../authentication/db_connection.php');
-
-if (isset($_SESSION['userID'])) {
+if (!isset($_SESSION['userID'])) {
+  header("Location: ../authentication/login.php");
+  exit();
+} else {
+  require('../authentication/db_connection.php');
   $user = get_user_info($con, $_SESSION['userID']);
 }
 ?>

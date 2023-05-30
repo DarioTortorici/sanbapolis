@@ -203,6 +203,19 @@ function getEvent($id)
 }
 
 /**
+ * Recupera gli incontri dal database.
+ * @return string JSON contenente gli incontri recuperati dal database.
+*/
+function getMatches()
+{
+    $con = get_connection();
+    $query = "SELECT ce.* FROM calendar_events ce INNER JOIN event_info ei ON ce.id = ei.event_id WHERE ei.training = 0";
+    $statement = $con->query($query);
+    $events = $statement->fetchAll(PDO::FETCH_ASSOC);
+    return json_encode($events);
+}
+
+/**
  * Recupera gli eventi per un allenatore specifico dal database.
  * @param string $coach Il nome o l'identificatore dell'allenatore.
  * @return string Stringa JSON contenente gli eventi dell'allenatore.
@@ -324,9 +337,14 @@ if (isset($_GET['action'])) {
         }
 
         echo json_encode($response);
+    } elseif ($action == 'get-matches') { // recupero tutti gli eventi segnati come match
+        header('Content-Type: application/json');
+        echo getMatches();
     } else {
         // Invalid action
     }
 } else {
     // Missing 'action' parameter
 }
+
+?>

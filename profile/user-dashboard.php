@@ -1,19 +1,17 @@
 <?php
-
 session_start();
-include ('../modals/header.php');
-include ('../authentication/auth-helper.php');
+
+require('../authentication/db_connection.php');
+include('../modals/header.php');
+include('../authentication/auth-helper.php');
+
 $user = array();
 
 if (!isset($_SESSION['userID'])) {
     header("Location: ../authentication/login.php");
     exit();
-}
-
-if(isset($_SESSION['userID'])){
-    require ('../authentication/db_connection.php');
+} else {
     $user = get_user_info($con, $_SESSION['userID']);
-
 }
 ?>
 
@@ -26,8 +24,8 @@ if(isset($_SESSION['userID'])){
                         <img class="img rounded-circle" style="width: 200px; height: 200px;" src="<?php echo isset($user['profileImage']) ? $user['profileImage'] : './assets/profile/beard.png'; ?>" alt="">
                         <h4 class="py-3">
                             <?php
-                            if(isset($user['firstName'])){
-                                printf('%s %s', $user['firstName'], $user['lastName'] );
+                            if (isset($user['firstName'])) {
+                                printf('%s %s', $user['firstName'], $user['lastName']);
                             }
                             ?>
                         </h4>
