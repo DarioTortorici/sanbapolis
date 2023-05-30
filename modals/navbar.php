@@ -16,7 +16,7 @@
                             <a class="nav-link" href="../calendar/calendar.php">Calendario</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#">Filmati</a>
+                            <a class="nav-link" href="../cameras/video_storage.php">Filmati</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="../cameras/overview.php">Livecams</a>
@@ -32,7 +32,7 @@
 
                     <?php if (isset($_SESSION['userID']) && $_SESSION['userID']) : ?>
 
-                        <a href="../user-dashboard.php"><img class="img rounded-circle" style="width: 20px; height: 20px;" src="<?php echo isset($user['profileImage']) ? substr($user['profileImage'], 2) : '../assets/profileimg/beard.png'; ?>" alt=""></a>
+                        <a href="../profile/user-dashboard.php"><img class="img rounded-circle" style="width: 20px; height: 20px;" src="<?php echo isset($user['profileImage']) ? substr($user['profileImage'], 2) : '../assets/profileimg/beard.png'; ?>" alt=""></a>
                     <?php else : ?>
                         <li> <a class="btn btn-primary" href="/authentication/login.php" role="button">Accedi</a> </li>
                         <li> <a class="btn btn-primary" href="/authentication/register.php" role="button">Iscriviti</a></li>

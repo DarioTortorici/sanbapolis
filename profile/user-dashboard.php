@@ -15,7 +15,6 @@ if(isset($_SESSION['userID'])){
     $user = get_user_info($con, $_SESSION['userID']);
 
 }
-printf('%s', $user['profileImage']);
 ?>
 
 <section id="main-site">
@@ -43,7 +42,7 @@ printf('%s', $user['profileImage']);
                         <li class="nav-link"><b>User Type: </b><span><?php echo $user['userType']; ?></span></li>
                         <li class="nav-link"><b>Sport: </b><span><?php echo $user['sport']; ?></span></li>
                         <li class="nav-link"><b>Society: </b><span><?php echo $user['society']; ?></span></li>
-                        <li class="nav-link"><a type="button" class="btn btn-dark" role="button" href="./authentication/logout.php">Log out</a></span></li>
+                        <li class="nav-link"><a type="button" class="btn btn-dark" role="button" href="../authentication/logout.php">Log out</a></span></li>
                     </ul>
                 </div>
 

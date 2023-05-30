@@ -4,6 +4,19 @@ require('auth-helper.php');
 // Array per gli errori
 $errors = array();
 
+/**
+ * Gestisce la validazione dei campi dell'utente e l'upload dell'immagine del profilo.
+ * In caso di errori di validazione, i messaggi di errore vengono aggiunti all'array $errors.
+ * @param string $_POST['firstName'] Il nome fornito dall'utente.
+ * @param string $_POST['lastName'] Il cognome fornito dall'utente.
+ * @param string $_POST['email'] L'indirizzo email fornito dall'utente.
+ * @param string $_POST['password'] La password fornita dall'utente.
+ * @param string $_POST['confirm_pwd'] La conferma della password fornita dall'utente.
+ * @param string $_POST['sport'] Lo sport fornito dall'utente. 
+ * @param string $_POST['userType'] Il ruolo fornito dall'utente.
+ * @param string $_POST['society'] La società fornita dall'utente.
+ * @param array $_FILES['profileUpload'] I dettagli dell'immagine del profilo da caricare.
+*/
 $firstName = validate_input_text($_POST['firstName']);
 if (empty($firstName)){
     $errors[] = "Hai dimenticato di inserire il tuo nome.";
@@ -50,6 +63,18 @@ $society = $_POST['society'];
 
 $profileImage = upload_profile("../assets/profileimg/",$_FILES['profileUpload']);
 
+/**
+ * Registra un nuovo utente nel database se non ci sono errori di validazione.
+ * La password fornita viene criptata utilizzando la funzione password_hash prima di essere memorizzata nel database.
+ * @param string $firstName Il nome fornito dall'utente.
+ * @param string $lastName Il cognome fornito dall'utente.
+ * @param string $email L'indirizzo email fornito dall'utente.
+ * @param string $password La password fornita dall'utente.
+ * @param string $sport Lo sport fornito dall'utente.
+ * @param string $userType Il ruolo fornito dall'utente. 
+ * @param string $society La società fornita dall'utente.
+ * @param string $profileImage Il percorso dell'immagine del profilo caricata dall'utente.
+*/
 if (empty($errors)){
     // Registra un nuovo utente
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);

@@ -1,3 +1,7 @@
+/**
+ * Funzione di gestione dell'evento di invio del modulo di accesso (login)
+ * @param {Event} event - Oggetto evento generato dall'invio del modulo
+*/
 document.getElementById('log-form').addEventListener('submit', function(event) {
     event.preventDefault(); // Blocca l'invio del modulo
 
@@ -15,7 +19,8 @@ document.getElementById('log-form').addEventListener('submit', function(event) {
 
             if (response.success) {
                 // Credenziali corrette, reindirizza l'utente alla pagina successiva
-                window.location.href = 'dashboard.php';
+                console.log("Reindirizzo");
+                window.location.href = 'http://localhost/profile/user-dashboard.php';
             } else {
                 // Credenziali errate, mostra un messaggio di errore
                 showErrorMessage();
@@ -25,6 +30,9 @@ document.getElementById('log-form').addEventListener('submit', function(event) {
     xhr.send('email=' + email + '&password=' + password);
 });
 
+/**
+ * Mostra un alert di errore nel caso in cui le credenziali di accesso siano errate.
+*/
 function showErrorMessage() {
     const alertDiv = document.getElementById('mismatch-credentials')
     alertDiv.style.display = 'block';
