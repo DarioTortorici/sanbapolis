@@ -150,11 +150,31 @@ function edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $ur
                 SET `groupId` = ?, `start` = ?, `end` = ?, `startTime` = ?, `endTime` = ?, `startRecur` = ?, `endRecur` = ?, `url` = ? 
                 WHERE id = ?";
         $query = $con->prepare($sql);
-        $query->execute([$groupId, $startDate, $endDate, $startTime, $endTime, $startRecur,$endRecur, $url, $id]);
+        $query->execute([$groupId, $startDate, $endDate, $startTime, $endTime, $startRecur, $endRecur, $url, $id]);
 
         $sql = "UPDATE event_info SET  `society`=?, `coach`=?, `note`=? WHERE event_id=?";
         $query = $con->prepare($sql);
         $query->execute([$society, $coach, $note, $id]);
+        return $id;
+    } else {
+        echo ("Errore, nessun ID specificato: " . $id);
+    }
+}
+
+/**
+ * Salva le telecamere selezionate nel database per un determinato evento.
+ * @param string $cameras - Le telecamere selezionate da salvare (formato JSON o array).
+ * @param int $id - L'ID dell'evento a cui associare le telecamere.
+ * @return int|null - L'ID dell'evento se l'aggiornamento ha avuto successo, altrimenti null.
+ */
+function save_cameras($cameras, $id)
+{
+    $con = get_connection();
+
+    if ($id) {
+        $sql = "UPDATE event_info SET  `cams`=? WHERE event_id=?";
+        $query = $con->prepare($sql);
+        $query->execute([$cameras, $id]);
         return $id;
     } else {
         echo ("Errore, nessun ID specificato: " . $id);
@@ -294,6 +314,32 @@ function getEventColor($sport)
     return '#378006';
 }
 
+/** Recupera le telecamere associate ad un evento dalla tabella "event_info" del database, in base all'ID dell'evento fornito.
+ *
+ * @param int $id L'ID dell'evento per il quale si desidera recuperare la nota.
+ * @return array Una stringa JSON contenente la lista di telecamere.
+ */
+function getCameras($id)
+{
+    $con = get_connection();
+    $query = "SELECT cams FROM event_info WHERE event_id = :id";
+    $statement = $con->prepare($query);
+    $statement->bindParam(':id', $id);
+    $statement->execute();
+    $cams = $statement->fetch(PDO::FETCH_ASSOC);
+    return json_encode($cams);
+}
+
+/** Restituisce la data corrente nel formato "YYYY-MM-DD".
+ *
+ * @return string La data corrente nel formato YYYY-MM-DD, esempio: 2023-06-28.
+ */
+function currentDate()
+{
+    return date('YYYY-MM-DD');
+}
+
+
 ///////////////////////////
 // GET e POST Management //
 ///////////////////////////
@@ -325,6 +371,7 @@ if (isset($_GET['action'])) {
 
         //Sono obbligatori society e startdate ed effettuiamo il controllo che esistano
         if ($society && $startDate) {
+            $id = null;
             $id = save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $id);
             echo json_encode(array('status' => 'success', 'id' => $id));
         } else {
@@ -393,6 +440,23 @@ if (isset($_GET['action'])) {
         //Sono obbligatori society e startdate ed effettuiamo il controllo che esistano
         if ($society && $startDate) {
             $id = edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $url, $society, $coach, $note, $id);
+            echo json_encode(array('status' => 'success', 'id' => $id));
+        } else {
+            echo json_encode(array('status' => 'error', 'message' => 'Missing required fields'));
+        }
+    } elseif ($action == 'get-cams') { // recupero telecamere attive per l'evento con id specifico
+
+        $id = isset($_GET['id']) ? $_GET['id'] : null;
+        header('Content-Type: application/json');
+        if ($id) {
+            echo getCameras($id);
+        }
+    } elseif ($action == 'save-cams') { //salvo le telecamere da atticare per l'evento
+        $id = isset($_POST['id']) ? $_POST['id'] : null;
+        $cameras = isset($_POST['cameras']) ? $_POST['cameras'] : null;
+        $cameras = json_encode($cameras);
+        $id = save_cameras($cameras, $id);
+        if ($id) {
             echo json_encode(array('status' => 'success', 'id' => $id));
         } else {
             echo json_encode(array('status' => 'error', 'message' => 'Missing required fields'));

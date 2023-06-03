@@ -163,7 +163,7 @@ function deleteEvent() {
 /** Mostra il modal per la modifica di un evento.
  */
 function ShowForEditEvent() {
-    
+
     var id = document.getElementById('event-id').value;
     // get evento dal server
     jQuery.get('http://localhost/calendar/calendar-helper.php?action=get-event', {
@@ -173,18 +173,44 @@ function ShowForEditEvent() {
         jQuery.get('http://localhost/calendar/calendar-helper.php?action=get-event-info', {
             id: id
         }, function (info) {
-            
-            updateEventEditModal(event.title,info.society, event.start, event.end, event.startTime, event.endTime, info.coach, event.url, info.note , event.groupID, event.id);
+
+            updateEventEditModal(event.title, info.society, event.start, event.end, event.startTime, event.endTime, info.coach, event.url, info.note, event.groupID, event.id);
 
             // Apre il modal
             $.magnificPopup.open({
                 items: {
-                    src: "#modify-event-modal"
+                    src: "#choose-cams"
                 },
                 type: 'inline',
                 enableEscapekey: false
             }, 0);
         });
+    });
+}
+
+function Showcameras() {
+
+    var id = document.getElementById('event-id').value;
+
+    jQuery.ajax({
+        url: 'http://localhost/calendar/calendar-helper.php?action=get-cams',
+        type: 'GET',
+        dataType: 'json',
+        data: { id: id },
+        success: function (response) {
+
+            updateAddcameras(response, id);
+            $.magnificPopup.open({
+                items: {
+                    src: "#choose-cams"
+                },
+                type: 'inline',
+                enableEscapekey: false
+            }, 0);
+        },
+        error: function (xhr, status, error) {
+            console.log(xhr.responseText);
+        }
     });
 }
 
@@ -218,6 +244,40 @@ function editEvent() {
             }
         },
         error: function (xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
+}
+
+/** Salva le telecamere selezionate tramite una chiamata AJAX.
+ */
+function saveCameras() {
+    // Ottieni l'ID delle telecamere
+    var eventId = document.getElementById('id-cams').value;
+
+    // Ottieni le telecamere selezionate come un array
+    var selectedCameras = $('input[name="camera[]"]:checked').map(function () {
+        return $(this).val();
+    }).get();
+
+    // Effettua la chiamata AJAX per salvare le telecamere
+    jQuery.ajax({
+        url: 'http://localhost/calendar/calendar-helper.php?action=save-cams',
+        type: 'POST',
+        data: {
+            id: eventId,
+            cameras: selectedCameras
+        },
+        dataType: 'json',
+        success: function (response) {
+            // Se la chiamata ha avuto successo, aggiorna gli eventi e chiudi il modal
+            if (response.status == 'success') {
+                fetchEvents();
+                $.magnificPopup.close();
+            }
+        },
+        error: function (xhr, status, error) {
+            // In caso di errore, visualizza il messaggio di errore nella console
             console.log(xhr.responseText);
         }
     });
@@ -325,8 +385,8 @@ function updateEventModal(date, startTime, endTime, title, note, id) {
  * @param {string} id - L'ID dell'evento.
  * @returns {void}
  */
-function updateEventEditModal(title,society, startDate, endDate, startTime, endTime, coach,  url, note, groupID,id) {
-    
+function updateEventEditModal(title, society, startDate, endDate, startTime, endTime, coach, url, note, groupID, id) {
+
     // Formatta la data per essere presa in input correttamente
     var formattedStartDate = formatDateYYYYMMDD(startDate);
     var formattedEndDate = formatDateYYYYMMDD(endDate);
@@ -349,18 +409,42 @@ function updateEventEditModal(title,society, startDate, endDate, startTime, endT
     document.getElementById("nome-evento").innerText = title;
     document.getElementById("society-edit").value = society;
     document.getElementById("coach-edit").value = coach;
-    
+
     // Aggiorna il titolo e l'URL dell'evento
     document.getElementById("url-edit").value = url;
     document.getElementById("description-edit").value = note;
 
     // Se presente mostra l'id altrimenti lascia il campo vuoto
-    if (groupID){
-    document.getElementById("group-id-edit").value = groupID;
+    if (groupID) {
+        document.getElementById("group-id-edit").value = groupID;
     }
     // Aggiorna l'id dell'evento
     document.getElementById("id-edit").value = id;
 }
+
+/**
+ * Aggiorna il modal "choose-cams" con le telecamere selezionate.
+ * @param {Array} response - JSON con l'array delle telecamere selezionate
+ * @param {string} id - L'ID delle telecamere.
+ */
+function updateAddcameras(response, id) {
+    // Imposta l'ID delle telecamere
+    document.getElementById("id-cams").value = id;
+
+    // Decodifica il JSON e converte la stringa in un array di stringhe
+    var selectedCameras = JSON.parse(response.cams).map(function(camera) {
+        return String(camera);
+    });
+
+    // Seleziona le checkbox corrispondenti alle telecamere preselezionate
+    var checkboxes = document.querySelectorAll('input[type="checkbox"][name="camera[]"]');
+    checkboxes.forEach(function (checkbox) {
+        if (selectedCameras.includes(checkbox.value)) {
+            checkbox.checked = true;
+        }
+    });
+}
+
 
 /** Funzione per validare il modulo eventi.
  * 
@@ -412,7 +496,7 @@ function formatDate(date) {
     var eventDate = new Date(date);
     var day = eventDate.getDate();
     var month = eventDate.toLocaleString('default', {
-       month: 'long'
+        month: 'long'
     });
     var year = eventDate.getFullYear();
 
@@ -429,7 +513,7 @@ function formatDateYYYYMMDD(dateString) {
     var year = date.getFullYear();
     var month = ('0' + (date.getMonth() + 1)).slice(-2);
     var day = ('0' + date.getDate()).slice(-2);
-  
+
     return year + '-' + month + '-' + day;
 }
 
