@@ -330,6 +330,16 @@ function getCameras($id)
     return json_encode($cams);
 }
 
+function getDatetimeEvent($id){
+    $con = get_connection();
+    $query = "SELECT start,startTime FROM calendar_events WHERE id = :id";
+    $statement = $con->prepare($query);
+    $statement->bindParam(':id', $id);
+    $statement->execute();
+    $date = $statement->fetch(PDO::FETCH_ASSOC);
+    return json_encode($date);
+}
+
 /** Restituisce la data corrente nel formato "YYYY-MM-DD".
  *
  * @return string La data corrente nel formato YYYY-MM-DD, esempio: 2023-06-28.
@@ -338,6 +348,8 @@ function currentDate()
 {
     return date('YYYY-MM-DD');
 }
+
+
 
 
 ///////////////////////////
@@ -460,6 +472,14 @@ if (isset($_GET['action'])) {
             echo json_encode(array('status' => 'success', 'id' => $id));
         } else {
             echo json_encode(array('status' => 'error', 'message' => 'Missing required fields'));
+        }
+    } elseif ($action == 'get-time') { // recupero il datetime dell'evento
+
+        $id = isset($_POST['id']) ? $_POST['id'] : null;
+        header('Content-Type: application/json');
+
+        if ($id) {
+            echo getDatetimeEvent($id);
         }
     } else {
         // Missing 'action' parameter

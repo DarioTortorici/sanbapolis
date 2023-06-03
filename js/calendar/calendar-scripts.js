@@ -140,7 +140,6 @@ function showGoal(id) {
  */
 function deleteEvent() {
     var eventId = document.getElementById('event-id').value;
-    console.log(eventId);
     // Rimuove l'evento (visivamente) dal calendario
     calendar.getEventById(eventId).remove();
 
@@ -188,6 +187,10 @@ function ShowForEditEvent() {
     });
 }
 
+/** Aggiorna il modal "choose-cams" con le telecamere selezionate.
+ * @param {string} cameras - Il JSON contenente le telecamere selezionate.
+ * @param {string} id - L'ID delle telecamere.
+ */
 function Showcameras() {
 
     var id = document.getElementById('event-id').value;
@@ -422,8 +425,7 @@ function updateEventEditModal(title, society, startDate, endDate, startTime, end
     document.getElementById("id-edit").value = id;
 }
 
-/**
- * Aggiorna il modal "choose-cams" con le telecamere selezionate.
+/** Aggiorna il modal "choose-cams" con le telecamere selezionate.
  * @param {Array} response - JSON con l'array delle telecamere selezionate
  * @param {string} id - L'ID delle telecamere.
  */
@@ -444,7 +446,6 @@ function updateAddcameras(response, id) {
         }
     });
 }
-
 
 /** Funzione per validare il modulo eventi.
  * 
