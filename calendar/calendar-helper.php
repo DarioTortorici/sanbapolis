@@ -89,6 +89,8 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
     $backgroundColor = getEventColor($sport);
     $textcolor = "white";
 
+    //Camere preselezionate da attivare
+    $cams = "[]";
 
     $eventTypeBoolean = ($eventType === 'match') ? 0 : 1;
 
@@ -110,10 +112,10 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
     ]);
 
     $calendar_id = $con->lastInsertId();
-    $sql = "INSERT INTO event_info (`society`, `sport`, `coach`, `note`, `training`, `event_id`) 
-        VALUES (?,?,?,?,?,?)";
+    $sql = "INSERT INTO event_info (`society`, `sport`, `coach`, `note`, `training`, `event_id`, `cams`) 
+        VALUES (?,?,?,?,?,?,?)";
     $query = $con->prepare($sql);
-    $query->execute([$society, $sport, $coach, $note, $eventTypeBoolean, $calendar_id]);
+    $query->execute([$society, $sport, $coach, $note, $eventTypeBoolean, $calendar_id, $cams]);
 
     return $calendar_id;
 }

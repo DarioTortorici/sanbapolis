@@ -53,7 +53,11 @@ if (!isset($_SESSION['userID'])) {
   }
 </style>
 
+
 <script src="../js/cameras/cameras-scripts.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.10.0/js/md5.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+
 
 <section id="camera-overview">
   <table>
@@ -62,7 +66,6 @@ if (!isset($_SESSION['userID'])) {
         <div class="video-container">
           <div class="video-title">Camera 1</div>
           <video id="camera1" controls autoplay>
-            <source src="www.url.it" type="video/mp4">
           </video>
         </div>
       </td>
@@ -70,7 +73,6 @@ if (!isset($_SESSION['userID'])) {
         <div class="video-container">
           <div class="video-title">Camera 2</div>
           <video id="camera2" controls autoplay>
-            <source src="www.url.it" type="video/mp4">
           </video>
         </div>
       </td>
@@ -80,7 +82,6 @@ if (!isset($_SESSION['userID'])) {
         <div class="video-container">
           <div class="video-title">Camera 3</div>
           <video id="camera3" controls autoplay>
-            <source src="www.url.it" type="video/mp4">
           </video>
         </div>
       </td>

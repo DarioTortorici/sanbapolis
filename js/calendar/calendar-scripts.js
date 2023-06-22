@@ -178,7 +178,7 @@ function ShowForEditEvent() {
             // Apre il modal
             $.magnificPopup.open({
                 items: {
-                    src: "#choose-cams"
+                    src: "#modify-event-modal"
                 },
                 type: 'inline',
                 enableEscapekey: false
