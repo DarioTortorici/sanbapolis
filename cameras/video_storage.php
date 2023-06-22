@@ -3,19 +3,14 @@
 
 <!-- PHP session init -->
 <?php
-session_start();
 
-require('../authentication/db_connection.php');
 include('../modals/calendar-header.php');
-include('../authentication/auth-helper.php');
-
-$user = array();
+include_once("../modals/navbar.php");
+include_once('../authentication/auth-helper.php');
 
 if (!isset($_SESSION['userID'])) {
-    header("Location: ../authentication/login.php");
-    exit();
-} else {
-    $user = get_user_info($con, $_SESSION['userID']);
+  header("Location: ../authentication/login.php");
+  exit();
 }
 
 if ($user['userType'] == "allenatore") {

@@ -21,6 +21,3 @@
 
 <body>
     <main id="main-area">
-        <?php
-        include("navbar.php");
-        ?>

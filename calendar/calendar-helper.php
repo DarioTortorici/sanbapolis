@@ -42,7 +42,7 @@ function is_ajax_request()
  * @param string $eventType Il tipo di evento (es. "match" o altro).
  * @return int L'ID del training salvato (ID calendar_events).
  */
-function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType)
+function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras)
 {
     // missing premium parameter `resourceEditable`=?, `resourceId`=?, `resourceIds`=?
 
@@ -90,8 +90,10 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
     $textcolor = "white";
 
     //Camere preselezionate da attivare
-    $cams = "[]";
-
+    if (!$cameras){
+        $cameras = "[]";
+    }
+    
     $eventTypeBoolean = ($eventType === 'match') ? 0 : 1;
 
     if ($eventTypeBoolean) {
@@ -115,7 +117,7 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
     $sql = "INSERT INTO event_info (`society`, `sport`, `coach`, `note`, `training`, `event_id`, `cams`) 
         VALUES (?,?,?,?,?,?,?)";
     $query = $con->prepare($sql);
-    $query->execute([$society, $sport, $coach, $note, $eventTypeBoolean, $calendar_id, $cams]);
+    $query->execute([$society, $sport, $coach, $note, $eventTypeBoolean, $calendar_id, $cameras]);
 
     return $calendar_id;
 }
@@ -382,11 +384,13 @@ if (isset($_GET['action'])) {
         $coach = isset($_POST['coach']) ? $_POST['coach'] : null;
         $note = isset($_POST['description']) ? $_POST['description'] : null;
         $eventType = isset($_POST['event_type']) ? $_POST['event_type'] : null;
+        $cameras = isset($_POST['camera']) ? $_POST['camera'] : null;
+        $cameras = json_encode($cameras);
 
         //Sono obbligatori society e startdate ed effettuiamo il controllo che esistano
         if ($society && $startDate) {
             $id = null;
-            $id = save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $id);
+            $id = save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras);
             echo json_encode(array('status' => 'success', 'id' => $id));
         } else {
             echo json_encode(array('status' => 'error', 'message' => 'Missing required fields'));

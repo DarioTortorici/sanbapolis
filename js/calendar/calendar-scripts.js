@@ -488,6 +488,19 @@ function toggleWeeklyRepeat(checkbox) {
     }
 }
 
+/** Modifica la visibilità delle opzioni della telecamera in base allo stato della casella di controllo.
+ * @param {HTMLElement} checkbox - L'elemento della casella di controllo che attiva la scelta delle telecamere.
+*/
+function toggleCameraOptions(checkbox) {
+    var cameraOptions = document.getElementById("camera-options");
+    if (checkbox.checked) {
+      cameraOptions.style.display = "block";
+    } else {
+      cameraOptions.style.display = "none";
+    }
+  }
+  
+
 /** Funzione per formattare una data nel formato "DD mese YYYY".
  * 
  * @param {string} date - La data da formattare (nel formato accettato dal costruttore Date() di JavaScript).

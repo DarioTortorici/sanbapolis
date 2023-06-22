@@ -3,25 +3,20 @@
 
 <!-- PHP session init -->
 <?php
-session_start();
 
-require('../authentication/db_connection.php');
 include('../modals/calendar-header.php');
-include('../authentication/auth-helper.php');
-
-$user = array();
+include_once("../modals/navbar.php");
+include_once('../authentication/auth-helper.php');
 
 if (!isset($_SESSION['userID'])) {
     header("Location: ../authentication/login.php");
     exit();
-} else {
-    $user = get_user_info($con, $_SESSION['userID']);
 }
 
 if ($user['userType'] == "allenatore") {
     // Chiamata alla funzione JavaScript per il calendario degli allenatori
     echo '<script>';
-    echo 'fetchCoachEvents("' . $user['firstName'] . '");';
+    echo 'fetchCoachEvents("' . $user['email'] . '");';
     echo '</script>';
     $delete = true;
     $modify = false;
@@ -45,7 +40,6 @@ if ($user['userType'] == "allenatore") {
 }
 ?>
 
-
 <!-- Calendario "FullCalendar" caricato da JavaScript -->
 <div class="container">
     <div id="calendar"></div>
@@ -68,13 +62,38 @@ if ($user['userType'] == "allenatore") {
             Data fine: <input id="end-date" type="date" name="end-date" placeholder="Data fine" autocomplete="off" value="<?= date('Y-m-d') ?>" required /><br>
             Ora inizio: <input type="time" name="startTime" placeholder="Ora inizio" /><br>
             Ora fine: <input type="time" name="endTime" placeholder="Ora fine" /><br>
-            Allenatore: <input type="text" name="coach" placeholder="Allenatore*" required /><br>
+            Allenatore: <input type="text" name="coach" placeholder="Mail allenatore*" required /><br>
             Sport:
             <select name="sport">
                 <option value="calcio">Calcio a 5</option>
                 <option value="pallavolo">Pallavolo</option>
                 <option value="basket">Basket</option>
             </select><br>
+
+            <!-- Scelta camere -->
+            <div>
+                <input type="checkbox" id="camera-checkbox" name="camera-checkbox" onchange="toggleCameraOptions(this)" />
+                <label for="camera-checkbox">Seleziona telecamere</label>
+            </div>
+            <div id="camera-options" style="display: none;">
+                <label>
+                    <input type="checkbox" name="camera[]" value="1">
+                    Camera 1
+                </label>
+                <label>
+                    <input type="checkbox" name="camera[]" value="2">
+                    Camera 2
+                </label>
+                <label>
+                    <input type="checkbox" name="camera[]" value="3">
+                    Camera 3
+                </label>
+                <label>
+                    <input type="checkbox" name="camera[]" value="4">
+                    Camera 4
+                </label>
+            </div>
+
             <!-- Ripetizione settimanale -->
             Ripetizione settimanale:<br>
             <input type="checkbox" name="repeatWeekly" onchange="toggleWeeklyRepeat(this)"> Si ripete ogni:<br>
@@ -155,7 +174,7 @@ if ($user['userType'] == "allenatore") {
             <label for="end-time-edit">Ora fine:</label>
             <input type="time" name="end-time-edit" id="end-time-edit" placeholder="Ora fine" /><br>
             <label for="coach-edit">Allenatore:</label>
-            <input type="text" name="coach-edit" id="coach-edit" placeholder="Allenatore*" required /><br>
+            <input type="text" name="coach-edit" id="coach-edit" placeholder="Mail allenatore*" required /><br>
             <label for="description-edit">Note:</label><br>
             <textarea cols="55" rows="5" name="description-edit" id="description-edit" placeholder="Note"></textarea><br>
             <label for="url-edit">Url:</label>
