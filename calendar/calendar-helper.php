@@ -90,7 +90,7 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
     $textcolor = "white";
 
     //Camere preselezionate da attivare
-    if (!$cameras){
+    if ($cameras == "null"){
         $cameras = "[]";
     }
     

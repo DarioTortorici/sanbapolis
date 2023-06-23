@@ -1,13 +1,14 @@
 <?php
 // header.php
 include('../modals/header.php');
-?>
 
-<?php
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     require('register-process.php');
 }
 ?>
+
+<!-- registration scripts -->
+<script src="../js/authentication/register.js"></script>
 
 <!-- registration area -->
 <section id="register">
@@ -71,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                     <div class="form-row my-4">
                         <div class="col">
-                            <select required name="userType" id="userType" class="form-control">
+                            <select required name="userType" id="userType" class="form-control" onchange="handleUserType()">
                                 <option value="">Select your role*</option>
                                 <option value="allenatore" <?php if (isset($_POST['userType']) && $_POST['userType'] === 'allenatore') echo 'selected'; ?>>Allenatore</option>
                                 <option value="giocatore" <?php if (isset($_POST['userType']) && $_POST['userType'] === 'giocatore') echo 'selected'; ?>>Giocatore</option>
@@ -79,7 +80,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </select>
                         </div>
                     </div>
-
+                    <div class="form-row my-4" id="teamCodeRow" style="display: none;">
+                        <div class="col">
+                            <input type="text" name="teamCode" id="teamCode" class="form-control" placeholder="Team Code">
+                        </div>
+                    </div>
                     <div class="form-row my-4">
                         <div class="col">
                             <input type="text" name="society" id="society" class="form-control" placeholder="Society">
@@ -102,6 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </div>
 </section>
 <!-- #registration area -->
+
 <?php
 // footer.php
 include('../modals/footer.php');
