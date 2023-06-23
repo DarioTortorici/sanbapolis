@@ -1,16 +1,7 @@
 <?php
 
-
 include ('modals/header.php');
-include ('phpfunctions/helper.php');
-session_start();
-$user = array();
-
-
-if(isset($_SESSION['userID'])){
-    require ('./authentication/db_connection.php');
-    $user = get_user_info($con, $_SESSION['userID']);
-}
+include("modals/navbar.php");
 
 ?>
 

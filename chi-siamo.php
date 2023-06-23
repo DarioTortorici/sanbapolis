@@ -1,9 +1,7 @@
 <?php
 
-include ('modals/header.php');
-session_start();
-$user = array();
-
+include('modals/header.php');
+include("modals/navbar.php");
 ?>
 <section id="main-site">
     <div class="container">

@@ -1,10 +1,12 @@
 <!-- PHP session init -->
 <?php
-session_start();
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 
 $user = array();
-require('../authentication/db_connection.php');
-include_once('../authentication/auth-helper.php');
+require(__DIR__ . '/../authentication/db_connection.php');
+include(__DIR__ . '/../authentication/auth-helper.php');
 
 if (!isset($_SESSION['userID'])) {
     header("Location: ../authentication/login.php");
@@ -42,7 +44,6 @@ if (!isset($_SESSION['userID'])) {
                                 <a class="nav-link" href="../profile/my-team.php">My team</a>
                             </li>
                         <?php endif; ?>
-                    <?php else : ?>
                         <li class="nav-item">
                             <a class="nav-link" href="../chi-siamo.php">Chi siamo</a>
                         </li>
