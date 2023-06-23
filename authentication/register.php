@@ -72,11 +72,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="form-row my-4" id="teamCodeRow" style="display: none;">
                         <div class="col">
                             <input type="text" name="teamCode" id="teamCode" class="form-control" placeholder="Team Code">
+                            <p id="teamCodeError" class="error-message">Codice squadra non esistente</p>
                         </div>
                     </div>
                     <div class="form-row my-4" id="societyCodeRow" style="display: none;">
                         <div class="col">
-                            <input type="text" name="teamCode" id="societyCode" class="form-control" placeholder="Society Code">
+                            <input type="text" name="societyCode" id="societyCode" class="form-control" placeholder="Society Code">
+                            <p id="societyCodeError" class="error-message">Codice societario non esistente</p>
                         </div>
                     </div>
 
@@ -94,9 +96,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                     <div class="form-row my-4">
                         <div class="col">
-                            <input type="date" value="<?php if (isset($_POST['dataNascita'])) echo $_POST['dataNascita'];  ?>" name="dataNascita" id="dataNascita" class="form-control" placeholder="Data di nascita">
+                            <label for="dataNascita">Data di nascita</label>
+                            <input type="date" value="<?php if (isset($_POST['dataNascita'])) echo $_POST['dataNascita']; ?>" name="dataNascita" id="dataNascita" class="form-control" placeholder="Data di nascita">
                         </div>
                     </div>
+
 
                     <div class="form-check form-check-inline">
                         <input type="checkbox" name="agreement" class="form-check-input" required>

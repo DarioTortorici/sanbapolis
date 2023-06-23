@@ -68,6 +68,57 @@ function validate_password($password)
     return true;
 }
 
+/**
+ * Verifica se il codice societario esiste nel database delle società sportive.
+ *
+ * @param PDO $con La connessione al database.
+ * @param string $societyCode Il codice societario da verificare.
+ * @return bool True se il codice societario esiste nel database, altrimenti False.
+ */
+function validate_society_code($con, $societyCode)
+{
+    try {
+        $query = "SELECT COUNT(*) as count FROM societa_sportive WHERE code = :societyCode";
+        $stmt = $con->prepare($query);
+        $stmt->bindParam(':societyCode', $societyCode);
+        $stmt->execute();
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $count = $result['count'];
+
+        return ($count > 0);
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+        return false;
+    }
+}
+
+/**
+ * Verifica se il codice squadra esiste nel database delle squadre.
+ *
+ * @param PDO $con La connessione al database.
+ * @param string $teamCode Il codice squadra da verificare.
+ * @return bool True se il codice squadra esiste nel database, altrimenti False.
+ */
+
+function validate_team_code($con, $teamCode)
+{
+    try {
+        $query = "SELECT COUNT(*) as count FROM squadre WHERE code = :teamCode";
+        $stmt = $con->prepare($query);
+        $stmt->bindParam(':teamCode', $teamCode);
+        $stmt->execute();
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        $count = $result['count'];
+
+        return ($count > 0);
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+        return false;
+    }
+}
+
 
 /**
  * Gestisce il caricamento di un'immagine del profilo sul server. 
@@ -106,20 +157,35 @@ function upload_profile($path, $file)
     return $path . $default;
 }
 
-
 /**
- * Aggiunge un nuovo allenatore alla tabella 'allenatori'.
+ * Aggiunge un allenatore alla tabella "allenatori" e crea una relazione con una squadra nella tabella "allenatori_squadre".
  *
- * @param PDO $con L'oggetto di connessione al database.
- * @param string $email L'email dell'allenatore da aggiungere.
- * @return bool Restituisce true se l'allenatore è stato aggiunto con successo, false altrimenti.
-*/
-function addCoach($con, $email) {
+ * @param PDO $con Connessione al database
+ * @param string $email Email dell'allenatore
+ * @param string $code Codice della squadra
+ * @return bool True se l'inserimento è avvenuto con successo, altrimenti False
+ */
+function addCoach($con, $email, $code)
+{
     try {
         $query = "INSERT INTO allenatori (email) VALUES (:email)";
         $stmt = $con->prepare($query);
         $stmt->bindParam(':email', $email);
         $stmt->execute();
+
+        $query = "SELECT id FROM squadre INNER JOIN societa_sportive as sp ON partita_iva = societa WHERE sp.code = :code";
+        $stmt = $con->prepare($query);
+        $stmt->bindParam(':code', $code);
+        $stmt->execute();
+        $row = $stmt->fetch();
+        $id = $row['id'];
+
+        $query = "INSERT INTO allenatori_squadre (email_allenatore, id_squadra) VALUES (:email, :id)";
+        $stmt = $con->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+
         return true;
     } catch (PDOException $e) {
         echo "Error: " . $e->getMessage();
@@ -128,15 +194,52 @@ function addCoach($con, $email) {
 }
 
 /**
- * Aggiunge un nuovo allenatore alla tabella 'allenatori'.
+ * Aggiunge un giocatore alla tabella "giocatori" e crea una relazione con una squadra nella tabella "giocatori_squadre".
+ *
+ * @param PDO $con Connessione al database
+ * @param string $email Email del giocatore
+ * @param string $code Codice della squadra
+ * @return bool True se l'inserimento è avvenuto con successo, altrimenti False
+ */
+function addPlayer($con, $email, $code)
+{
+    try {
+        $query = "INSERT INTO giocatori (email) VALUES (:email)";
+        $stmt = $con->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+
+        $query = "SELECT id FROM squadre WHERE code = :code";
+        $stmt = $con->prepare($query);
+        $stmt->bindParam(':code', $code);
+        $stmt->execute();
+        $row = $stmt->fetch();
+        $id = $row['id'];
+
+        $query = "INSERT INTO giocatori_squadre (email_giocatore, id_squadra) VALUES (:email, :id)";
+        $stmt = $con->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+
+        return true;
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+        return false;
+    }
+}
+
+/**
+ * Aggiunge un nuovo tifoso alla tabella 'tifosi'.
  *
  * @param PDO $con L'oggetto di connessione al database.
  * @param string $email L'email del giocatore da aggiungere.
- * @return bool Restituisce true se il giocatore è stato aggiunto con successo, false altrimenti.
-*/
-function addPlayer($con, $email) {
+ * @return bool Restituisce true se il tifoso è stato aggiunto con successo, false altrimenti.
+ */
+function addFan($con, $email)
+{
     try {
-        $query = "INSERT INTO giocatori (email) VALUES (:email)";
+        $query = "INSERT INTO tifosi (email) VALUES (:email)";
         $stmt = $con->prepare($query);
         $stmt->bindParam(':email', $email);
         $stmt->execute();
@@ -146,7 +249,6 @@ function addPlayer($con, $email) {
         return false;
     }
 }
-
 
 /**
  * Recupera le informazioni dell'utente dal database. 

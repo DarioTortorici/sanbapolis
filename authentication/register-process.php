@@ -1,6 +1,8 @@
+<!-- registration scripts -->
+<script src="../js/authentication/register.js"></script>
 <?php
 require('auth-helper.php');
-
+require('db_connection.php');
 // Array per gli errori
 $errors = array();
 
@@ -16,6 +18,8 @@ $errors = array();
  * @param string $_POST['dataNascita'] La data di nascita fornita dall'utente.
  * @param string $_POST['citta'] La citta fornita dall'utente.
  * @param string $_POST['telefono'] Il numero di telefono dell'utente
+ * @param string $_POST['societyCode'] Il codice associato alla società
+ * @param string $_POST['teamCode'] Il codice associato alla squadra
  * @param array $_FILES['profileUpload'] I dettagli dell'immagine del profilo da caricare.
  */
 $firstName = validate_input_text($_POST['firstName']);
@@ -61,11 +65,25 @@ $citta = $_POST['citta'];
 $telefono = $_POST['telefono'];
 $profileImage = upload_profile("../assets/profileimg/", $_FILES['profileUpload']);
 
+$societyCode = $_POST['societyCode'];
+$teamCode = $_POST['teamCode'];
+
+if (!empty($societyCode)){
+    if (!validate_society_code($con, $societyCode)){
+        $errors[] = "Il codice societario non esiste";
+    }
+}
+else if (!empty($teamCode)){
+    if (!validate_team_code($con, $teamCode)){
+        $errors[] = "Il codice squadra non esiste";
+    }
+}
+
 if (empty($errors)) {
+
     // Registra un nuovo utente
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     try {
-        require('db_connection.php');
         // Crea una query
         $query = "INSERT INTO persone (nome, cognome, email, data_nascita, citta, indirizzo, telefono, digest_password, locazione_immagine_profilo, data_registrazione, session_id)";
         $query .= " VALUES (:firstName, :lastName, :email, :dataNascita, :citta, :indirizzo, :telefono, :password, :profileImage, NOW(), NULL)";
@@ -96,9 +114,12 @@ if (empty($errors)) {
 
             // Esegue query su tabella utente corretta
             if ($userType == "allenatore") {
-                addCoach($con, $email);
+                addCoach($con, $email, $societyCode);
             } elseif ($userType == "giocatore") {
-                addPlayer($con, $email);
+                addPlayer($con, $email, $teamCode);
+            }
+            else {
+                addFan($con, $email);
             }
 
             header('Location: ../profile/user-dashboard.php');
@@ -122,4 +143,12 @@ if (empty($errors)) {
     }
 
     echo $passwordError;
+}
+// Mostra gli errori a schermo
+if (!empty($errors)) {
+    echo "<ul>";
+    foreach ($errors as $error) {
+        echo "<li>$error</li>";
+    }
+    echo "</ul>";
 }
