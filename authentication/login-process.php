@@ -33,7 +33,7 @@ if (empty($password)) {
  */
 if (empty($error)) {
     // Preparazione SQL query e PDO statement 
-    $query = "SELECT userID, firstName, lastName, email, password, profileImage FROM user WHERE email=:email";
+    $query = "SELECT * FROM persone WHERE email=:email";
     $stmt = $con->prepare($query);
 
     // Imposta parametro email
@@ -46,10 +46,10 @@ if (empty($error)) {
 
     if (!empty($row)) {
         // Verifica password
-        if (password_verify($password, $row['password'])) {
+        if (password_verify($password, $row['digest_password'])) {
             session_start();
             // Imposta la variabile di sessione con l'ID dell'utente
-            $_SESSION['userID'] = $row['userID'];
+            $_SESSION['userID'] = $row['session_id'];
             // Credenziali corrette, reindirizza l'utente alla pagina successiva
             $response = array('success' => true);
             echo json_encode($response);

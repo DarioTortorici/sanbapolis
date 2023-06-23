@@ -12,35 +12,36 @@ $errors = array();
  * @param string $_POST['email'] L'indirizzo email fornito dall'utente.
  * @param string $_POST['password'] La password fornita dall'utente.
  * @param string $_POST['confirm_pwd'] La conferma della password fornita dall'utente.
- * @param string $_POST['sport'] Lo sport fornito dall'utente. 
  * @param string $_POST['userType'] Il ruolo fornito dall'utente.
- * @param string $_POST['society'] La società fornita dall'utente.
+ * @param string $_POST['dataNascita'] La data di nascita fornita dall'utente.
+ * @param string $_POST['citta'] La citta fornita dall'utente.
+ * @param string $_POST['telefono'] Il numero di telefono dell'utente
  * @param array $_FILES['profileUpload'] I dettagli dell'immagine del profilo da caricare.
-*/
+ */
 $firstName = validate_input_text($_POST['firstName']);
-if (empty($firstName)){
+if (empty($firstName)) {
     $errors[] = "Hai dimenticato di inserire il tuo nome.";
 }
 
 $lastName = validate_input_text($_POST['lastName']);
-if (empty($lastName)){
+if (empty($lastName)) {
     $errors[] = "Hai dimenticato di inserire il tuo cognome.";
 }
 
 $email = validate_input_email($_POST['email']);
-if (empty($email)){
+if (empty($email)) {
     $errors[] = "Hai dimenticato di inserire il tuo indirizzo email.";
 }
 
 $password = validate_input_text($_POST['password']);
-if (empty($password)){
+if (empty($password)) {
     $errors[] = "Hai dimenticato di inserire una password.";
-} elseif (!validate_password($password)){
+} elseif (!validate_password($password)) {
     $errors[] = "La password deve contenere almeno 8 caratteri, di cui uno maiuscolo ed uno speciale.";
 }
 
 $confirmPwd = validate_input_text($_POST['confirm_pwd']);
-if (empty($confirmPwd)){
+if (empty($confirmPwd)) {
     $errors[] = "Hai dimenticato di inserire la conferma della password.";
 }
 
@@ -49,41 +50,25 @@ if ($password !== $confirmPwd) {
     $errors[] = "Le password non coincidono.";
 }
 
-$sport = validate_input_text($_POST['sport']);
-if (empty($sport)){
-    $errors[] = "Hai dimenticato di inserire il tuo sport.";
-}
-
 $userType = validate_input_text($_POST['userType']);
-if (empty($userType)){
+if (empty($userType)) {
     $errors[] = "Hai dimenticato di inserire il tuo ruolo.";
 }
 
-$society = $_POST['society'];
 
-$profileImage = upload_profile("../assets/profileimg/",$_FILES['profileUpload']);
+$dataNascita = $_POST['dataNascita'];
+$citta = $_POST['citta'];
+$telefono = $_POST['telefono'];
+$profileImage = upload_profile("../assets/profileimg/", $_FILES['profileUpload']);
 
-/**
- * Registra un nuovo utente nel database se non ci sono errori di validazione.
- * La password fornita viene criptata utilizzando la funzione password_hash prima di essere memorizzata nel database.
- * @param string $firstName Il nome fornito dall'utente.
- * @param string $lastName Il cognome fornito dall'utente.
- * @param string $email L'indirizzo email fornito dall'utente.
- * @param string $password La password fornita dall'utente.
- * @param string $sport Lo sport fornito dall'utente.
- * @param string $userType Il ruolo fornito dall'utente. 
- * @param string $society La società fornita dall'utente.
- * @param string $profileImage Il percorso dell'immagine del profilo caricata dall'utente.
-*/
-if (empty($errors)){
+if (empty($errors)) {
     // Registra un nuovo utente
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     try {
         require('db_connection.php');
-
         // Crea una query
-        $query = "INSERT INTO user (firstName, lastName, email, password, sport, userType, society, profileImage, registerDate)";
-        $query .= " VALUES (:firstName, :lastName, :email, :password, :sport, :userType, :society, :profileImage, NOW())";
+        $query = "INSERT INTO persone (nome, cognome, email, data_nascita, citta, indirizzo, telefono, digest_password, locazione_immagine_profilo, data_registrazione, session_id)";
+        $query .= " VALUES (:firstName, :lastName, :email, :dataNascita, :citta, :indirizzo, :telefono, :password, :profileImage, NOW(), NULL)";
 
         // Prepara la dichiarazione
         $stmt = $con->prepare($query);
@@ -92,21 +77,30 @@ if (empty($errors)){
         $stmt->bindParam(':firstName', $firstName);
         $stmt->bindParam(':lastName', $lastName);
         $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':dataNascita', $dataNascita);
+        $stmt->bindParam(':citta', $citta);
+        $stmt->bindParam(':indirizzo', $indirizzo);
+        $stmt->bindParam(':telefono', $telefono);
         $stmt->bindParam(':password', $hashedPassword);
-        $stmt->bindParam(':sport', $sport);
-        $stmt->bindParam(':userType', $userType);
-        $stmt->bindParam(':society', $society);
-        $stmt->bindParam(':profileImage', $profileImage,PDO::PARAM_LOB);
-    
+        $stmt->bindParam(':profileImage', $profileImage, PDO::PARAM_LOB);
+
         // Esegui la query
         $stmt->execute();
 
-        if ($stmt->rowCount() == 1){
+        if ($stmt->rowCount() == 1) {
             // Inizia una nuova sessione
             session_start();
 
             // Crea la variabile di sessione
             $_SESSION['userID'] = $con->lastInsertId();
+
+            // Esegue query su tabella utente corretta
+            if ($userType == "allenatore") {
+                addCoach($con, $email);
+            } elseif ($userType == "giocatore") {
+                addPlayer($con, $email);
+            }
+
             header('Location: ../profile/user-dashboard.php');
             exit();
         } else {
@@ -126,6 +120,6 @@ if (empty($errors)){
             break;
         }
     }
-    
+
     echo $passwordError;
 }

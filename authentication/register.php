@@ -61,22 +61,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                     <div class="form-row my-4">
                         <div class="col">
-                            <select required name="sport" id="sport" class="form-control">
-                                <option value="">Select a sport*</option>
-                                <option value="calcio" <?php if (isset($_POST['sport']) && $_POST['sport'] === 'calcio') echo 'selected'; ?>>Calcio</option>
-                                <option value="pallavolo" <?php if (isset($_POST['sport']) && $_POST['sport'] === 'pallavolo') echo 'selected'; ?>>Pallavolo</option>
-                                <option value="basket" <?php if (isset($_POST['sport']) && $_POST['sport'] === 'basket') echo 'selected'; ?>>Basket</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-row my-4">
-                        <div class="col">
                             <select required name="userType" id="userType" class="form-control" onchange="handleUserType()">
                                 <option value="">Select your role*</option>
                                 <option value="allenatore" <?php if (isset($_POST['userType']) && $_POST['userType'] === 'allenatore') echo 'selected'; ?>>Allenatore</option>
                                 <option value="giocatore" <?php if (isset($_POST['userType']) && $_POST['userType'] === 'giocatore') echo 'selected'; ?>>Giocatore</option>
-                                <option value="altro" <?php if (isset($_POST['userType']) && $_POST['userType'] === 'altro') echo 'selected'; ?>>Altro</option>
+                                <option value="altro" <?php if (isset($_POST['userType']) && $_POST['userType'] === 'tifoso') echo 'selected'; ?>>Tifoso</option>
                             </select>
                         </div>
                     </div>
@@ -85,9 +74,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <input type="text" name="teamCode" id="teamCode" class="form-control" placeholder="Team Code">
                         </div>
                     </div>
+                    <div class="form-row my-4" id="societyCodeRow" style="display: none;">
+                        <div class="col">
+                            <input type="text" name="teamCode" id="societyCode" class="form-control" placeholder="Society Code">
+                        </div>
+                    </div>
+
                     <div class="form-row my-4">
                         <div class="col">
-                            <input type="text" name="society" id="society" class="form-control" placeholder="Society">
+                            <input type="text" value="<?php if (isset($_POST['telefono'])) echo $_POST['telefono'];  ?>" name="telefono" id="telefono" class="form-control" placeholder="Telefono">
+                        </div>
+                    </div>
+
+                    <div class="form-row my-4">
+                        <div class="col">
+                            <input type="text" value="<?php if (isset($_POST['citta'])) echo $_POST['citta'];  ?>" name="citta" id="citta" class="form-control" placeholder="Città">
+                        </div>
+                    </div>
+
+                    <div class="form-row my-4">
+                        <div class="col">
+                            <input type="date" value="<?php if (isset($_POST['dataNascita'])) echo $_POST['dataNascita'];  ?>" name="dataNascita" id="dataNascita" class="form-control" placeholder="Data di nascita">
                         </div>
                     </div>
 

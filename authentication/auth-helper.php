@@ -108,6 +108,47 @@ function upload_profile($path, $file)
 
 
 /**
+ * Aggiunge un nuovo allenatore alla tabella 'allenatori'.
+ *
+ * @param PDO $con L'oggetto di connessione al database.
+ * @param string $email L'email dell'allenatore da aggiungere.
+ * @return bool Restituisce true se l'allenatore è stato aggiunto con successo, false altrimenti.
+*/
+function addCoach($con, $email) {
+    try {
+        $query = "INSERT INTO allenatori (email) VALUES (:email)";
+        $stmt = $con->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+        return true;
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+        return false;
+    }
+}
+
+/**
+ * Aggiunge un nuovo allenatore alla tabella 'allenatori'.
+ *
+ * @param PDO $con L'oggetto di connessione al database.
+ * @param string $email L'email del giocatore da aggiungere.
+ * @return bool Restituisce true se il giocatore è stato aggiunto con successo, false altrimenti.
+*/
+function addPlayer($con, $email) {
+    try {
+        $query = "INSERT INTO giocatori (email) VALUES (:email)";
+        $stmt = $con->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+        return true;
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+        return false;
+    }
+}
+
+
+/**
  * Recupera le informazioni dell'utente dal database. 
  * Richiede due parametri: 
  * $con, che rappresenta l'oggetto di connessione al database,
@@ -120,11 +161,36 @@ function upload_profile($path, $file)
  */
 function get_user_info($con, $userID)
 {
-    $query = "SELECT firstName, lastName, email, sport, userType, society, profileImage FROM user WHERE userID=:userID";
+    $query = "SELECT p.*,
+    g.email AS giocatore_email,
+    a.email AS allenatore_email,
+    m.email AS manutentore_email
+    FROM persone AS p
+    LEFT JOIN allenatori AS a ON p.email = a.email
+    LEFT JOIN giocatori AS g ON p.email = g.email
+    LEFT JOIN manutentori AS m ON p.email = m.email
+    WHERE session_id = :userID";
+
     $stmt = $con->prepare($query);
     $stmt->bindParam(':userID', $userID, PDO::PARAM_INT);
     $stmt->execute();
 
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    return empty($row) ? false : $row;
+
+    if (empty($row)) {
+        return false;
+    }
+
+    // Aggiungi il campo "userType" al risultato in base alla presenza dell'ID dell'allenatore
+    if (!empty($row['allenatore_email'])) {
+        $row['userType'] = 'allenatore';
+    } else if (!empty($row['giocatore_email'])) {
+        $row['userType'] = 'giocatore';
+    } else if (!empty($row['manutentore_email'])) {
+        $row['userType'] = 'manutentore';
+    } else {
+        $row['userType'] = 'tifoso';
+    }
+
+    return $row;
 }

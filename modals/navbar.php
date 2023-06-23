@@ -1,5 +1,6 @@
 <!-- PHP session init -->
 <?php
+
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
@@ -8,13 +9,11 @@ $user = array();
 require(__DIR__ . '/../authentication/db_connection.php');
 include(__DIR__ . '/../authentication/auth-helper.php');
 
-if (!isset($_SESSION['userID'])) {
-    header("Location: ../authentication/login.php");
-    exit();
-} else {
+if (isset($_SESSION['userID'])) {
     $user_id = $_SESSION['userID'];
     $user = get_user_info($con, $_SESSION['userID']);
 }
+
 ?>
 <!-- Navbar-->
 <div class="container">
@@ -39,7 +38,7 @@ if (!isset($_SESSION['userID'])) {
                         <li class="nav-item">
                             <a class="nav-link" href="../cameras/overview.php">Livecams</a>
                         </li>
-                        <?php if ($user['userType'] == "allenatore") : ?>
+                        <?php if (isset($user) && $user['userType'] == "allenatore") : ?>
                             <li class="nav-item">
                                 <a class="nav-link" href="../profile/my-team.php">My team</a>
                             </li>
@@ -55,7 +54,7 @@ if (!isset($_SESSION['userID'])) {
 
                     <?php if (isset($user_id)) : ?>
 
-                        <a href="../profile/user-dashboard.php"><img class="img rounded-circle" style="width: 20px; height: 20px;" src="<?php echo isset($user['profileImage']) ? substr($user['profileImage'], 2) : '../assets/profileimg/beard.png'; ?>" alt=""></a>
+                        <a href="../profile/user-dashboard.php"><img class="img rounded-circle" style="width: 20px; height: 20px;" src="<?php echo isset($user['locazione_immagine_profilo']) ? substr($user['locazione_immagine_profilo'], 2) : '../assets/profileimg/beard.png'; ?>" alt=""></a>
                     <?php else : ?>
                         <li> <a class="btn btn-primary" href="/authentication/login.php" role="button">Accedi</a> </li>
                         <li> <a class="btn btn-primary" href="/authentication/register.php" role="button">Iscriviti</a></li>
