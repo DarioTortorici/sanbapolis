@@ -40,4 +40,43 @@ function handleUserType() {
     }
 }
 
-  
+/**
+ * Event listener che controlla che la password inserita rispetti i vincoli
+ * @param {string} password - la password da controlalre.
+ * @returns {boolean} - True se rispetta i vincoli, False altrimenti.
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    var form = document.getElementById('reg-form');
+    var passwordInput = document.getElementById('password');
+    var passwordError = document.getElementById('confirm_error');
+
+    form.addEventListener('submit', function(event) {
+        if (!isPasswordValid(passwordInput.value)) {
+            event.preventDefault(); // Impedisce l'invio del modulo
+            passwordError.textContent = 'La password non rispetta i vincoli richiesti.';
+            passwordError.style.display = 'block'; // Rendi visibile il messaggio di errore
+            
+        }
+    });
+});
+
+
+/**
+ * Controlla che la password inserita rispetti i vincoli
+ * 1. Deve avere una lunghezza minima di 8 caratteri.
+ * 2. Deve contenere almeno una lettera maiuscola.
+ * 3. Deve contenere almeno un carattere speciale diverso da lettere e numeri.
+ * @param {string} password - la password da controlalre.
+ * @returns {boolean} - True se rispetta i vincoli, False altrimenti.
+ */
+    function isPasswordValid(password) {
+        var minLength = 8;
+        var hasUppercase = /[A-Z]/.test(password);
+        var hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
+
+        return (
+            password.length >= minLength &&
+            hasUppercase &&
+            hasSpecialChar
+        );
+    }
