@@ -10,7 +10,7 @@ if (!isset($_SESSION['userID'])) {
 ?>
 
 
-<button type="submit" class="btn btn-primary" name="recButton" onclick="getRecordingEvents()">Avvia Rec</button>
+<button type="submit" class="btn btn-primary" name="recButton" onclick="getLiveCams()">Avvia Rec</button>
 
 
 <style>

@@ -1,63 +1,75 @@
+// Variabili per l'autenticazione e le informazioni sulla telecamera
 var username = 'admin';
 var password = '123-iSTAR';
 var cameraId = 'E4-30-22-3F-CF-65';
 var serverAddress = "https://127.0.0.1:7001";
+const systemId = 'bcf49919-0ace-4c32-a16c-27eac572fb3f';
 
+// Funzione per ottenere gli stream video in diretta
+async function getLiveCams() {
+  const url = `https://${systemId}.relay.vmsproxy.com/api/createEvent`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: 'Bearer vms-61c9e97918c389409a20aa731230d43e-U1xOeOz4RR'
+  };
+  const data = {
+    timestamp: '',
+    source: 'live',
+    caption: ''
+  };
 
-// Prendi il flusso di cams live all'apertura della pagina
-document.addEventListener("DOMContentLoaded", function () {
-  integrateVideo()
-});
-
-
-// Function to get live camera streams
-function getLiveCams() {
-  // Construct the API URL
-  var url = `${serverAddress}/api/createEvent?source=live&login=${username}&password=${password}`;
-
-  axios.get(url)
-    .then(function (response) {
-      if (response.status === 200) {
-        return response.data;
-      } else {
-        throw new Error('Request error. Status code: ' + response.status);
-      }
-    })
-    .then(function (data) {
-      // Handle the response here
-      var camera1_flow = data;
-      console.log('API response:', camera1_flow);
-      // Perform additional actions with the live camera streams
-    })
-    .catch(function (error) {
-      console.log('Request error:', error.message);
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data)
     });
+
+    if (response.ok) {
+      const responseData = await response.json();
+      // console.log('Evento creato con successo:', responseData);
+    } else {
+      console.error('Errore nella creazione dell\'evento:', response.status);
+    }
+  } catch (error) {
+    console.error('Si è verificato un errore durante la creazione dell\'evento:', error);
+  }
 }
 
-// Function to get recording events
-function getRecordingEvents() {
-  var url = `${serverAddress}/api/createEvent?source=recording&login=${username}&password=${password}`;
+// Funzione per ottenere gli eventi di registrazione
+async function getRecordingEvents() {
+  const url = `https://${systemId}.relay.vmsproxy.com/api/createEvent`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: 'Bearer vms-61c9e97918c389409a20aa731230d43e-U1xOeOz4RR'
+  };
+  const data = {
+    timestamp: '',
+    source: 'live',
+    caption: ''
+  };
 
-  axios.get(url)
-    .then(function (response) {
-      if (response.status === 200) {
-        return response.data;
-      } else {
-        throw new Error('Errore nella richiesta. Codice di stato: ' + response.status);
-      }
-    })
-    .then(function (responseData) {
-      // Set the new URL for Camera 1 video
-      console.log(responseData);
-      var camera1Video = document.getElementById('camera1');
-      camera1Video.src = responseData;
-    })
-    .catch(function (error) {
-      console.log('Errore nella richiesta:', error.message);
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data)
     });
+
+    if (response.ok) {
+      const responseData = await response.json();
+      // console.log('Evento creato con successo:', responseData);
+    } else {
+      console.error('Errore nella creazione dell\'evento:', response.status);
+    }
+  } catch (error) {
+    console.error('Si è verificato un errore durante la creazione dell\'evento:', error);
+  }
 }
 
-// Funzione per espandere il video selezionato e modifcare il layout
+// Funzione per espandere il video selezionato e modificare il layout
 function expandVideo(element) {
   var table = element.closest("table");
   var mainRow = table.querySelector(".main-row");
@@ -74,10 +86,11 @@ function expandVideo(element) {
   mainRow.classList.add("expanded-row");
 }
 
+// Funzione per combinare data e ora in un oggetto DateTime
 function combineDateAndTime(date, time) {
   var dateParts = date.split('-');
   var year = parseInt(dateParts[0]);
-  var month = parseInt(dateParts[1]) - 1; // Months are zero-based in JavaScript
+  var month = parseInt(dateParts[1]) - 1; // I mesi sono indicizzati da 0 in JavaScript
   var day = parseInt(dateParts[2]);
 
   var timeParts = time.split(':');
@@ -89,10 +102,12 @@ function combineDateAndTime(date, time) {
   return combinedDate;
 }
 
+// Funzione per introdurre un ritardo
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// Funzione per pianificare una registrazione
 async function scheduleRecording(dateTime) {
   var targetDateTime = new Date(dateTime);
   var currentDateTime = new Date();
@@ -108,7 +123,7 @@ async function scheduleRecording(dateTime) {
   }
 }
 
-
+// Funzione per ottenere data e ora da un ID
 function getDateTime(id) {
   jQuery.ajax({
     url: 'http://localhost/calendar/calendar-helper.php?action=get-time',
@@ -122,36 +137,4 @@ function getDateTime(id) {
       console.log(xhr.responseText);
     }
   });
-}
-
-function integrateVideo(){
-  $.ajax({
-    url: serverAddress +"/api/getNonce",
-    type: "GET",
-    success: function (response) {
-
-        var realm = response.reply.realm;
-        var nonce = response.reply.nonce;
-        var digest = md5(username + ":" + realm + ":" + password);
-        var partial_ha2 = md5("GET" + ":");
-        var simplified_ha2 = md5(digest + ":" + nonce + ":" + partial_ha2);
-        var authKey = btoa(username + ":" + nonce + ":" + simplified_ha2);
-
-        callback(authKey); // This key can be used in URL now
-    }
-});
-
-var cameraURL = serverAddress + '/hls/' + cameraId + '.m3u8?lo&auth=' + authKey;
-var video = document.getElementById('camera1');
- 
-if (Hls.isSupported()) {
- 
-    var hls = new Hls();
-    hls.loadSource(cameraURL);
-    hls.attachMedia(video);
-    hls.on(Hls.Events.MANIFEST_PARSED, function() {
- 
-        video.play();
-    });
-}
 }
