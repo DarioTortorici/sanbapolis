@@ -7,6 +7,7 @@
 include('../modals/calendar-header.php');
 include_once("../modals/navbar.php");
 include_once('../authentication/auth-helper.php');
+include("./calendar-helper.php");
 
 if (!isset($_SESSION['userID'])) {
     header("Location: ../authentication/login.php");
@@ -52,7 +53,11 @@ if ($user['userType'] == "allenatore") {
     <div style="min-height: 250px;">
         <form id="save-form">
             <input type="hidden" name="id" />
-            Società: <input type="text" name="society" placeholder="Società*" required /><br>
+            Società:
+            <select name="society" required>
+                <option value="" disabled selected>Scegli una società</option>
+                <?php echo getSociety(); ?>
+            </select>
             Evento:
             <select name="event_type">
                 <option value="training">Allenamento</option>
@@ -62,13 +67,6 @@ if ($user['userType'] == "allenatore") {
             Data fine: <input id="end-date" type="date" name="end-date" placeholder="Data fine" autocomplete="off" value="<?= date('Y-m-d') ?>" required /><br>
             Ora inizio: <input type="time" name="startTime" placeholder="Ora inizio" /><br>
             Ora fine: <input type="time" name="endTime" placeholder="Ora fine" /><br>
-            Allenatore: <input type="text" name="coach" placeholder="Mail allenatore*" required /><br>
-            Sport:
-            <select name="sport">
-                <option value="calcio">Calcio a 5</option>
-                <option value="pallavolo">Pallavolo</option>
-                <option value="basket">Basket</option>
-            </select><br>
 
             <!-- Scelta camere -->
             <div>
@@ -120,7 +118,7 @@ if ($user['userType'] == "allenatore") {
                 Tutto il giorno: <input type="checkbox" name="allDay" placeholder="allday"><br>
             </div>
 
-            <button type="button" id="save-event" onclick="saveEvent()">Salva</button>
+            <button type="button" id="save-event" onclick="saveEvent(<?php echo $user_id; ?>)">Salva</button>
         </form>
     </div>
     <div id="error-message" style="color: red; display: none;">Si prega di compilare tutti i campi obbligatori.</div>

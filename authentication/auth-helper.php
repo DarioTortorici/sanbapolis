@@ -168,7 +168,7 @@ function upload_profile($path, $file)
 function addCoach($con, $email, $code)
 {
     try {
-        $query = "INSERT INTO allenatori (email) VALUES (:email)";
+        $query = "INSERT INTO allenatori (email, cam_privileges) VALUES (:email, 0)";
         $stmt = $con->prepare($query);
         $stmt->bindParam(':email', $email);
         $stmt->execute();
@@ -266,7 +266,8 @@ function get_user_info($con, $userID)
     $query = "SELECT p.*,
     g.email AS giocatore_email,
     a.email AS allenatore_email,
-    m.email AS manutentore_email
+    m.email AS manutentore_email,
+    cam_privileges 
     FROM persone AS p
     LEFT JOIN allenatori AS a ON p.email = a.email
     LEFT JOIN giocatori AS g ON p.email = g.email

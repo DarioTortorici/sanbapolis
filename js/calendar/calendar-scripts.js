@@ -78,23 +78,24 @@ function fetchCoachEvents(coach) {
  * La risposta viene interpretata come JSON, se la richiesta è andata a buon fine, vengono aggiornati gli eventi.
  * In caso di errore, viene visualizzato il messaggio di errore nella console.
  */
-function saveEvent() {
+function saveEvent(user_id) {
     var formData = $('#save-form').serialize();
+    formData += '&user_id=' + user_id;
 
     // Verifica se i campi richiesti sono stati compilati prima di inviare la richiesta
     if (validateForm()) {
-        jQuery.ajax({
+        $.ajax({
             url: 'http://localhost/calendar/calendar-helper.php?action=save-event',
             type: 'POST',
             data: formData,
             dataType: 'json',
-            success: function (response) {
-                if (response.status == 'success') {
+            success: function(response) {
+                if (response.status === 'success') {
                     fetchEvents();
                     $.magnificPopup.close();
                 }
             },
-            error: function (xhr, status, error) {
+            error: function(xhr, status, error) {
                 console.log(xhr.responseText);
             }
         });
@@ -102,6 +103,7 @@ function saveEvent() {
         $('#error-message').show();
     }
 }
+
 
 /** Funzione per visualizzare i dettagli di un obiettivo.
  * 
@@ -455,7 +457,7 @@ function updateAddcameras(response, id) {
  * @returns {boolean} True se il modulo è valido, altrimenti false.
  */
 function validateForm() {
-    var requiredFields = ['society', 'start-date', 'coach'];
+    var requiredFields = ['society', 'start-date'];
 
     for (var i = 0; i < requiredFields.length; i++) {
         var field = document.querySelector('[name="' + requiredFields[i] + '"]');

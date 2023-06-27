@@ -1,7 +1,5 @@
 <?php
 
-use JetBrains\PhpStorm\Internal\ReturnTypeContract;
-
 require_once '../authentication/db_connection.php';
 
 /** Verifica se la richiesta corrente è una richiesta AJAX.
@@ -22,7 +20,7 @@ function is_ajax_request()
     return false;
 }
 
-/** Salva un training nella tabella "calendar_events" insieme alle informazioni correlate nella tabella "event_info".
+/** Salva un training nella tabella "calendar_events" insieme alle informazioni correlate nella tabella "prenotazioni".
  * Inoltre gestisce i parametri di fullcalendar.io che non sono al momento utilizzati
  *
  * @param int $groupId L'ID del gruppo associato all'evento.
@@ -42,7 +40,7 @@ function is_ajax_request()
  * @param string $eventType Il tipo di evento (es. "match" o altro).
  * @return int L'ID del training salvato (ID calendar_events).
  */
-function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras)
+function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras, $sessionId)
 {
     // missing premium parameter `resourceEditable`=?, `resourceId`=?, `resourceIds`=?
 
@@ -90,18 +88,19 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
     $textcolor = "white";
 
     //Camere preselezionate da attivare
-    if ($cameras == "null"){
+    if ($cameras == "null") {
         $cameras = "[]";
     }
-    
-    $eventTypeBoolean = ($eventType === 'match') ? 0 : 1;
 
+    $squadra = getSquadra($society);
+
+    $eventTypeBoolean = ($eventType === 'match') ? 1 : 0;
     if ($eventTypeBoolean) {
-        $title = $society;
-        $borderColor = $backgroundColor;
-    } else {
         $title = $society . ' | ' . $eventType;
         $borderColor = "black";
+    } else {
+        $title = $society;
+        $borderColor = $backgroundColor;
     }
 
     $sql = "INSERT INTO calendar_events (`groupId`,`allDay`,`start`,`end`,`daysOfWeek`, `startTime`, `endTime`,`startRecur`, `endRecur`, `title`, `url`,
@@ -114,15 +113,37 @@ function save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $st
     ]);
 
     $calendar_id = $con->lastInsertId();
-    $sql = "INSERT INTO event_info (`society`, `sport`, `coach`, `note`, `training`, `event_id`, `cams`) 
+
+    $author = getAuthorEvent($sessionId);
+    $data_ora_inizio = accorpaTime($startDate,$startTime);
+    $data_ora_fine = accorpaTime($endDate, $endTime);
+
+    $sql = "INSERT INTO prenotazioni (`data_ora_inizio`,`data_ora_fine`, `autore_prenotazione`, `note`, `id_squadra`, `id_calendar_events`, `cams`) 
         VALUES (?,?,?,?,?,?,?)";
     $query = $con->prepare($sql);
-    $query->execute([$society, $sport, $coach, $note, $eventTypeBoolean, $calendar_id, $cameras]);
+    $query->execute([$data_ora_inizio, $data_ora_fine, $author, $note, $squadra['id'], $calendar_id, $cameras]);
+    $prenotazioni_id = $con->lastInsertId();
+
+    if ($eventTypeBoolean) { // Partita
+        $sport = getSportbyTeam($squadra);
+        $event_id = save_match($data_ora_inizio, $data_ora_fine, $squadra, $sport);
+        save_prenotazioni_partita($prenotazioni_id, $event_id, $con);
+    } else { // Allenamento
+        $event_id = save_training($data_ora_inizio, $data_ora_fine, $squadra);
+        save_prenotazioni_allenamenti($prenotazioni_id, $event_id, $con);
+    }
 
     return $calendar_id;
 }
 
-/** Modifica un training nella tabella "calendar_events" insieme alle informazioni correlate nella tabella "event_info".
+function accorpaTime($date, $time)
+{
+    $datetime = $date . ' ' . $time;
+    return $datetime;
+}
+
+
+/** Modifica un training nella tabella "calendar_events" insieme alle informazioni correlate nella tabella "prenotazioni".
  *
  * @param int $groupId L'ID del gruppo associato all'evento.
  * @param string $startDate La data di inizio dell'evento.
@@ -156,7 +177,7 @@ function edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $ur
         $query = $con->prepare($sql);
         $query->execute([$groupId, $startDate, $endDate, $startTime, $endTime, $startRecur, $endRecur, $url, $id]);
 
-        $sql = "UPDATE event_info SET  `society`=?, `coach`=?, `note`=? WHERE event_id=?";
+        $sql = "UPDATE prenotazioni SET `society`=?, `coach`=?, `note`=? WHERE id_calendar_events=?";
         $query = $con->prepare($sql);
         $query->execute([$society, $coach, $note, $id]);
         return $id;
@@ -176,7 +197,7 @@ function save_cameras($cameras, $id)
     $con = get_connection();
 
     if ($id) {
-        $sql = "UPDATE event_info SET  `cams`=? WHERE event_id=?";
+        $sql = "UPDATE prenotazioni SET `cams`=? WHERE id_calendar_events=?";
         $query = $con->prepare($sql);
         $query->execute([$cameras, $id]);
         return $id;
@@ -185,33 +206,109 @@ function save_cameras($cameras, $id)
     }
 }
 
-/** Elimina un training specifico dalla tabella "calendar_events" e le righe figlie correlate nella tabella "event_info".
+function save_training($inizio, $fine, $squadra)
+{
+    $con = get_connection();
+    $sql = "INSERT INTO allenamenti (`data_ora_inizio`, `data_ora_fine`, `id_squadra`) VALUES (:inizio, :fine, :squadra)";
+    $query = $con->prepare($sql);
+    $query->bindParam(':inizio', $inizio);
+    $query->bindParam(':fine', $fine);
+    $query->bindParam(':squadra', $squadra['id']);
+    $query->execute();
+    return $con->lastInsertId();
+}
+
+function save_match($inizio, $fine, $squadra, $sport)
+{
+    $con = get_connection();
+    $sql = "INSERT INTO partite (`data_ora_inizio`, `data_ora_fine`, `id_squadra_casa`, `sport`) VALUES (:inizio, :fine, :squadra, :sport)";
+    $query = $con->prepare($sql);
+    $query->bindParam(':inizio', $inizio);
+    $query->bindParam(':fine', $fine);
+    $query->bindParam(':squadra', $squadra['id']);
+    $query->bindParam(':sport', $sport);
+    $query->execute();
+    return $con->lastInsertId();
+}
+
+function getSportbyTeam($squadra)
+{
+    $con = get_connection();
+    $sql = "SELECT sport.nome_sport
+            FROM sport
+            INNER JOIN squadre ON sport.nome_sport = squadre.sport
+            WHERE squadre.id = :squadra";
+    $query = $con->prepare($sql);
+    $query->bindParam(':squadra', $squadra['id']);
+    $query->execute();
+    $result = $query->fetchColumn();
+    return $result;
+}
+
+function save_prenotazioni_partita($calendar_id, $event_id, $con)
+{
+    $sql = "INSERT INTO prenotazioni_partite VALUES (?,?)";
+    $query = $con->prepare($sql);
+    $query->execute([$calendar_id, $event_id]);
+}
+
+function save_prenotazioni_allenamenti($calendar_id, $event_id, $con)
+{
+    $sql = "INSERT INTO prenotazioni_allenamenti VALUES (?,?)";
+    $query = $con->prepare($sql);
+    $query->execute([$calendar_id, $event_id]);
+}
+
+/** Elimina un training specifico dalla tabella "calendar_events" e le righe figlie correlate nella tabella "prenotazioni".
  *
- * @param int $event_id L'ID dell'evento da eliminare.
+ * @param int $id_calendar_events L'ID dell'evento da eliminare.
  * @return bool True se l'eliminazione ha avuto successo per entrambe le tabelle, altrimenti False.
  */
-function delete_training($event_id)
+function delete_training($id_calendar_events)
 {
     $con = get_connection();
 
-    // Elimina le righe figlie nella tabella "event_info"
-    $sql_delete_event_info = "DELETE FROM event_info WHERE event_id = ?";
-    $query_delete_event_info = $con->prepare($sql_delete_event_info);
-    $query_delete_event_info->execute([$event_id]);
+    // Elimina le righe figlie nella tabella "prenotazioni"
+    $sql_delete_prenotazioni = "DELETE FROM prenotazioni WHERE id_calendar_events = ?";
+    $query_delete_prenotazioni = $con->prepare($sql_delete_prenotazioni);
+    $query_delete_prenotazioni->execute([$id_calendar_events]);
 
     // Elimina l'evento dalla tabella "calendar_events"
     $sql_delete_event = "DELETE FROM calendar_events WHERE id = ?";
     $query_delete_event = $con->prepare($sql_delete_event);
-    $query_delete_event->execute([$event_id]);
+    $query_delete_event->execute([$id_calendar_events]);
 
     // Verifica se le query di eliminazione hanno avuto successo
-    if ($query_delete_event_info->rowCount() > 0 && $query_delete_event->rowCount() > 0) {
+    if ($query_delete_prenotazioni->rowCount() > 0 && $query_delete_event->rowCount() > 0) {
         return true;
     } else {
         // Almeno una delle eliminazioni non è riuscita
         return false;
     }
 }
+
+
+function getSquadra($society)
+{
+    $con = get_connection();
+    $sql = "SELECT squadre.id FROM squadre INNER JOIN societa_sportive ON societa_sportive.partita_iva = squadre.societa WHERE societa_sportive.nome = ?";
+    $query = $con->prepare($sql);
+    $query->execute([$society]);
+    $squadra = $query->fetch(PDO::FETCH_ASSOC);
+    return $squadra;
+}
+
+function getAuthorEvent($sessionId)
+{
+    $con = get_connection();
+    $sql = "SELECT email FROM persone WHERE session_id = :session_id";
+    $statement = $con->prepare($sql);
+    $statement->bindParam(':session_id', $sessionId);
+    $statement->execute();
+    $author = $statement->fetchColumn(); // Ottieni solo il valore della colonna 'email'
+    return $author;
+}
+
 
 /** Recupera tutti gli eventi dalla tabella "calendar_events" del database e li restituisce come JSON.
  *
@@ -243,14 +340,14 @@ function getEvent($id)
 }
 
 /** Funzione per ottenere le informazioni di un evento dal database.
- * Recupera le informazioni dell'evento corrispondente all'ID specificato dalla tabella "event_info"
+ * Recupera le informazioni dell'evento corrispondente all'ID specificato dalla tabella "prenotazioni"
  * @param int $id - L'ID dell'evento da recuperare.
  * @return string - Le informazioni dell'evento nel formato JSON.
  */
 function getInfoEvent($id)
 {
     $con = get_connection();
-    $query = "SELECT ei.* FROM calendar_events ce INNER JOIN event_info ei ON ce.id = ei.event_id WHERE ce.id = :id";
+    $query = "SELECT ei.* FROM calendar_events ce INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events WHERE ce.id = :id";
     $statement = $con->prepare($query);
     $statement->bindParam(':id', $id);
     $statement->execute();
@@ -264,7 +361,7 @@ function getInfoEvent($id)
 function getMatches()
 {
     $con = get_connection();
-    $query = "SELECT ce.* FROM calendar_events ce INNER JOIN event_info ei ON ce.id = ei.event_id WHERE ei.training = 0";
+    $query = "SELECT ce.* FROM calendar_events ce INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events WHERE ei.training = 0";
     $statement = $con->query($query);
     $events = $statement->fetchAll(PDO::FETCH_ASSOC);
     return json_encode($events);
@@ -277,7 +374,10 @@ function getMatches()
 function getCoachEvents($coach)
 {
     $con = get_connection();
-    $query = "SELECT ce.* FROM calendar_events ce INNER JOIN event_info ei ON ce.id = ei.event_id WHERE ei.coach = :coach";
+    $query = "SELECT ce.* FROM calendar_events ce 
+              INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events 
+              INNER JOIN allenatori_squadre on allenatori_squadre.id_squadra = ei.id_squadra 
+              WHERE allenatori_squadre.email_allenatore = :coach";
     $statement = $con->prepare($query);
     $statement->bindParam(':coach', $coach);
     $statement->execute();
@@ -285,7 +385,7 @@ function getCoachEvents($coach)
     return json_encode($events);
 }
 
-/** Recupera la nota associata a un evento dalla tabella "event_info" del database, in base all'ID dell'evento fornito.
+/** Recupera la nota associata a un evento dalla tabella "prenotazioni" del database, in base all'ID dell'evento fornito.
  *
  * @param int $id L'ID dell'evento per il quale si desidera recuperare la nota.
  * @return array Un array associativo contenente la nota dell'evento. Se la nota non viene trovata, l'array sarà vuoto.
@@ -293,7 +393,7 @@ function getCoachEvents($coach)
 function getNote($id)
 {
     $con = get_connection();
-    $query = "SELECT note FROM event_info WHERE event_id = :id";
+    $query = "SELECT note FROM prenotazioni WHERE id_calendar_events = :id";
     $statement = $con->prepare($query);
     $statement->bindParam(':id', $id);
     $statement->execute();
@@ -318,7 +418,7 @@ function getEventColor($sport)
     return '#378006';
 }
 
-/** Recupera le telecamere associate ad un evento dalla tabella "event_info" del database, in base all'ID dell'evento fornito.
+/** Recupera le telecamere associate ad un evento dalla tabella "prenotazioni" del database, in base all'ID dell'evento fornito.
  *
  * @param int $id L'ID dell'evento per il quale si desidera recuperare la nota.
  * @return array Una stringa JSON contenente la lista di telecamere.
@@ -326,7 +426,7 @@ function getEventColor($sport)
 function getCameras($id)
 {
     $con = get_connection();
-    $query = "SELECT cams FROM event_info WHERE event_id = :id";
+    $query = "SELECT cams FROM prenotazioni WHERE id_calendar_events = :id";
     $statement = $con->prepare($query);
     $statement->bindParam(':id', $id);
     $statement->execute();
@@ -334,7 +434,8 @@ function getCameras($id)
     return json_encode($cams);
 }
 
-function getDatetimeEvent($id){
+function getDatetimeEvent($id)
+{
     $con = get_connection();
     $query = "SELECT start,startTime FROM calendar_events WHERE id = :id";
     $statement = $con->prepare($query);
@@ -353,7 +454,21 @@ function currentDate()
     return date('YYYY-MM-DD');
 }
 
+function getSociety()
+{
+    $con = get_connection();
+    $query = "SELECT nome FROM societa_sportive";
+    $stmt = $con->query($query);
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    $options = '';
+    foreach ($result as $row) {
+        $nomeSocieta = $row['nome'];
+        $options .= "<option value='$nomeSocieta'>$nomeSocieta</option>";
+    }
+
+    return $options;
+}
 
 
 ///////////////////////////
@@ -378,7 +493,7 @@ if (isset($_GET['action'])) {
         // parsato daysOfWeek in JSON in modo da salvarlo nel database come stringa
         $daysOfWeek = json_encode($daysOfWeek);
 
-        //tabella event-info 
+        //tabella prenotazioni
         $society = isset($_POST['society']) ? $_POST['society'] : null;
         $sport = isset($_POST['sport']) ? $_POST['sport'] : null;
         $coach = isset($_POST['coach']) ? $_POST['coach'] : null;
@@ -387,10 +502,13 @@ if (isset($_GET['action'])) {
         $cameras = isset($_POST['camera']) ? $_POST['camera'] : null;
         $cameras = json_encode($cameras);
 
+        //GetAuthor parametro necessario
+        $user_id = isset($_POST['user_id']) ? $_POST['user_id'] : null;
+
         //Sono obbligatori society e startdate ed effettuiamo il controllo che esistano
         if ($society && $startDate) {
             $id = null;
-            $id = save_training($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras);
+            $id = save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras, $user_id);
             echo json_encode(array('status' => 'success', 'id' => $id));
         } else {
             echo json_encode(array('status' => 'error', 'message' => 'Missing required fields'));
@@ -404,7 +522,7 @@ if (isset($_GET['action'])) {
         if ($id) {
             echo getEvent($id);
         }
-    } elseif ($action == 'get-note') { // recupero descrizione evento (se esiste) da event_info
+    } elseif ($action == 'get-note') { // recupero descrizione evento (se esiste) da prenotazioni
         $id = isset($_GET['id']) ? $_GET['id'] : null;
         if ($id) {
             $note = getNote($id);
@@ -432,7 +550,7 @@ if (isset($_GET['action'])) {
     } elseif ($action == 'get-matches') { // recupero tutti gli eventi segnati come match
         header('Content-Type: application/json');
         echo getMatches();
-    } elseif ($action == 'get-event-info') { // recupero evento da event_info con id (di calendar_events) specifico
+    } elseif ($action == 'get-event-info') { // recupero evento da prenotazioni con id (di calendar_events) specifico
         $id = isset($_GET['id']) ? $_GET['id'] : null;
         header('Content-Type: application/json');
         if ($id) {

@@ -16,7 +16,7 @@ if (!isset($_SESSION['userID'])) {
 if ($user['userType'] == "allenatore") {
     // Chiamata alla funzione JavaScript per il calendario degli allenatori
     echo '<script>';
-    echo 'fetchCoachEvents("' . $user['firstName'] . '");';
+    echo 'fetchCoachEvents("' . $user['email'] . '");';
     echo '</script>';
 } elseif ($user['userType'] == "manutentore") {
     // Chiamata alla funzione JavaScript per il calendario dei manutentori
