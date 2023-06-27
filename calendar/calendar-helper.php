@@ -184,6 +184,10 @@ function edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $ur
     $endRecursive = strtotime($endDate . ' +1 day');
     $endRecur =  date('Y-m-d', $endRecursive);
 
+    //Calcolo squadra
+    $squadra = getSquadra($society);
+
+
     // Se è presente un ID, esegui l'aggiornamento nelle due tabelle
     if ($id) {
         $sql = "UPDATE calendar_events 
@@ -192,9 +196,9 @@ function edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $ur
         $query = $con->prepare($sql);
         $query->execute([$groupId, $startDate, $endDate, $startTime, $endTime, $startRecur, $endRecur, $url, $id]);
 
-        $sql = "UPDATE prenotazioni SET `society`=?, `coach`=?, `note`=? WHERE id_calendar_events=?";
+        $sql = "UPDATE prenotazioni SET `society`=?, `data_ora_inizio`=?, `data_ora_fine`=? `note`=? WHERE id_calendar_events=?";
         $query = $con->prepare($sql);
-        $query->execute([$society, $coach, $note, $id]);
+        $query->execute([$squadra['id'],  $startDate, $endDate, $note, $id]);
         return $id;
     } else {
         echo ("Errore, nessun ID specificato: " . $id);

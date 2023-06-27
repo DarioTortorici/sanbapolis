@@ -161,7 +161,10 @@ if ($user['userType'] == "allenatore") {
     <div style="min-height: 250px;">
         <form id="edit-form">
             <input type="text" id="id-edit" style="display: none;"></p>
-            <label for="society-edit">Società:</label>
+            <select name="society-edit" required>
+                <option value="" id="selected-option" selected>Scegli una società</option>
+                <?php echo getSociety(); ?>
+            </select>
             <input type="text" name="society-edit" id="society-edit" placeholder="Società*" required /><br>
             <label for="start-date-edit">Data inizio:</label>
             <input id="start-date-edit" type="date" name="start-date-edit" placeholder="Data inizio" autocomplete="off" required /><br>
@@ -171,9 +174,6 @@ if ($user['userType'] == "allenatore") {
             <input type="time" name="start-time-edit" id="start-time-edit" placeholder="Ora inizio" /><br>
             <label for="end-time-edit">Ora fine:</label>
             <input type="time" name="end-time-edit" id="end-time-edit" placeholder="Ora fine" /><br>
-            <label for="coach-edit">Allenatore:</label>
-            <input type="text" name="coach-edit" id="coach-edit" placeholder="Mail allenatore*" required /><br>
-            <label for="description-edit">Note:</label><br>
             <textarea cols="55" rows="5" name="description-edit" id="description-edit" placeholder="Note"></textarea><br>
             <label for="url-edit">Url:</label>
             <input type="text" name="url-edit" id="url-edit" placeholder="Url"><br>

@@ -326,7 +326,7 @@ function loadCalendar(data) {
         navLinks: true, // Abilita la navigazione ai giorni/settimane/mesi
         dateClick: function (info) {
             // Gestisce il click su una data nel calendario
-            createGoal(info.dateStr); // Triggera modal nuovo evento
+            createCalendarEvent(info.dateStr); // Triggera modal nuovo evento
             handleDateClick(info); //Aggiunge automaticamente la data cliccata nel form
         },
         eventClick: function (info) {
@@ -412,7 +412,7 @@ function updateEventEditModal(title, society, startDate, endDate, startTime, end
 
     // Aggiorna le informazioni evento
     document.getElementById("nome-evento").innerText = title;
-    document.getElementById("society-edit").value = society;
+    document.getElementById("selected-option").value = society;
     document.getElementById("coach-edit").value = coach;
 
     // Aggiorna il titolo e l'URL dell'evento
@@ -546,13 +546,13 @@ function formatTime(time) {
     return hours + ':' + minutes;
 }
 
-/** Funzione per creare un nuovo obiettivo.
+/** Funzione per creare un nuovo evento nel calendario.
  * 
  * La funzione apre una finestra modale utilizzando il plugin Magnific Popup, visualizzando il contenuto con l'ID "add-event-modal".
  * 
  * @param {string} currentDate - La data corrente da utilizzare come valore predefinito per la data di inizio del nuovo obiettivo.
  */
-function createGoal(currentDate) {
+function createCalendarEvent(currentDate) {
     $('#save-form').trigger('reset');
     $('#save-form input[name=id]').val("");
     $('#sd').val(currentDate);
