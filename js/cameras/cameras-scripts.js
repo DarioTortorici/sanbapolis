@@ -28,7 +28,7 @@ async function getLiveCams() {
 
     if (response.ok) {
       const responseData = await response.json();
-      // console.log('Evento creato con successo:', responseData);
+      console.log('Evento creato con successo:', responseData);
     } else {
       console.error('Errore nella creazione dell\'evento:', response.status);
     }
@@ -47,7 +47,7 @@ async function getRecordingEvents() {
   };
   const data = {
     timestamp: '',
-    source: 'live',
+    source: 'recording',
     caption: ''
   };
 
@@ -60,7 +60,7 @@ async function getRecordingEvents() {
 
     if (response.ok) {
       const responseData = await response.json();
-      // console.log('Evento creato con successo:', responseData);
+      console.log('Evento creato con successo:', responseData);
     } else {
       console.error('Errore nella creazione dell\'evento:', response.status);
     }

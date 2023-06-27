@@ -20,25 +20,30 @@ function is_ajax_request()
     return false;
 }
 
-/** Salva un training nella tabella "calendar_events" insieme alle informazioni correlate nella tabella "prenotazioni".
- * Inoltre gestisce i parametri di fullcalendar.io che non sono al momento utilizzati
+/**
+ * Salva un evento nel calendario.
  *
- * @param int $groupId L'ID del gruppo associato all'evento.
- * @param bool $allDay Indica se l'evento dura per l'intera giornata.
- * @param string $startDate La data di inizio dell'evento.
- * @param string $endDate La data di fine del training.
- * @param string|null $daysOfWeek I giorni della settimana in cui si ripete l'evento.
- * @param string|null $startTime L'orario di inizio del training.
- * @param string|null $endTime L'orario di fine del training.
- * @param string|null $startRecur La data di inizio della ricorrenza del training.
- * @param string|null $endRecur La data di fine della ricorrenza del training.
- * @param string $url L'URL associato al training.
- * @param string $society Il nome dell'associazione/società associata al training.
- * @param string $sport Lo sport del training.
- * @param string $coach Il nome dell'allenatore associato al training.
- * @param string $note La nota relativa al training.
- * @param string $eventType Il tipo di evento (es. "match" o altro).
- * @return int L'ID del training salvato (ID calendar_events).
+ * Questa funzione salva un nuovo evento nel calendario. Riceve diversi parametri che descrivono l'evento
+ * e esegue le operazioni necessarie per salvare l'evento nel database.
+ *
+ * @param int $groupId L'ID del gruppo di calendari a cui l'evento appartiene.
+ * @param bool $allDay Indica se l'evento dura l'intera giornata o ha un'ora specifica.
+ * @param string $startDate La data di inizio dell'evento nel formato "YYYY-MM-DD".
+ * @param string $endDate La data di fine dell'evento nel formato "YYYY-MM-DD".
+ * @param string $daysOfWeek I giorni della settimana in cui si ripete l'evento.
+ * @param string $startTime L'ora di inizio dell'evento nel formato "HH:MM:SS".
+ * @param string $endTime L'ora di fine dell'evento nel formato "HH:MM:SS".
+ * @param string $startRecur La data di inizio della ricorrenza dell'evento nel formato "YYYY-MM-DD".
+ * @param string $endRecur La data di fine della ricorrenza dell'evento nel formato "YYYY-MM-DD".
+ * @param string $url L'URL associato all'evento.
+ * @param string $society Il nome della società sportiva associata all'evento.
+ * @param string $sport Lo sport associato all'evento.
+ * @param string $coach L'email dell'allenatore associato all'evento.
+ * @param string $note Le note aggiuntive sull'evento.
+ * @param string $eventType Il tipo di evento ("match" per una partita, "training" per un allenamento).
+ * @param string $cameras Le telecamere preselezionate da attivare durante l'evento.
+ * @param string $sessionId L'ID della sessione dell'utente che sta creando l'evento.
+ * @return int L'ID dell'evento appena creato nel calendario.
  */
 function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras, $sessionId)
 {
@@ -136,6 +141,16 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
     return $calendar_id;
 }
 
+/**
+ * Accorpa la data e l'ora in un unico valore di data e ora.
+ *
+ * Prende una data nel formato "YYYY-MM-DD" e un'ora nel formato "HH:MM:SS"
+ * e le unisce in un unico valore di data e ora nel formato "YYYY-MM-DD HH:MM:SS".
+ *
+ * @param string $date La data nel formato "YYYY-MM-DD".
+ * @param string $time L'ora nel formato "HH:MM:SS".
+ * @return string Il valore di data e ora accorpato nel formato "YYYY-MM-DD HH:MM:SS".
+ */
 function accorpaTime($date, $time)
 {
     $datetime = $date . ' ' . $time;
@@ -206,6 +221,16 @@ function save_cameras($cameras, $id)
     }
 }
 
+/**
+ * Salva un allenamento nel database.
+ *
+ * Registra un nuovo allenamento nel database con le informazioni specificate.
+ *
+ * @param string $inizio La data e l'ora di inizio dell'allenamento.
+ * @param string $fine La data e l'ora di fine dell'allenamento.
+ * @param array $squadra L'array contenente l'ID della squadra associata all'allenamento.
+ * @return int L'ID dell'allenamento appena inserito nel database.
+ */
 function save_training($inizio, $fine, $squadra)
 {
     $con = get_connection();
@@ -218,6 +243,17 @@ function save_training($inizio, $fine, $squadra)
     return $con->lastInsertId();
 }
 
+/**
+ * Salva una partita nel database.
+ *
+ * Registra una nuova partita nel database con le informazioni specificate.
+ *
+ * @param string $inizio La data e l'ora di inizio della partita.
+ * @param string $fine La data e l'ora di fine della partita.
+ * @param array $squadra L'array contenente l'ID della squadra di casa.
+ * @param string $sport Il nome dello sport associato alla partita.
+ * @return int L'ID della partita appena inserita nel database.
+ */
 function save_match($inizio, $fine, $squadra, $sport)
 {
     $con = get_connection();
@@ -231,6 +267,14 @@ function save_match($inizio, $fine, $squadra, $sport)
     return $con->lastInsertId();
 }
 
+/**
+ * Ottiene il nome dello sport associato a una squadra.
+ *
+ * Recupera il nome dello sport dal database corrispondente all'ID della squadra specificata.
+ *
+ * @param array $squadra L'array contenente l'ID della squadra.
+ * @return string Il nome dello sport associato alla squadra.
+ */
 function getSportbyTeam($squadra)
 {
     $con = get_connection();
@@ -245,6 +289,16 @@ function getSportbyTeam($squadra)
     return $result;
 }
 
+/**
+ * Salva l'associazione tra un evento di calendario e una prenotazione di partita.
+ *
+ * Registra nel database l'associazione tra l'ID dell'evento di calendario e l'ID della prenotazione di partita.
+ *
+ * @param int $calendar_id L'ID dell'evento di calendario.
+ * @param int $event_id L'ID della prenotazione di partita.
+ * @param PDO $con L'oggetto di connessione al database.
+ * @return void
+ */
 function save_prenotazioni_partita($calendar_id, $event_id, $con)
 {
     $sql = "INSERT INTO prenotazioni_partite VALUES (?,?)";
@@ -252,6 +306,16 @@ function save_prenotazioni_partita($calendar_id, $event_id, $con)
     $query->execute([$calendar_id, $event_id]);
 }
 
+/**
+ * Salva l'associazione tra un evento di calendario e una prenotazione di allenamento.
+ *
+ * Registra nel database l'associazione tra l'ID dell'evento di calendario e l'ID della prenotazione di allenamento.
+ *
+ * @param int $calendar_id L'ID dell'evento di calendario.
+ * @param int $event_id L'ID della prenotazione di allenamento.
+ * @param PDO $con L'oggetto di connessione al database.
+ * @return void
+ */
 function save_prenotazioni_allenamenti($calendar_id, $event_id, $con)
 {
     $sql = "INSERT INTO prenotazioni_allenamenti VALUES (?,?)";
@@ -287,7 +351,14 @@ function delete_training($id_calendar_events)
     }
 }
 
-
+/**
+ * Ottiene l'ID della squadra associata a una determinata società sportiva.
+ *
+ * Recupera dal database l'ID della squadra che è associata alla società sportiva specificata.
+ *
+ * @param string $society Il nome della società sportiva.
+ * @return array|false L'array associativo contenente l'ID della squadra, o false in caso di errore.
+ */
 function getSquadra($society)
 {
     $con = get_connection();
@@ -298,6 +369,14 @@ function getSquadra($society)
     return $squadra;
 }
 
+/**
+ * Ottiene l'autore dell'evento corrispondente all'ID della sessione specificato.
+ *
+ * Recupera dal database l'email dell'autore dell'evento associato all'ID della sessione fornito.
+ *
+ * @param string $sessionId L'ID della sessione dell'utente.
+ * @return string L'email dell'autore dell'evento.
+ */
 function getAuthorEvent($sessionId)
 {
     $con = get_connection();
@@ -434,6 +513,15 @@ function getCameras($id)
     return json_encode($cams);
 }
 
+/**
+ * Ottiene la data e l'ora di un evento specifico dal database.
+ *
+ * Recupera dal database la data di inizio e l'ora di un evento corrispondente all'ID specificato.
+ * Restituisce i dati in formato JSON.
+ *
+ * @param int $id L'ID dell'evento di cui ottenere la data e l'ora.
+ * @return string I dati della data e dell'ora dell'evento in formato JSON.
+ */
 function getDatetimeEvent($id)
 {
     $con = get_connection();
@@ -454,6 +542,14 @@ function currentDate()
     return date('YYYY-MM-DD');
 }
 
+/**
+ * Ottiene elenco delle società sportive dal database.
+ *
+ * Recupera dal database l'elenco dei nomi delle società sportive e li restituisce come opzioni
+ * per un elemento di selezione HTML.
+ *
+ * @return string Le opzioni HTML per l'elemento di selezione delle società sportive.
+ */
 function getSociety()
 {
     $con = get_connection();

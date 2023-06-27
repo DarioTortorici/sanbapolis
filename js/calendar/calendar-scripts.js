@@ -71,13 +71,13 @@ function fetchCoachEvents(coach) {
         });
 }
 
-/** Funzione per salvare un evento.
- * 
- * Serializza i dati del modulo per inviarli al database. 
- * Se i campi sono validi, invia una richiesta AJAX di tipo POST.
- * La risposta viene interpretata come JSON, se la richiesta è andata a buon fine, vengono aggiornati gli eventi.
- * In caso di errore, viene visualizzato il messaggio di errore nella console.
- */
+/** Salva un evento nel calendario dell'utente specificato.
+ * Questa funzione invia una richiesta AJAX al server per salvare l'evento utilizzando i dati del modulo '#save-form'
+ * e l'ID dell'utente specificato. La funzione esegue una verifica preliminare dei campi richiesti
+ * attraverso la funzione 'validateForm()' prima di inviare la richiesta.
+ * @param {string} user_id - L'ID dell'utente a cui associare l'evento nel calendario.
+ * @return {void}
+*/
 function saveEvent(user_id) {
     var formData = $('#save-form').serialize();
     formData += '&user_id=' + user_id;
