@@ -554,7 +554,7 @@ function currentDate()
  *
  * @return string Le opzioni HTML per l'elemento di selezione delle società sportive.
  */
-function getSociety()
+function getSocieties()
 {
     $con = get_connection();
     $query = "SELECT nome FROM societa_sportive";

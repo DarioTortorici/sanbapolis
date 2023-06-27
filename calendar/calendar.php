@@ -56,7 +56,7 @@ if ($user['userType'] == "allenatore") {
             Società:
             <select name="society" required>
                 <option value="" disabled selected>Scegli una società</option>
-                <?php echo getSociety(); ?>
+                <?php echo getSocieties(); ?>
             </select>
             Evento:
             <select name="event_type">
@@ -163,7 +163,7 @@ if ($user['userType'] == "allenatore") {
             <input type="text" id="id-edit" style="display: none;"></p>
             <select name="society-edit" required>
                 <option value="" id="selected-option" selected>Scegli una società</option>
-                <?php echo getSociety(); ?>
+                <?php echo getSocieties(); ?>
             </select>
             <input type="text" name="society-edit" id="society-edit" placeholder="Società*" required /><br>
             <label for="start-date-edit">Data inizio:</label>
