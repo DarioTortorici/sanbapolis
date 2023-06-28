@@ -175,18 +175,17 @@ function accorpaTime($date, $time)
  * @param int|null $id L'ID del training da modificare.
  * @return int L'ID del training modificato.
  */
-function edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $url, $society, $coach, $note, $id)
+function edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $url, $society, $note, $id)
 {
     $con = get_connection();
 
     // Da modificare altrimenti eseguono l'override di startDate ed endDate
     $startRecur = $startDate;
     $endRecursive = strtotime($endDate . ' +1 day');
-    $endRecur =  date('Y-m-d', $endRecursive);
+    $endRecur = date('Y-m-d', $endRecursive);
 
-    //Calcolo squadra
+    // Calcolo squadra
     $squadra = getSquadra($society);
-
 
     // Se è presente un ID, esegui l'aggiornamento nelle due tabelle
     if ($id) {
@@ -196,14 +195,16 @@ function edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $ur
         $query = $con->prepare($sql);
         $query->execute([$groupId, $startDate, $endDate, $startTime, $endTime, $startRecur, $endRecur, $url, $id]);
 
-        $sql = "UPDATE prenotazioni SET `society`=?, `data_ora_inizio`=?, `data_ora_fine`=? `note`=? WHERE id_calendar_events=?";
+        $sql = "UPDATE prenotazioni SET `id_squadra`=?, `data_ora_inizio`=?, `data_ora_fine`=?, `note`=? WHERE id_calendar_events=?";
         $query = $con->prepare($sql);
-        $query->execute([$squadra['id'],  $startDate, $endDate, $note, $id]);
+        $query->execute([$squadra['id'], $startDate, $endDate, $note, $id]);
+
         return $id;
     } else {
-        echo ("Errore, nessun ID specificato: " . $id);
+        throw new Exception("Errore, nessun ID specificato.");
     }
 }
+
 
 /**
  * Salva le telecamere selezionate nel database per un determinato evento.
@@ -444,7 +445,7 @@ function getInfoEvent($id)
 function getMatches()
 {
     $con = get_connection();
-    $query = "SELECT ce.* FROM calendar_events ce INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events WHERE ei.training = 0";
+    $query = "SELECT ce.* FROM calendar_events ce INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events INNER JOIN prenotazioni_partite on ei.id = prenotazioni_partite.id_prenotazione";
     $statement = $con->query($query);
     $events = $statement->fetchAll(PDO::FETCH_ASSOC);
     return json_encode($events);
@@ -670,12 +671,11 @@ if (isset($_GET['action'])) {
 
         //tabella event-info 
         $society = isset($_POST['society']) ? $_POST['society'] : null;
-        $coach = isset($_POST['coach']) ? $_POST['coach'] : null;
         $note = isset($_POST['note']) ? $_POST['note'] : null;
 
         //Sono obbligatori society e startdate ed effettuiamo il controllo che esistano
         if ($society && $startDate) {
-            $id = edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $url, $society, $coach, $note, $id);
+            $id = edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $url, $society, $note, $id);
             echo json_encode(array('status' => 'success', 'id' => $id));
         } else {
             echo json_encode(array('status' => 'error', 'message' => 'Missing required fields'));
