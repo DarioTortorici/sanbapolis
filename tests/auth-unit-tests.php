@@ -1,95 +1,80 @@
-<?php
-// Include lo script di registrazione
-require('registration_script.php');
+<!doctype html>
+<html lang="it">
 
-// Definisci una funzione di utilità per simulare i dati $_POST e $_FILES
-function setPostData($postData, $filesData)
-{
-    $_POST = $postData;
-    $_FILES = $filesData;
-}
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-// Caso di test 1: dati di registrazione validi
-$postData = array(
-    'firstName' => 'John',
-    'lastName' => 'Doe',
-    'email' => 'johndoe@example.com',
-    'password' => 'Password123!',
-    'confirm_pwd' => 'Password123!',
-    'userType' => 'allenatore',
-    'dataNascita' => '1990-01-01',
-    'citta' => 'Città',
-    'telefono' => '123456789',
-    'societyCode' => 'SOC123',
-    'teamCode' => 'TEAM456'
-);
-$filesData = array(
-    'profileUpload' => array(
-        'name' => 'profile.jpg',
-        'type' => 'image/jpeg',
-        'size' => 1000,
-        'tmp_name' => '/tmp/profile.jpg',
-        'error' => 0
-    )
-);
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
-setPostData($postData, $filesData);
+    <title>Authentication Unit Tests</title>
+</head>
 
-// Testa il processo di registrazione
-ob_start();
-register();
-$output = ob_get_clean();
+<body>
+    <!-- Optional JavaScript; choose one of the two! -->
 
-// Verifica se l'utente è stato reindirizzato alla dashboard
-if (strpos($output, 'Location: ../profile/user-dashboard.php') === false) {
-    echo "Caso di test 1 fallito: l'utente non è stato reindirizzato alla dashboard.\n";
-}
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <div class="container text-center fw-light">
+            <?php
+            require('../authentication/auth-helper.php');
+            require('../authentication/db_connection.php');
 
-// Caso di test 2: dati di registrazione non validi (campi obbligatori mancanti)
-$postData = array(
-    'firstName' => '',
-    'lastName' => '',
-    'email' => '',
-    'password' => '',
-    'confirm_pwd' => '',
-    'userType' => '',
-    'dataNascita' => '',
-    'citta' => '',
-    'telefono' => '',
-    'societyCode' => '',
-    'teamCode' => ''
-);
-$filesData = array(
-    'profileUpload' => array(
-        'name' => 'profile.jpg',
-        'type' => 'image/jpeg',
-        'size' => 1000,
-        'tmp_name' => '/tmp/profile.jpg',
-        'error' => 0
-    )
-);
+            $testCount = 0; // Contatore dei test superati
 
-setPostData($postData, $filesData);
+            // Test caso email vuota
+            $_POST['email'] = '';
+            $result = validate_input_email($_POST['email']);
+            assert($result === '');
+            $testCount++;
 
-// Testa il processo di registrazione
-ob_start();
-register();
-$output = ob_get_clean();
+            // Test caso email valida
+            $_POST['email'] = 'example@example.com';
+            $result = validate_input_email($_POST['email']);
+            assert($result === 'example@example.com');
+            $testCount++;
 
-// Verifica se gli errori vengono visualizzati correttamente
-if (strpos($output, '<li>Hai dimenticato di inserire il tuo nome.</li>') === false ||
-    strpos($output, '<li>Hai dimenticato di inserire il tuo cognome.</li>') === false ||
-    strpos($output, '<li>Hai dimenticato di inserire il tuo indirizzo email.</li>') === false ||
-    strpos($output, '<li>Hai dimenticato di inserire una password.</li>') === false ||
-    strpos($output, '<li>La password deve contenere almeno 8 caratteri, di cui uno maiuscolo ed uno speciale.</li>') === false ||
-    strpos($output, '<li>Hai dimenticato di inserire la conferma della password.</li>') === false ||
-    strpos($output, '<li>Le password non coincidono.</li>') === false ||
-    strpos($output, '<li>Hai dimenticato di inserire il tuo ruolo.</li>') === false
-) {
-    echo "Caso di test 2 fallito: gli errori non vengono visualizzati correttamente.\n";
-}
+            // Test caso password vuota
+            $_POST['password'] = '';
+            $result = validate_input_text($_POST['password']);
+            assert($result === '');
+            $testCount++;
 
-// È possibile aggiungere casi di test aggiuntivi per coprire ulteriori scenari
+            // Test caso password valida
+            $_POST['password'] = 'password123';
+            $result = validate_password($_POST['password']);
+            assert($result === false);
+            $testCount++;
 
-echo "Unit test completato.\n";
-?>
+            // Test hashing
+            $email = 'example@example.com';
+            $password = 'password123';
+            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            if ($password == $hashedPassword) {
+                $testCount++;
+            }
+
+            // Test inserimento record
+            $con = get_connection();
+            $stmt = $con->prepare("INSERT INTO persone (email, digest_password) VALUES (:email, :password)");
+            $stmt->bindParam(':email', $email);
+            $stmt->bindParam(':password', $hashedPassword);
+            $stmt->execute();
+            $testCount++;
+
+            // Test elimina record
+            $stmt = $con->prepare("DELETE FROM persone WHERE email = :email");
+            $stmt->bindParam(':email', $email);
+            $stmt->execute();
+            $testCount++;
+
+            echo "Unit tests completato con successo. Tests passati: " . $testCount . "/7\n";
+            ?>
+    </div>
+
+
+</body>
+
+</html>

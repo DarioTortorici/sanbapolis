@@ -1,339 +1,379 @@
-<?php
-include ("../calendar/calendar-helper.php");
+<!doctype html>
+<html lang="it">
 
-// Configurazione di prova
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-$groupId = 1;
-$allDay = 0; // false
-$startDate = '2023-07-01';
-$endDate = '2023-07-01';
-$daysOfWeek = '[2,3,4]';
-$startTime = '10:00:00';
-$endTime = '12:00:00';
-$startRecur = null;
-$endRecur = null;
-$url = 'http://example.com/event';
-$society = 'Aquila Basket';
-$sport = 'Basket';
-$coach = 'coach@example.com';
-$note = 'Evento unit test';
-$eventType = '0';
-$cameras = '["1", "2"]';
-$sessionId = '4';
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 
-$passedTests = 0;
-$failedTests = 0;
+    <title>Calendar Unit Tests</title>
+</head>
 
-function test_save_event()
-{
-    global $groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras, $sessionId;
-    // Chiamata alla funzione
-    $id = save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras, $sessionId);
+<body>
+    <!-- Optional JavaScript; choose one of the two! -->
 
-    // Verifica dei risultati
-    if ($id) {
-        echo "Evento salvato correttamente con ID: " . $id . "\n\n";
-        return true;
-    } else {
-        echo "Errore durante il salvataggio dell'evento.\n\n";
-        return false;
-    }
-}
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <div class="container text-center">
+        <input type="checkbox" id="verboseModeCheckbox" checked value="Verbose-mode"> Verbose-mode
+        <div class="fw-light" id="testResults">
+            <script>
+                document.addEventListener("DOMContentLoaded", function() {
+                    const checkbox = document.getElementById("verboseModeCheckbox");
+                    const testResults = document.getElementById("testResults");
 
-function test_edit_training()
-{
-    // Configurazione di prova
-    $groupId = 2;
-    $startDate = '2023-07-01';
-    $endDate = '2023-07-01';
-    $startTime = '10:00:00';
-    $endTime = '11:00:00';
-    $url = 'http://example.com/modified_event';
-    $society = 'Aquila Basket';
-    $note = 'Evento unit test modificato';
-   
-    global $id;
+                    checkbox.addEventListener("change", function() {
+                        if (this.checked) {
+                            testResults.style.display = "block";
+                        } else {
+                            testResults.style.display = "none";
+                        }
+                    });
+                });
+            </script>
 
-    // Chiamata alla funzione
-    $result = edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $url, $society, $note, $id);
+            <?php
+            include("../calendar/calendar-helper.php");
 
-    // Verifica dei risultati
-    if ($result === $id) {
-        echo "Evento di allenamento modificato correttamente.\n\n";
-        return true;
-    } else {
-        echo "Errore durante la modifica dell'evento di allenamento.\n\n";
-        return false;
-    }
-}
+            // Configurazione di prova
 
-function test_save_cameras()
-{
-    // Configurazione di prova
-    global $cameras, $id;
+            $groupId = 1;
+            $allDay = 0; // false
+            $startDate = '2023-07-01';
+            $endDate = '2023-07-01';
+            $daysOfWeek = '[2,3,4]';
+            $startTime = '10:00:00';
+            $endTime = '12:00:00';
+            $startRecur = null;
+            $endRecur = null;
+            $url = 'http://example.com/event';
+            $society = 'Aquila Basket';
+            $sport = 'Basket';
+            $coach = 'coach@example.com';
+            $note = 'Evento unit test';
+            $eventType = '0';
+            $cameras = '["1", "2"]';
+            $sessionId = '4';
 
-    // Chiamata alla funzione
-    $result = save_cameras($cameras, $id);
+            $passedTests = 0;
+            $failedTests = 0;
 
-    // Verifica dei risultati
-    if ($result === $id) {
-        echo "Telecamere salvate correttamente per l'evento con ID: $id.\n\n";
-        return true;
-    } else {
-        echo "Errore durante il salvataggio delle telecamere per l'evento con ID: $id.\n\n";
-        return false;
-    }
-}
+            $id = test_save_event();
 
-function test_getSportbyTeam()
-{
-    // Configurazione di prova
-    $squadra = array('id' => 1); // Dati della squadra di prova
+            function test_save_event()
+            {
+                global $groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras, $sessionId;
+                // Chiamata alla funzione
+                $id = save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras, $sessionId);
 
-    // Chiamata alla funzione
-    $result = getSportbyTeam($squadra);
+                // Verifica dei risultati
+                return $id;
+            }
 
-    // Verifica dei risultati
-    if ($result) {
-        echo "Lo sport della squadra con ID " . $squadra['id'] . " è: $result";
-        return true;
-    } else {
-        echo "Impossibile determinare lo sport della squadra con ID " . $squadra['id']. "\n\n";
-        return false;
-    }
-}
+            function test_edit_training()
+            {
+                // Configurazione di prova
+                $groupId = 2;
+                $startDate = '2023-07-01';
+                $endDate = '2023-07-01';
+                $startTime = '10:00:00';
+                $endTime = '11:00:00';
+                $url = 'http://example.com/modified_event';
+                $society = 'Aquila Basket';
+                $note = 'Evento unit test modificato';
 
-function test_delete_training()
-{
-    // Configurazione di prova
-    global $id;
+                global $id;
 
-    // Chiamata alla funzione
-    $result = delete_training($id);
+                // Chiamata alla funzione
+                $result = edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $url, $society, $note, $id);
 
-    // Verifica dei risultati
-    if ($result) {
-        echo "L'evento con ID $id è stato eliminato correttamente.\n\n";
-        return true;
-    } else {
-        echo "Errore durante l'eliminazione dell'evento con ID $id. \n\n";
-        return false;
-    }
-}
+                // Verifica dei risultati
+                if ($result === $id) {
+                    echo " <p> Evento di allenamento modificato correttamente.\n\n </p>";
+                    return true;
+                } else {
+                    echo " <p> Errore durante la modifica dell'evento di allenamento.\n\n </p>";
+                    return false;
+                }
+            }
 
-function test_getSquadra()
-{
-    // Configurazione di prova
-    global $society; 
+            function test_save_cameras()
+            {
+                // Configurazione di prova
+                global $cameras, $id;
 
-    // Chiamata alla funzione
-    $result = getSquadra($society);
+                // Chiamata alla funzione
+                $result = save_cameras($cameras, $id);
 
-    // Verifica dei risultati
-    if ($result) {
-        echo "ID della squadra associata alla società $society: " . $result['id']. "\n\n";
-        return true;
-    } else {
-        echo "Nessuna squadra trovata per la società $society.";
-        return false;
-    }
-}
+                // Verifica dei risultati
+                if ($result === $id) {
+                    echo " <p> Telecamere salvate correttamente per l'evento con ID: $id.\n\n </p>";
+                    return true;
+                } else {
+                    echo " <p> Errore durante il salvataggio delle telecamere per l'evento con ID: $id.\n\n </p>";
+                    return false;
+                }
+            }
 
-function test_getAuthorEvent()
-{
-    // Configurazione di prova
-    global $sessionId; // ID della sessione
+            function test_getSportbyTeam()
+            {
+                // Configurazione di prova
+                $squadra = array('id' => 1); // Dati della squadra di prova
 
-    // Chiamata alla funzione
-    $result = getAuthorEvent($sessionId);
+                // Chiamata alla funzione
+                $result = getSportbyTeam($squadra);
 
-    // Verifica dei risultati
-    if ($result) {
-        echo "Email dell'autore associato alla sessione $sessionId: " . $result. "\n\n";
-        return true;
-    } else {
-        echo "Nessun autore trovato per la sessione $sessionId.";
-        return false;
-    }
-}
+                // Verifica dei risultati
+                if ($result) {
+                    echo " <p> Lo sport della squadra con ID " . $squadra['id'] . " è: $result";
+                    return true;
+                } else {
+                    echo " <p> Impossibile determinare lo sport della squadra con ID " . $squadra['id'] . "\n\n </p>";
+                    return false;
+                }
+            }
 
-function test_getEvents()
-{
-    // Chiamata alla funzione
-    $result = getEvents();
+            function test_delete_training()
+            {
+                // Configurazione di prova
+                global $id;
 
-    // Verifica dei risultati
-    if ($result) {
-        echo "Elenco degli eventi:\n" . $result. "\n\n";
-        return true;
-    } else {
-        echo "Nessun evento trovato.";
-        return false;
-    }
-}
+                // Chiamata alla funzione
+                $result = delete_training($id);
 
-function test_getEvent($id)
-{
-    // Chiamata alla funzione
-    $result = getEvent($id);
+                // Verifica dei risultati
+                if ($result) {
+                    echo " <p> L'evento con ID $id è stato eliminato correttamente.\n\n </p> </div>";
+                    return true;
+                } else {
+                    echo " <p> Errore durante l'eliminazione dell'evento con ID $id. \n\n </p>";
+                    return false;
+                }
+            }
 
-    // Verifica dei risultati
-    if ($result) {
-        echo "Dettagli dell'evento:\n" . $result. "\n\n";
-        return true;
-    } else {
-        echo "Evento non trovato.";
-        return false;
-    }
-}
+            function test_getSquadra()
+            {
+                // Configurazione di prova
+                global $society;
 
-function test_getInfoEvent($id)
-{
-    // Chiamata alla funzione
-    $result = getInfoEvent($id);
+                // Chiamata alla funzione
+                $result = getSquadra($society);
 
-    // Verifica dei risultati
-    if ($result) {
-        echo "Dettagli dell'evento:\n" . $result. "\n\n";
-        return true;
-    } else {
-        echo "Evento non trovato.";
-        return false;
-    }
-}
+                // Verifica dei risultati
+                if ($result) {
+                    echo " <p> ID della squadra associata alla società $society: " . $result['id'] . "\n\n </p>";
+                    return true;
+                } else {
+                    echo " <p> Nessuna squadra trovata per la società $society.";
+                    return false;
+                }
+            }
 
-function test_getMatches()
-{
-    // Chiamata alla funzione
-    $result = getMatches();
+            function test_getAuthorEvent()
+            {
+                // Configurazione di prova
+                global $sessionId; // ID della sessione
 
-    // Verifica dei risultati
-    if ($result) {
-        echo "Partite trovate:\n" . $result. "\n\n";
-        return true;
-    } else {
-        echo "Nessuna partita trovata.";
-        return false;
-    }
-}
+                // Chiamata alla funzione
+                $result = getAuthorEvent($sessionId);
 
-function test_getCoachEvents()
-{
-    global $coach;
+                // Verifica dei risultati
+                if ($result) {
+                    echo " <p> Email dell'autore associato alla sessione $sessionId: " . $result . "\n\n </p>";
+                    return true;
+                } else {
+                    echo " <p> Nessun autore trovato per la sessione $sessionId.";
+                    return false;
+                }
+            }
 
-    // Chiamata alla funzione
-    $result = getCoachEvents($coach);
+            function test_getEvents()
+            {
+                // Chiamata alla funzione
+                $result = getEvents();
 
-    // Verifica dei risultati
-    if ($result) {
-        echo "Eventi dell'allenatore:\n" . $result. "\n\n";
-        return true;
-    } else {
-        echo "Nessun evento trovato per l'allenatore.\n\n";
-        return false;
-    }
-}
+                // Verifica dei risultati
+                if ($result) {
+                    echo " <p> Elenco degli eventi:\n" . $result . "\n\n </p>";
+                    return true;
+                } else {
+                    echo " <p> Nessun evento trovato.";
+                    return false;
+                }
+            }
 
-function test_getNote()
-{
-    // Specifica l'ID dell'evento per il quale si vogliono ottenere le note
-    global $id;
+            function test_getEvent($id)
+            {
+                // Chiamata alla funzione
+                $result = getEvent($id);
 
-    // Chiamata alla funzione
-    $result = getNote($id);
+                // Verifica dei risultati
+                if ($result) {
+                    echo " <p> Dettagli dell'evento:\n" . $result . "\n\n </p>";
+                    return true;
+                } else {
+                    echo " <p> Evento non trovato.";
+                    return false;
+                }
+            }
 
-    // Verifica dei risultati
-    if ($result) {
-        echo "Note dell'evento:\n" . json_encode($result) . "\n\n";
-        return true;
-    } else {
-        echo "Nessuna nota trovata per l'evento.\n\n";
-        return false;
-    }
-}
+            function test_getInfoEvent($id)
+            {
+                // Chiamata alla funzione
+                $result = getInfoEvent($id);
 
-function test_getEventColor()
-{
-    // Specifica lo sport per il quale si vuole ottenere il colore dell'evento
-    global $sport;
+                // Verifica dei risultati
+                if ($result) {
+                    echo " <p> Dettagli dell'evento:\n" . $result . "\n\n </p>";
+                    return true;
+                } else {
+                    echo " <p> Evento non trovato.";
+                    return false;
+                }
+            }
 
-    // Chiamata alla funzione
-    $result = getEventColor($sport);
+            function test_getMatches()
+            {
+                // Chiamata alla funzione
+                $result = getMatches();
 
-    // Verifica dei risultati
-    echo "Colore dell'evento per lo sport '$sport': $result\n\n";
-    return true;
-}
+                // Verifica dei risultati
+                if ($result) {
+                    echo " <p> Partite trovate:\n" . $result . "\n\n </p>";
+                    return true;
+                } else {
+                    echo " <p> Nessuna partita trovata.";
+                    return false;
+                }
+            }
 
-function test_getCameras()
-{
-    // Specifica l'ID dell'evento per il quale si vogliono ottenere le telecamere
-    global $id;
+            function test_getCoachEvents()
+            {
+                global $coach;
 
-    // Chiamata alla funzione
-    $result = getCameras($id);
+                // Chiamata alla funzione
+                $result = getCoachEvents($coach);
 
-    // Verifica dei risultati
-    if ($result) {
-        echo "Telecamere dell'evento con ID $id: $result\n\n";
-        return true;
-    } else {
-        echo "Nessuna telecamera trovata per l'evento.\n\n";
-        return false;
-    }
-}
+                // Verifica dei risultati
+                if ($result) {
+                    echo " <p> Eventi dell'allenatore:\n" . $result . "\n\n </p>";
+                    return true;
+                } else {
+                    echo " <p> Nessun evento trovato per l'allenatore.\n\n </p>";
+                    return false;
+                }
+            }
 
-function test_getDatetimeEvent()
-{
-    // Specifica l'ID dell'evento per il quale si vogliono ottenere la data e l'ora
-    global $id;
+            function test_getNote()
+            {
+                // Specifica l'ID dell'evento per il quale si vogliono ottenere le note
+                global $id;
 
-    // Chiamata alla funzione
-    $result = getDatetimeEvent($id);
+                // Chiamata alla funzione
+                $result = getNote($id);
 
-    // Verifica dei risultati
-    echo "Data e ora dell'evento con ID $id: $result\n\n";
-    return true;
-}
+                // Verifica dei risultati
+                if ($result) {
+                    echo " <p> Note dell'evento:\n" . json_encode($result) . "\n\n </p>";
+                    return true;
+                } else {
+                    echo " <p> Nessuna nota trovata per l'evento.\n\n </p>";
+                    return false;
+                }
+            }
 
-function test_getSociety()
-{
-    // Chiamata alla funzione
-    $result = getSocieties();
+            function test_getEventColor()
+            {
+                // Specifica lo sport per il quale si vuole ottenere il colore dell'evento
+                global $sport;
 
-    // Verifica dei risultati
-    echo "Elenco delle società sportive:\n" . $result . "\n\n";
-    return true;
-}
+                // Chiamata alla funzione
+                $result = getEventColor($sport);
 
-// Contatori per i test passati e non passati
-$passedTests = 0;
-$failedTests = 0;
+                // Verifica dei risultati
+                echo " <p> Colore dell'evento per lo sport '$sport': $result\n\n </p>";
+                return true;
+            }
 
-// Esegui il test e incrementa i contatori in base al risultato
-$passedTests += test_getSociety() ? 1 : 0;
+            function test_getCameras()
+            {
+                // Specifica l'ID dell'evento per il quale si vogliono ottenere le telecamere
+                global $id;
 
-$passedTests += test_getDatetimeEvent() ? 1 : 0;
-$passedTests += test_getCameras() ? 1 : 0;
-$passedTests += test_getCoachEvents() ? 1 : 0;
-$passedTests += test_getEventColor() ? 1 : 0;
-$passedTests += test_getNote() ? 1 : 0;
-$passedTests += test_getMatches() ? 1 : 0;
-$passedTests += test_getInfoEvent(1) ? 1 : 0;
-$passedTests += test_getEvent(1) ? 1 : 0;
-$passedTests += test_getEvents() ? 1 : 0;
-$passedTests += test_getAuthorEvent(1) ? 1 : 0;
-$passedTests += test_getSquadra() ? 1 : 0;
-$passedTests += test_delete_training() ? 1 : 0;
-$passedTests += test_getSportbyTeam() ? 1 : 0;
-$passedTests += test_save_cameras() ? 1 : 0;
-$passedTests += test_edit_training() ? 1 : 0;
-$passedTests += test_save_event() ? 1 : 0;
+                // Chiamata alla funzione
+                $result = getCameras($id);
 
-// Calcola il numero di test falliti
-$failedTests = 16 - $passedTests;
+                // Verifica dei risultati
+                if ($result) {
+                    echo " <p> Telecamere dell'evento con ID $id: $result\n\n </p>";
+                    return true;
+                } else {
+                    echo " <p> Nessuna telecamera trovata per l'evento.\n\n </p>";
+                    return false;
+                }
+            }
 
-// Stampa il risultato totale
-echo "Test completati:\n";
-echo "Test passati: $passedTests\n";
-echo "Test falliti: $failedTests\n";
+            function test_getDatetimeEvent()
+            {
+                // Specifica l'ID dell'evento per il quale si vogliono ottenere la data e l'ora
+                global $id;
+
+                // Chiamata alla funzione
+                $result = getDatetimeEvent($id);
+
+                // Verifica dei risultati
+                echo " <p> Data e ora dell'evento con ID $id: $result\n\n </p>";
+                return true;
+            }
+
+            function test_getSociety()
+            {
+                // Chiamata alla funzione
+                $result = getSocieties();
+
+                // Verifica dei risultati
+                echo " <p> Elenco delle società sportive:\n" . $result . "\n\n </p>";
+                return true;
+            }
+
+            // Contatori per i test passati e non passati
+            $passedTests = 0;
+            $failedTests = 0;
+
+            // Esegui il test e incrementa i contatori in base al risultato
+            $id != null ? 1 : 0;
+            $passedTests += test_getSociety() ? 1 : 0;
+            $passedTests += test_getDatetimeEvent() ? 1 : 0;
+            $passedTests += test_getCameras() ? 1 : 0;
+            $passedTests += test_getCoachEvents() ? 1 : 0;
+            $passedTests += test_getEventColor() ? 1 : 0;
+            $passedTests += test_getNote() ? 1 : 0;
+            $passedTests += test_getMatches() ? 1 : 0;
+            $passedTests += test_getInfoEvent(1) ? 1 : 0;
+            $passedTests += test_getEvent(1) ? 1 : 0;
+            $passedTests += test_getEvents() ? 1 : 0;
+            $passedTests += test_getAuthorEvent(1) ? 1 : 0;
+            $passedTests += test_getSquadra() ? 1 : 0;
+            $passedTests += test_getSportbyTeam() ? 1 : 0;
+            $passedTests += test_save_cameras() ? 1 : 0;
+            $passedTests += test_edit_training() ? 1 : 0;
+            $passedTests += test_delete_training() ? 1 : 0;
+
+            // Calcola il numero di test falliti
+            $failedTests = 16 - $passedTests;
+
+            // Stampa il risultato totale
+            echo " <p> Test completati:\n";
+            echo " Test passati: $passedTests\n";
+            echo " Test falliti: $failedTests\n";
+
+            ?>
+    </div>
+
+
+</body>
+
+</html>

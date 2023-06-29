@@ -89,13 +89,13 @@ function saveEvent(user_id) {
             type: 'POST',
             data: formData,
             dataType: 'json',
-            success: function(response) {
+            success: function (response) {
                 if (response.status === 'success') {
                     fetchEvents();
                     $.magnificPopup.close();
                 }
             },
-            error: function(xhr, status, error) {
+            error: function (xhr, status, error) {
                 console.log(xhr.responseText);
             }
         });
@@ -301,6 +301,7 @@ function saveCameras() {
  * @param {Array} data - Gli eventi da visualizzare nel calendario.
  */
 function loadCalendar(data) {
+    console.log(data);
     var calendarEl = document.getElementById('calendar');
 
     if (calendar) {
@@ -314,6 +315,20 @@ function loadCalendar(data) {
             left: 'prev,next today', // Elementi del header a sinistra
             center: 'title', // Elemento del header al centro
             right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth' // Elementi del header a destra
+        },
+        views: {
+            listMonth: {
+                buttonText: 'Lista' // Modifica il testo del pulsante per la visualizzazione "listMonth"
+            },
+            dayGridMonth: {
+                buttonText: 'Mese' // Modifica il testo del pulsante per la visualizzazione "dayGridMonth"
+            },
+            timeGridWeek: {
+                buttonText: 'Settimana' // Modifica il testo del pulsante per la visualizzazione "timeGridWeek"
+            },
+            timeGridDay: {
+                buttonText: 'Giorno' // Modifica il testo del pulsante per la visualizzazione "timeGridWeek"
+            }
         },
         eventTimeFormat: { // Formattazione orario
             hour: '2-digit',
@@ -340,7 +355,6 @@ function loadCalendar(data) {
     });
 
     calendar.render(); // Rende visibile il calendario
-
 }
 
 /** Funzione per aggiornare i valori del modal dell'evento.
@@ -436,7 +450,7 @@ function updateAddcameras(response, id) {
     document.getElementById("id-cams").value = id;
 
     // Decodifica il JSON e converte la stringa in un array di stringhe
-    var selectedCameras = JSON.parse(response.cams).map(function(camera) {
+    var selectedCameras = JSON.parse(response.cams).map(function (camera) {
         return String(camera);
     });
 
@@ -496,12 +510,12 @@ function toggleWeeklyRepeat(checkbox) {
 function toggleCameraOptions(checkbox) {
     var cameraOptions = document.getElementById("camera-options");
     if (checkbox.checked) {
-      cameraOptions.style.display = "block";
+        cameraOptions.style.display = "block";
     } else {
-      cameraOptions.style.display = "none";
+        cameraOptions.style.display = "none";
     }
-  }
-  
+}
+
 
 /** Funzione per formattare una data nel formato "DD mese YYYY".
  * 

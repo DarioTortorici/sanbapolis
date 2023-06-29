@@ -328,33 +328,63 @@ function save_prenotazioni_allenamenti($calendar_id, $event_id, $con)
     $query->execute([$calendar_id, $event_id]);
 }
 
-/** Elimina un training specifico dalla tabella "calendar_events" e le righe figlie correlate nella tabella "prenotazioni".
+/**
+ * Elimina un allenamento e tutti i suoi dati correlati dal database.
  *
- * @param int $id_calendar_events L'ID dell'evento da eliminare.
- * @return bool True se l'eliminazione ha avuto successo per entrambe le tabelle, altrimenti False.
+ * @param int $id_calendar_events ID dell'evento del calendario relativo all'allenamento da eliminare.
+ * @return bool True se l'eliminazione è avvenuta con successo, False altrimenti.
  */
 function delete_training($id_calendar_events)
 {
     $con = get_connection();
 
-    // Elimina le righe figlie nella tabella "prenotazioni"
-    $sql_delete_prenotazioni = "DELETE FROM prenotazioni WHERE id_calendar_events = ?";
-    $query_delete_prenotazioni = $con->prepare($sql_delete_prenotazioni);
-    $query_delete_prenotazioni->execute([$id_calendar_events]);
+    $con->beginTransaction();
 
-    // Elimina l'evento dalla tabella "calendar_events"
-    $sql_delete_event = "DELETE FROM calendar_events WHERE id = ?";
-    $query_delete_event = $con->prepare($sql_delete_event);
-    $query_delete_event->execute([$id_calendar_events]);
+    try {
+        // Cerca id prenotazione
+        $sql_search_prenotazioni = "SELECT id FROM prenotazioni WHERE id_calendar_events = ?";
+        $query_search_prenotazioni = $con->prepare($sql_search_prenotazioni);
+        $query_search_prenotazioni->execute([$id_calendar_events]);
+        $id_prenotazioni = $query_search_prenotazioni->fetchColumn();
 
-    // Verifica se le query di eliminazione hanno avuto successo
-    if ($query_delete_prenotazioni->rowCount() > 0 && $query_delete_event->rowCount() > 0) {
+        // Cerca id allenamento
+        $sql_search_prenotazioni_allenamenti = "SELECT id_allenamento FROM prenotazioni_allenamenti WHERE id_prenotazione = ?";
+        $query_search_prenotazioni_allenamenti = $con->prepare($sql_search_prenotazioni_allenamenti);
+        $query_search_prenotazioni_allenamenti->execute([$id_prenotazioni]);
+        $id_allenamento = $query_search_prenotazioni_allenamenti->fetchColumn();
+
+        // Elimina le righe figlie nella tabella "allenamenti"
+        $sql_delete_allenamenti = "DELETE FROM allenamenti WHERE id = ?";
+        $query_delete_allenamenti = $con->prepare($sql_delete_allenamenti);
+        $query_delete_allenamenti->execute([$id_allenamento]);
+
+        // Elimina le righe figlie nella tabella "prenotazioni_allenamenti"
+        $sql_delete_prenotazioni_allenamenti = "DELETE FROM prenotazioni_allenamenti WHERE id_prenotazione = ?";
+        $query_delete_prenotazioni_allenamenti = $con->prepare($sql_delete_prenotazioni_allenamenti);
+        $query_delete_prenotazioni_allenamenti->execute([$id_prenotazioni]);
+
+
+        // Elimina le righe figlie nella tabella "prenotazioni"
+        $sql_delete_prenotazioni = "DELETE FROM prenotazioni WHERE id_calendar_events = ?";
+        $query_delete_prenotazioni = $con->prepare($sql_delete_prenotazioni);
+        $query_delete_prenotazioni->execute([$id_calendar_events]);
+
+        // Elimina l'evento dalla tabella "calendar_events"
+        $sql_delete_event = "DELETE FROM calendar_events WHERE id = ?";
+        $query_delete_event = $con->prepare($sql_delete_event);
+        $query_delete_event->execute([$id_calendar_events]);
+
+        // Commit delle modifiche al database
+        $con->commit();
+
         return true;
-    } else {
-        // Almeno una delle eliminazioni non è riuscita
+    } catch (Exception $e) {
+        // Rollback delle modifiche in caso di errore
+        $con->rollBack();
         return false;
     }
 }
+
 
 /**
  * Ottiene l'ID della squadra associata a una determinata società sportiva.
