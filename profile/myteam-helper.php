@@ -83,11 +83,10 @@ function getPlayersbyTeam($teamid)
 {
   try {
     $con = get_connection();
-    $query = "SELECT DISTINCT utenti.* 
-    FROM utenti, squadre 
-    INNER JOIN giocatori_squadre ON squadre.id = giocatori_squadre.id_squadra 
-    INNER JOIN giocatori ON giocatori.email = giocatori_squadre.email_giocatore 
-    WHERE squadre.id = :id and utenti.tipo = 'giocatore'";
+    $query = "SELECT DISTINCT persone.* 
+    FROM persone, squadre INNER JOIN giocatori_squadre ON squadre.id = giocatori_squadre.id_squadra 
+    INNER JOIN giocatori ON giocatori_squadre.email_giocatore = giocatori.email 
+    and giocatori.email = email WHERE squadre.id = :id";
     $statement = $con->prepare($query);
     $statement->bindParam(':id', $teamid);
     $statement->execute();

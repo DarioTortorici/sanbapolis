@@ -13,13 +13,21 @@ if (!isset($_SESSION['userID'])) {
   exit();
 }
 
-
-echo '<script>';
-echo 'getTeambyCoach("' . $user["email"] . '");';
-echo 'getPlayersbyTeam(1);';
-echo '</script>';
-
 ?>
+
+
+<script>
+  // Otteniamo l'ID della squadra del coach e recuperiamo i giocatori della squadra
+  // Creiamo una promessa chiamando la funzione getTeambyCoach con l'email del coach
+  var teamIdPromise = getTeambyCoach("<?php echo $user['email']; ?>");
+
+  // Quando la promessa si risolve, otteniamo l'ID della squadra e chiamiamo getPlayersbyTeam
+  teamIdPromise.then(function(teamId) {
+    getPlayersbyTeam(teamId);
+  });
+</script>
+
+
 
 <div class="container">
   <h2 id="team-name">My team Name</h2>
@@ -32,7 +40,6 @@ echo '</script>';
         <div class="card-body">
           <h5 class="card-title">Card Title 1</h5>
           <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-          <a href="#" class="btn btn-primary">Dettagli</a>
         </div>
       </div>
     </div>
@@ -43,7 +50,6 @@ echo '</script>';
         <div class="card-body">
           <h5 class="card-title">Card Title 2</h5>
           <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-          <a href="#" class="btn btn-primary">Dettagli</a>
         </div>
       </div>
     </div>
@@ -54,7 +60,6 @@ echo '</script>';
         <div class="card-body">
           <h5 class="card-title">Card Title 3</h5>
           <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-          <a href="#" class="btn btn-primary">Dettagli</a>
         </div>
       </div>
     </div>
@@ -65,7 +70,6 @@ echo '</script>';
         <div class="card-body">
           <h5 class="card-title">Card Title 4</h5>
           <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-          <a href="#" class="btn btn-primary">Dettagli</a>
         </div>
       </div>
     </div>
