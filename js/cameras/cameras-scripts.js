@@ -5,35 +5,43 @@ var cameraId = 'E4-30-22-3F-CF-65';
 var serverAddress = "https://127.0.0.1:7001";
 const systemId = 'bcf49919-0ace-4c32-a16c-27eac572fb3f';
 
+
+//Avvio pagina
+document.addEventListener('DOMContentLoaded', async () => {
+  
+  const stream = await getLiveCams(cameraId);
+
+  if (stream) {
+    const videoElement = document.getElementById('camera1');
+    videoElement.src = stream;
+  }
+});
+
 // Funzione per ottenere gli stream video in diretta
-async function getLiveCams() {
-  const url = `https://${systemId}.relay.vmsproxy.com/api/createEvent`;
+async function getLiveCams(cameraId) {
+  const url = `https://${systemId}.relay.vmsproxy.com/media/${cameraId}.mp4`;
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
     Authorization: 'Bearer vms-61c9e97918c389409a20aa731230d43e-U1xOeOz4RR'
   };
-  const data = {
-    timestamp: '',
-    source: 'live',
-    caption: ''
-  };
 
   try {
     const response = await fetch(url, {
       method: 'POST',
-      headers,
-      body: JSON.stringify(data)
+      headers
     });
 
     if (response.ok) {
-      const responseData = await response.json();
-      console.log('Evento creato con successo:', responseData);
+      const videoUrl = URL.createObjectURL(await response.blob());
+      return videoUrl;
     } else {
-      console.error('Errore nella creazione dell\'evento:', response.status);
+      console.error('Errore nella richiesta dello stream:', response.status);
+      return null;
     }
   } catch (error) {
-    console.error('Si è verificato un errore durante la creazione dell\'evento:', error);
+    console.error('Si è verificato un errore durante il recupero dello stream:', error);
+    return null;
   }
 }
 
