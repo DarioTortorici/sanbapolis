@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <div class="row m-0">
         <div class="col-lg-4 offset-lg-2">
             <div class="text-center pb-5">
-                <h1 class="login-title text-dark">Register</h1>
+                <h1 id="Registerform" class="login-title text-dark">Register</h1>
                 <p class="p-1 m-0 font-ubuntu text-black-50">Register and enjoy additional features</p>
                 <span class="font-ubuntu text-black-50">I already have <a href="login.php">Login</a></span>
             </div>
@@ -103,7 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
                     <div class="form-check form-check-inline">
-                        <input type="checkbox" name="agreement" class="form-check-input" required>
+                        <input type="checkbox" name="agreement" id=agreement class="form-check-input" required>
                         <label for="agreement" class="form-check-label font-ubuntu text
                         -black-50">I agree <a href="#">term, conditions, and policy </a>(*) </label>
                     </div>
