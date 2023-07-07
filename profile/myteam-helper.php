@@ -1,5 +1,5 @@
 <?php
-require_once '../authentication/db_connection.php';
+require_once __DIR__.'/../authentication/db_connection.php';
 
 /** Ottiene tutte le squadre dal database.
  *
