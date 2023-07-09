@@ -1,39 +1,71 @@
 // Variabili per l'autenticazione e le informazioni sulla telecamera
 var username = 'admin';
 var password = '123-iSTAR';
-var cameraId = 'E4-30-22-3F-CF-65';
+var cameraMAC = 'E4-30-22-3F-CF-65';
+var cameraId = '25c54d43-ff6f-02f7-b313-eaf464e41506'
 var serverAddress = "https://127.0.0.1:7001";
 const systemId = 'bcf49919-0ace-4c32-a16c-27eac572fb3f';
 
 
 //Avvio pagina
-document.addEventListener('DOMContentLoaded', async () => {
-  
-  const stream = await getLiveCams(cameraId);
 
-  if (stream) {
-    const videoElement = document.getElementById('camera1');
-    videoElement.src = stream;
-  }
+document.addEventListener('DOMContentLoaded', async () => {
+  // Passo 1: Autenticazione
+
+  authKey = authenticate()
+  videoUrl = generateVideoUrl(authKey);
+
+  const videoElement = document.getElementById('camera1');
+  videoElement.src = videoUrl;
+  console.log(videoUrl);
+  videoElement.play();
 });
 
+function authenticate() {
+  $.ajax({
+    url: `https://${systemId}.relay.vmsproxy.com/api/getNonce`,
+    type: "GET",
+    success: function (response) {
+      var realm = response.realm;
+      var nonce = response.nonce;
+      var digest = md5(username + ":" + realm + ":" + password);
+      var partial_ha2 = md5("GET" + ":");
+      var simplified_ha2 = md5(digest + ":" + nonce + ":" + partial_ha2);
+      var authKey = btoa(username + ":" + nonce + ":" + simplified_ha2);
+      return authKey
+    }
+  })
+}
+
+
+function generateVideoUrl(authKey) {
+  return `https://${systemId}.relay.vmsproxy.com/media/${cameraId}.mp4&auth=${authKey}`;
+}
+
+
 // Funzione per ottenere gli stream video in diretta
-async function getLiveCams(cameraId) {
+async function getLiveStream() {
   const url = `https://${systemId}.relay.vmsproxy.com/media/${cameraId}.mp4`;
   const headers = {
-    Accept: 'application/json',
+    'Accept': 'application/json',
     'Content-Type': 'application/json',
-    Authorization: 'Bearer vms-61c9e97918c389409a20aa731230d43e-U1xOeOz4RR'
+    'Authorization': 'Bearer vms-61c9e97918c389409a20aa731230d43e-U1xOeOz4RR'
+  };
+
+  const data = {
+    "user": username,
+    "password": password
   };
 
   try {
     const response = await fetch(url, {
-      method: 'POST',
-      headers
+      method: 'GET',
+      headers: headers
     });
 
     if (response.ok) {
-      const videoUrl = URL.createObjectURL(await response.blob());
+      const videoBlob = await response.blob();
+      const videoUrl = URL.createObjectURL(videoBlob);
       return videoUrl;
     } else {
       console.error('Errore nella richiesta dello stream:', response.status);
@@ -44,6 +76,100 @@ async function getLiveCams(cameraId) {
     return null;
   }
 }
+
+async function createSession() {
+  const url = `https://${systemId}.relay.vmsproxy.com/rest/v1/login/sessions`;
+  const headers = {
+    'Content-Type': 'application/json',
+  };
+  const body = {
+    username: username,
+    password: password,
+    setCookie: true,
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(body),
+    });
+
+    if (response.ok) {
+      const sessionData = await response.json();
+      const token = sessionData.token;
+      const expiresInS = sessionData.expiresInS;
+      console.log('Session created successfully');
+      console.log('Token:', token);
+      console.log('Expires in seconds:', expiresInS);
+      return token;
+    } else {
+      console.error('Failed to create session:', response.status);
+    }
+  } catch (error) {
+    console.error('An error occurred while creating the session:', error);
+  }
+}
+
+
+// Funzione per ottenere gli stream video in diretta
+async function getLiveCams(token) {
+  const url = `https://${systemId}.relay.vmsproxy.com/media/${cameraId}.mp4`;
+  const headers = {
+    Authorization: 'Bearer vms-61c9e97918c389409a20aa731230d43e-KPMxP7sJBT'
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: headers
+    });
+
+    if (response.ok) {
+      const videoElement = document.getElementById('camera1');
+      videoElement.src = url;
+      videoElement.play();
+    } else {
+      console.error('Errore nella richiesta dello stream:', response.status);
+      return null;
+    }
+  } catch (error) {
+    console.error('Si è verificato un errore durante il recupero dello stream:', error);
+    return null;
+  }
+}
+
+async function prova(token) {
+  const url = `https://${systemId}.relay.vmsproxy.com/api/createEvent`;
+  const headers = {
+    Accept: 'application/json',
+    'Content-Type': 'application/json',
+    Authorization: "Bearer vms-61c9e97918c389409a20aa731230d43e-F4KgZzgFSm"
+  };
+  const data = {
+    timestamp: '',
+    source: 'prova',
+    caption: ''
+  };
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data)
+    });
+
+    if (response.ok) {
+      const responseData = await response.json();
+      console.log('Evento creato con successo:', responseData);
+    } else {
+      console.error('Errore nella creazione dell\'evento:', response.status);
+    }
+  } catch (error) {
+    console.error('Si è verificato un errore durante la creazione dell\'evento:', error);
+  }
+}
+
 
 // Funzione per ottenere gli eventi di registrazione
 async function getRecordingEvents() {
@@ -137,7 +263,7 @@ function getDateTime(id) {
     url: 'http://localhost/calendar/calendar-helper.php?action=get-time',
     type: 'GET',
     dataType: 'json',
-    data: {id: id},
+    data: { id: id },
     success: function (response) {
       return combineDateAndTime(response.start, response.StartTime);
     },

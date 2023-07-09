@@ -11,7 +11,7 @@ if (!isset($_SESSION['userID'])) {
 
 
 
-<button type="submit" class="btn btn-primary" name="recButton" onclick="getRecordingEvents()">Avvia Rec</button>
+<button type="submit" class="btn btn-primary" name="recButton" onclick="getLiveCams()">Avvia Rec</button>
 
 
 <style>
@@ -62,8 +62,9 @@ if (!isset($_SESSION['userID'])) {
       <td onclick="expandVideo(this)">
         <div class="video-container">
           <div class="video-title">Camera 1</div>
-          <video id="camera1" controls autoplay>
-          </video>
+          <video id="camera1" controls autoplay></video>
+          <source type="video/mp4">
+        </div>
         </div>
       </td>
       <td onclick="expandVideo(this)">
@@ -86,7 +87,7 @@ if (!isset($_SESSION['userID'])) {
         <div class="video-container">
           <div class="video-title">Camera 4</div>
           <video id="camera4" controls autoplay>
-            <source src="www.url.it" type="video/mp4">
+            <source type="video/mp4">
           </video>
         </div>
       </td>
