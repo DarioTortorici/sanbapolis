@@ -5,5 +5,9 @@
         "codeception/module-phpbrowser": "*",
         "codeception/module-asserts": "*",
         "codeception/module-webdriver": "^3.2"
+    },
+    "require": {
+        "phpmailer/phpmailer": "^6.8",
+        "sendinblue/api-v3-sdk": "8.4.2"
     }
 }

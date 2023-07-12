@@ -73,7 +73,7 @@ function getTeambyCoach(coach) {
     });
   }
 
-function updateMyTeampage(team) {
+  function updateMyTeampage(team) {
     var teamNameElement = document.getElementById("team-name");
     if (teamNameElement) {
         teamNameElement.textContent = team.nome;
@@ -83,7 +83,13 @@ function updateMyTeampage(team) {
     if (teamCodeElement) {
         teamCodeElement.textContent = team.code;
     }
+
+    var hiddenInput = document.getElementsByName("hidden-team-name")[0];
+    if (hiddenInput) {
+        hiddenInput.value = team.nome;
+    }
 }
+
 
 function updateCardVisibility(players) {
     var n_players = players.length;

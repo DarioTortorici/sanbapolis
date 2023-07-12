@@ -42,6 +42,7 @@ class ComposerStaticInita1aeefdcca0d4bfce1b13471e5f0e4df
             'Symfony\\Component\\CssSelector\\' => 30,
             'Symfony\\Component\\Console\\' => 26,
             'Symfony\\Component\\BrowserKit\\' => 29,
+            'SendinBlue\\Client\\' => 18,
         ),
         'P' => 
         array (
@@ -51,6 +52,7 @@ class ComposerStaticInita1aeefdcca0d4bfce1b13471e5f0e4df
             'Psr\\EventDispatcher\\' => 20,
             'Psr\\Container\\' => 14,
             'PhpParser\\' => 10,
+            'PHPMailer\\PHPMailer\\' => 20,
         ),
         'G' => 
         array (
@@ -139,6 +141,10 @@ class ComposerStaticInita1aeefdcca0d4bfce1b13471e5f0e4df
         array (
             0 => __DIR__ . '/..' . '/symfony/browser-kit',
         ),
+        'SendinBlue\\Client\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/sendinblue/api-v3-sdk/lib',
+        ),
         'Psy\\' => 
         array (
             0 => __DIR__ . '/..' . '/psy/psysh/src',
@@ -163,6 +169,10 @@ class ComposerStaticInita1aeefdcca0d4bfce1b13471e5f0e4df
         'PhpParser\\' => 
         array (
             0 => __DIR__ . '/..' . '/nikic/php-parser/lib/PhpParser',
+        ),
+        'PHPMailer\\PHPMailer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
         'GuzzleHttp\\Psr7\\' => 
         array (

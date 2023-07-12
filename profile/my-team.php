@@ -33,6 +33,21 @@ if (!isset($_SESSION['userID'])) {
   <h2 id="team-name">My team Name</h2>
   <p class="text-left" id="team-code">Code</p>
 
+
+  <!-- Form di inviti -->
+  <div>
+    <form id="invite-email-form" action="../modals/email-handler.php" method="post">
+      <div class="form-group">
+        <label for="email">Invita tramite indirizzo email</label>
+        <input type="email" class="form-control" id="invited-email" name="invited-email" placeholder="Inserisci l'indirizzo email">
+        <!-- Aggiungi un campo nascosto per memorizzare il nome del team -->
+        <input type="hidden" name="hidden-team-name" value="My team Name">
+      </div>
+      <button type="submit" class="btn btn-primary">Invita</button>
+    </form>
+  </div>
+
+  <!-- Partecipanti -->
   <div class="row">
     <div class="col-md-4">
       <div class="card">
@@ -63,12 +78,72 @@ if (!isset($_SESSION['userID'])) {
         </div>
       </div>
     </div>
-    
+
     <div class="col-md-4">
       <div class="card">
         <img src="https://via.placeholder.com/150" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 4</h5>
+          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
+        <div class="card-body">
+          <h5 class="card-title">Card Title 5</h5>
+          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
+        <div class="card-body">
+          <h5 class="card-title">Card Title 6</h5>
+          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
+        <div class="card-body">
+          <h5 class="card-title">Card Title 7</h5>
+          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
+        <div class="card-body">
+          <h5 class="card-title">Card Title 8</h5>
+          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
+        <div class="card-body">
+          <h5 class="card-title">Card Title 9</h5>
+          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card">
+        <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
+        <div class="card-body">
+          <h5 class="card-title">Card Title 10</h5>
           <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
         </div>
       </div>

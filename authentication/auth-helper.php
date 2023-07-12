@@ -305,7 +305,7 @@ function get_user_info($con, $userID)
     s.*,
     cam_privileges 
     FROM persone AS p
-    INNER JOIN societa_sportive AS s ON p.email = s.responsabile
+    LEFT JOIN societa_sportive AS s ON p.email = s.responsabile
     LEFT JOIN allenatori AS a ON p.email = a.email
     LEFT JOIN giocatori AS g ON p.email = g.email
     LEFT JOIN manutentori AS m ON p.email = m.email

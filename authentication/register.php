@@ -5,6 +5,12 @@ include('../modals/header.php');
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     require('register-process.php');
 }
+
+// Set default values from URL parameters
+$userType = $_GET['userType'] ?? '';
+$teamcode = $_GET['teamcode'] ?? '';
+$societycode = $_GET['societycode'] ?? '';
+
 ?>
 
 <!-- registration scripts -->
@@ -63,10 +69,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div class="col">
                             <select required name="userType" id="userType" class="form-control" onchange="handleUserType()">
                                 <option value="">Select your role*</option>
-                                <option value="società" <?php if (isset($_POST['userType']) && $_POST['userType'] === 'società') echo 'selected'; ?>>Società</option>
-                                <option value="allenatore" <?php if (isset($_POST['userType']) && $_POST['userType'] === 'allenatore') echo 'selected'; ?>>Allenatore</option>
-                                <option value="giocatore" <?php if (isset($_POST['userType']) && $_POST['userType'] === 'giocatore') echo 'selected'; ?>>Giocatore</option>
-                                <option value="altro" <?php if (isset($_POST['userType']) && $_POST['userType'] === 'tifoso') echo 'selected'; ?>>Tifoso</option>
+                                <option value="società" <?php if ($userType === 'società') echo 'selected'; ?>>Società</option>
+                                <option value="allenatore" <?php if ($userType === 'allenatore') echo 'selected'; ?>>Allenatore</option>
+                                <option value="giocatore" <?php if ($userType === 'giocatore') echo 'selected'; ?>>Giocatore</option>
+                                <option value="altro" <?php if ($userType === 'tifoso') echo 'selected'; ?>>Tifoso</option>
                             </select>
                         </div>
                     </div>
@@ -79,13 +85,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
                     <div class="form-row my-4" id="teamCodeRow" style="display: none;">
                         <div class="col">
-                            <input type="text" name="teamCode" id="teamCode" class="form-control" placeholder="Team Code">
+                            <input type="text" value="<?php echo $teamcode; ?>" name="teamCode" id="teamCode" class="form-control" placeholder="Team Code">
                             <p id="teamCodeError" class="error-message">Codice squadra non esistente</p>
                         </div>
                     </div>
                     <div class="form-row my-4" id="societyCodeRow" style="display: none;">
                         <div class="col">
-                            <input type="text" name="societyCode" id="societyCode" class="form-control" placeholder="Society Code">
+                            <input type="text" value="<?php echo $societycode;?>" name="societyCode" id="societyCode" class="form-control" placeholder="Society Code">
                             <p id="societyCodeError" class="error-message">Codice societario non esistente</p>
                         </div>
                     </div>
