@@ -250,6 +250,41 @@ function addFan($con, $email)
     }
 }
 
+function addCompany($con, $email, $p_iva, $societyName, $address)
+{
+    $code = generateUniqueCode();
+
+    try {
+        $query = "INSERT INTO societa_sportive (responsabile, partita_iva, nome, indirizzo, code) VALUES (:email, :iva, :nome, :addr, :code)";
+        $stmt = $con->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':iva', $p_iva);
+        $stmt->bindParam(':nome', $societyName);
+        $stmt->bindParam(':addr', $address);
+        $stmt->bindParam(':code', $code);
+        $stmt->execute();
+        return true;
+    } catch (PDOException $e) {
+        echo "Error: " . $e->getMessage();
+        return false;
+    }
+}
+
+
+function generateUniqueCode()
+{
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $code = '';
+
+    for ($i = 0; $i < 5; $i++) {
+        $randomIndex = rand(0, strlen($characters) - 1);
+        $code .= $characters[$randomIndex];
+    }
+
+    return $code;
+}
+
+
 /**
  * Recupera le informazioni dell'utente dal database. 
  * Richiede due parametri: 
@@ -267,8 +302,10 @@ function get_user_info($con, $userID)
     g.email AS giocatore_email,
     a.email AS allenatore_email,
     m.email AS manutentore_email,
+    s.*,
     cam_privileges 
     FROM persone AS p
+    INNER JOIN societa_sportive AS s ON p.email = s.responsabile
     LEFT JOIN allenatori AS a ON p.email = a.email
     LEFT JOIN giocatori AS g ON p.email = g.email
     LEFT JOIN manutentori AS m ON p.email = m.email
@@ -291,6 +328,8 @@ function get_user_info($con, $userID)
         $row['userType'] = 'giocatore';
     } else if (!empty($row['manutentore_email'])) {
         $row['userType'] = 'manutentore';
+    } else if (!empty($row['responsabile'])) {
+        $row['userType'] = 'società';
     } else {
         $row['userType'] = 'tifoso';
     }

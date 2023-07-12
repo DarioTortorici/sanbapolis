@@ -63,10 +63,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div class="col">
                             <select required name="userType" id="userType" class="form-control" onchange="handleUserType()">
                                 <option value="">Select your role*</option>
+                                <option value="società" <?php if (isset($_POST['userType']) && $_POST['userType'] === 'società') echo 'selected'; ?>>Società</option>
                                 <option value="allenatore" <?php if (isset($_POST['userType']) && $_POST['userType'] === 'allenatore') echo 'selected'; ?>>Allenatore</option>
                                 <option value="giocatore" <?php if (isset($_POST['userType']) && $_POST['userType'] === 'giocatore') echo 'selected'; ?>>Giocatore</option>
                                 <option value="altro" <?php if (isset($_POST['userType']) && $_POST['userType'] === 'tifoso') echo 'selected'; ?>>Tifoso</option>
                             </select>
+                        </div>
+                    </div>
+                    <div class="form-row my-4" id="userSocietyRow" style="display: none;">
+                        <div class="col">
+                            <input type="text" name="p_iva" id="p_iva" class="form-control" placeholder="Partita Iva*">
+                            <input type="text" name="societyName" id="societyName" class="form-control" placeholder="Nome Società*">
+                            <input type="text" name="address" id="address" class="form-control" placeholder="Indirizzo">
                         </div>
                     </div>
                     <div class="form-row my-4" id="teamCodeRow" style="display: none;">

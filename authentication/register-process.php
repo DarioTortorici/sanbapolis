@@ -68,13 +68,12 @@ $profileImage = upload_profile("../assets/profileimg/", $_FILES['profileUpload']
 $societyCode = $_POST['societyCode'];
 $teamCode = $_POST['teamCode'];
 
-if (!empty($societyCode)){
-    if (!validate_society_code($con, $societyCode)){
+if (!empty($societyCode)) {
+    if (!validate_society_code($con, $societyCode)) {
         $errors[] = "Il codice societario non esiste";
     }
-}
-else if (!empty($teamCode)){
-    if (!validate_team_code($con, $teamCode)){
+} else if (!empty($teamCode)) {
+    if (!validate_team_code($con, $teamCode)) {
         $errors[] = "Il codice squadra non esiste";
     }
 }
@@ -112,13 +111,16 @@ if (empty($errors)) {
             // Crea la variabile di sessione
             $_SESSION['userID'] = $con->lastInsertId();
 
-            // Esegue query su tabella utente corretta
             if ($userType == "allenatore") {
                 addCoach($con, $email, $societyCode);
             } elseif ($userType == "giocatore") {
                 addPlayer($con, $email, $teamCode);
-            }
-            else {
+            } elseif ($userType == "società") {
+                $p_iva = $_POST['p_iva'];
+                $societyName = $_POST['societyName'];
+                $address = $_POST['address'];
+                addCompany($con, $email, $p_iva, $societyName, $address);
+            } else {
                 addFan($con, $email);
             }
 
