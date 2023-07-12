@@ -17,11 +17,13 @@ if (!isset($_SESSION['userID'])) {
 
 
 <script>
-
-getCoachesbyBoss("<?php echo $user['email']; ?>");
-
+var societyPromise = getSocietyByBoss("<?php echo $user['email']; ?>");
+societyPromise
+  .then(function(society) {
+    // Elabora la società ottenuta (successo)
+    return getCoachesByBoss("<?php echo $user['email']; ?>");
+  })
 </script>
-
 
 
 <div class="container">
@@ -37,6 +39,7 @@ getCoachesbyBoss("<?php echo $user['email']; ?>");
         <input type="email" class="form-control" id="invited-email" name="invited-email" placeholder="Inserisci l'indirizzo email">
         <!-- Aggiungi un campo nascosto per memorizzare il nome del society -->
         <input type="hidden" name="hidden-society-name" value="My society Name">
+        <input type="hidden" name="hidden-code" value="code">
       </div>
       <button type="submit" class="btn btn-primary">Invita</button>
     </form>

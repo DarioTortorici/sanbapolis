@@ -253,22 +253,38 @@ function addFan($con, $email)
 function addCompany($con, $email, $p_iva, $societyName, $address)
 {
     $code = generateUniqueCode();
+    $teamcode = generateUniqueCode();
 
     try {
+        $con->beginTransaction();
+
         $query = "INSERT INTO societa_sportive (responsabile, partita_iva, nome, indirizzo, code) VALUES (:email, :iva, :nome, :addr, :code)";
         $stmt = $con->prepare($query);
-        $stmt->bindParam(':email', $email);
-        $stmt->bindParam(':iva', $p_iva);
-        $stmt->bindParam(':nome', $societyName);
-        $stmt->bindParam(':addr', $address);
-        $stmt->bindParam(':code', $code);
-        $stmt->execute();
+        $stmt->execute([
+            ':email' => $email,
+            ':iva' => $p_iva,
+            ':nome' => $societyName,
+            ':addr' => $address,
+            ':code' => $code
+        ]);
+
+        $query = "INSERT INTO squadre (nome, societa, sport, code) VALUES (:nome, :iva, 'Basket', :teamcode)";
+        $stmt = $con->prepare($query);
+        $stmt->execute([
+            ':nome' => $societyName,
+            ':iva' => $p_iva,
+            ':teamcode' => $teamcode
+        ]);
+
+        $con->commit();
         return true;
     } catch (PDOException $e) {
+        $con->rollBack();
         echo "Error: " . $e->getMessage();
         return false;
     }
 }
+
 
 
 function generateUniqueCode()

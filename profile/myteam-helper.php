@@ -74,6 +74,44 @@ function getTeambyCoach($coach_email)
   }
 }
 
+
+function getSocietyByBoss($boss) {
+  try {
+      $con = get_connection();
+      $query = "SELECT sp.*
+                FROM societa_sportive AS sp
+                WHERE sp.responsabile = :email";
+      $statement = $con->prepare($query);
+      $statement->bindParam(':email', $boss);
+      $statement->execute();
+      $society = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+      if ($society) {
+          // Success response
+          $response = [
+              'status' => 'success',
+              'society' => $society
+          ];
+      } else {
+          // Error response if no team found
+          $response = [
+              'status' => 'error',
+              'message' => 'No team found for the given coach'
+          ];
+      }
+
+      echo json_encode($response);
+  } catch (Exception $e) {
+      // Error response if an exception occurs
+      $response = [
+          'status' => 'error',
+          'message' => 'An error occurred: ' . $e->getMessage()
+      ];
+      echo json_encode($response);
+  }
+}
+
+
 function getCoachesbyBoss($responsabile_email)
 {
   try {
@@ -189,5 +227,10 @@ if (isset($_GET['action'])) {
     header('Content-Type: application/json');
     $email = isset($_GET['boss_email']) ? $_GET['boss_email'] : null;
     echo getCoachesbyBoss($email);
+  }
+  elseif ($action == 'get-society-by-boss') { // Richiesta per ottenere la società di un responsabile specifico
+    header('Content-Type: application/json');
+    $email = isset($_GET['boss']) ? $_GET['boss'] : null;
+    echo getSocietyByBoss($email);
   }
 }

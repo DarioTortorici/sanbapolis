@@ -35,6 +35,28 @@ function fetchTeam(teamId) {
   });
 }
 
+function getSocietyByBoss(boss) {
+  return new Promise(function(resolve, reject) {
+      $.ajax({
+          url: 'http://localhost/profile/myteam-helper.php',
+          method: 'GET',
+          data: {
+              action: 'get-society-by-boss',
+              boss: boss
+          },
+          dataType: "json",
+          success: function(response) {
+              updateMyStaffpage(response.society);
+              resolve(response.society);
+          },
+          error: function(xhr, status, error) {
+              reject(error);
+          }
+      });
+  });
+}
+
+
 function getTeambyCoach(coach) {
   return new Promise(function (resolve, reject) {
     $.ajax({
@@ -73,7 +95,7 @@ function getPlayersbyTeam(team) {
   });
 }
 
-function getCoachesbyBoss(mail) {
+function getCoachesByBoss(mail) {
   $.ajax({
     url: 'http://localhost/profile/myteam-helper.php?action=get-coaches-by-boss',
     method: 'GET',
@@ -101,9 +123,36 @@ function updateMyTeampage(team) {
     teamCodeElement.textContent = team.code;
   }
 
-  var hiddenInput = document.getElementsByName("hidden-team-name")[0];
-  if (hiddenInput) {
-    hiddenInput.value = team.nome;
+  var hiddenTeamInput = document.getElementsByName("hidden-team-name")[0];
+  if (hiddenTeamInput) {
+    hiddenTeamInput.value = team.nome;
+  }
+
+  var hiddenCodeInput = document.getElementsByName("hidden-code")[0];
+  if (hiddenCodeInput) {
+    hiddenCodeInput.value = team.code;
+  }
+}
+
+function updateMyStaffpage(society) {
+  var societyNameElement = document.getElementById("society-name");
+  if (societyNameElement) {
+    societyNameElement.textContent = society.nome;
+  }
+
+  var societyCodeElement = document.getElementById("society-code");
+  if (societyCodeElement) {
+    societyCodeElement.textContent = society.code;
+  }
+
+  var hiddenTeamInput = document.getElementsByName("hidden-society-name")[0];
+  if (hiddenTeamInput) {
+    hiddenTeamInput.value = society.nome;
+  }
+
+  var hiddenCodeInput = document.getElementsByName("hidden-code")[0];
+  if (hiddenCodeInput) {
+    hiddenCodeInput.value = society.code;
   }
 }
 
