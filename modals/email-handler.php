@@ -7,7 +7,7 @@ require '../vendor/autoload.php';
 
 if (isset($_POST['invited-email'])) {
     $invitedEmail = $_POST['invited-email'];
-    $teamName = $_POST['hidden-team-name'];
+    $teamName = $_POST['hidden-title-name'];
     $code = $_POST['hidden-code'];
     inviteByEmail($invitedEmail, $teamName, $code);
 }

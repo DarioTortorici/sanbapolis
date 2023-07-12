@@ -123,7 +123,7 @@ function updateMyTeampage(team) {
     teamCodeElement.textContent = team.code;
   }
 
-  var hiddenTeamInput = document.getElementsByName("hidden-team-name")[0];
+  var hiddenTeamInput = document.getElementsByName("hidden-title-name")[0];
   if (hiddenTeamInput) {
     hiddenTeamInput.value = team.nome;
   }
@@ -145,7 +145,7 @@ function updateMyStaffpage(society) {
     societyCodeElement.textContent = society[0].code;
   }
 
-  var hiddenTeamInput = document.getElementsByName("hidden-society-name")[0];
+  var hiddenTeamInput = document.getElementsByName("hidden-title-name")[0];
   if (hiddenTeamInput) {
     hiddenTeamInput.value = society[0].nome;
   }
