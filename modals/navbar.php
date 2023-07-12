@@ -44,6 +44,11 @@ if (isset($_SESSION['userID'])) {
                                 <a class="nav-link" href="../profile/my-team.php">My team</a>
                             </li>
                         <?php endif; ?>
+                        <?php if (isset($user) && $user['userType'] == "società") : ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="../profile/my-staff.php">My staff</a>
+                            </li>
+                        <?php endif; ?>
                         <li class="nav-item">
                             <a class="nav-link" href="../chi-siamo.php">Chi siamo</a>
                         </li>

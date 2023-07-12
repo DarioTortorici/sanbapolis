@@ -74,6 +74,48 @@ function getTeambyCoach($coach_email)
   }
 }
 
+function getCoachesbyBoss($responsabile_email)
+{
+  try {
+    $con = get_connection();
+    $query = "SELECT DISTINCT p.* 
+    FROM persone AS p 
+    INNER JOIN allenatori AS coach ON coach.email = p.email 
+    INNER JOIN allenatori_squadre AS a_s ON a_s.email_allenatore = coach.email
+    INNER JOIN squadre ON a_s.id_squadra = squadre.id 
+    INNER JOIN societa_sportive AS sp ON sp.partita_iva = squadre.societa 
+    WHERE sp.responsabile = :email";
+    $statement = $con->prepare($query);
+    $statement->bindParam(':email', $responsabile_email);
+    $statement->execute();
+    $coaches = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+    if ($coaches) {
+      // Success response
+      $response = [
+        'status' => 'success',
+        'coaches' => $coaches
+      ];
+    } else {
+      // Error response if no team found
+      $response = [
+        'status' => 'error',
+        'message' => 'No team found for the given coach'
+      ];
+    }
+
+    return json_encode($response);
+  } catch (Exception $e) {
+    // Error response if an exception occurs
+    $response = [
+      'status' => 'error',
+      'message' => 'An error occurred: ' . $e->getMessage()
+    ];
+    return json_encode($response);
+  }
+}
+
+
 /** Ottiene i dettagli dei giocatori di una squadra dal database in base all'ID della squadra.
  *
  * @param int $teamid ID della squadra.
@@ -86,7 +128,7 @@ function getPlayersbyTeam($teamid)
     $query = "SELECT DISTINCT persone.* 
     FROM persone, squadre INNER JOIN giocatori_squadre ON squadre.id = giocatori_squadre.id_squadra 
     INNER JOIN giocatori ON giocatori_squadre.email_giocatore = giocatori.email 
-    and giocatori.email = email WHERE squadre.id = :id";
+    and giocatori.email = email WHERE squadre.id = :id and giocatori.email = persone.email";
     $statement = $con->prepare($query);
     $statement->bindParam(':id', $teamid);
     $statement->execute();
@@ -143,6 +185,9 @@ if (isset($_GET['action'])) {
     header('Content-Type: application/json');
     $team = isset($_GET['team']) ? $_GET['team'] : null;
     echo getPlayersbyTeam($team);
+  } elseif ($action == 'get-coaches-by-boss') { // Richiesta per ottenere gli allenatori di un responsabile specifico
+    header('Content-Type: application/json');
+    $email = isset($_GET['boss_email']) ? $_GET['boss_email'] : null;
+    echo getCoachesbyBoss($email);
   }
 }
-

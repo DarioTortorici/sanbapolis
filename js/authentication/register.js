@@ -12,33 +12,59 @@ function handleUserType() {
     var societyCodeRow = document.getElementById('societyCodeRow');
     var societyCodeInput = document.getElementById('societyCode');
 
+    // Ottieni il riferimento alla riga dell'IVA e del nome società
+    var userSocietyRow = document.getElementById('userSocietyRow');
+    var pIvaInput = document.getElementById('p_iva');
+    var societyNameInput = document.getElementById('societyName');
+
     // Verifica il valore selezionato nel tipo di utente
     if (userTypeSelect.value === 'giocatore') {
         // Se il tipo di utente è "giocatore", mostra la riga del codice squadra
         teamCodeRow.style.display = 'block';
         societyCodeRow.style.display = 'none';
+        userSocietyRow.style.display = 'none';
 
         // Rendi il campo del codice squadra obbligatorio
         teamCodeInput.required = true;
         societyCodeInput.required = false;
+        pIvaInput.required = false;
+        societyNameInput.required = false;
     } else if (userTypeSelect.value === 'allenatore') {
         // Se il tipo di utente è "allenatore", mostra la riga del codice società
         societyCodeRow.style.display = 'block';
         teamCodeRow.style.display = 'none';
+        userSocietyRow.style.display = 'none';
 
         // Rendi il campo del codice società obbligatorio
         societyCodeInput.required = true;
         teamCodeInput.required = false;
+        pIvaInput.required = false;
+        societyNameInput.required = false;
+    } else if (userTypeSelect.value === 'società') {
+        // Se il tipo di utente è "società", mostra la riga dell'IVA e del nome società
+        societyCodeRow.style.display = 'none';
+        teamCodeRow.style.display = 'none';
+        userSocietyRow.style.display = 'block';
+
+        // Rendi il campo dell'IVA e del nome società obbligatori
+        pIvaInput.required = true;
+        societyNameInput.required = true;
+        teamCodeInput.required = false;
+        societyCodeInput.required = false;
     } else {
         // Altrimenti, nascondi entrambe le righe
         teamCodeRow.style.display = 'none';
         societyCodeRow.style.display = 'none';
+        userSocietyRow.style.display = 'none';
 
-        // Rimuovi l'attributo required da entrambi i campi
+        // Rimuovi l'attributo required da tutti i campi
         teamCodeInput.required = false;
         societyCodeInput.required = false;
+        pIvaInput.required = false;
+        societyNameInput.required = false;
     }
 }
+
 
 /**
  * Event listener che controlla che la password inserita rispetti i vincoli
