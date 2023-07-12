@@ -137,22 +137,22 @@ function updateMyTeampage(team) {
 function updateMyStaffpage(society) {
   var societyNameElement = document.getElementById("society-name");
   if (societyNameElement) {
-    societyNameElement.textContent = society.nome;
+    societyNameElement.textContent = society[0].nome;
   }
 
   var societyCodeElement = document.getElementById("society-code");
   if (societyCodeElement) {
-    societyCodeElement.textContent = society.code;
+    societyCodeElement.textContent = society[0].code;
   }
 
   var hiddenTeamInput = document.getElementsByName("hidden-society-name")[0];
   if (hiddenTeamInput) {
-    hiddenTeamInput.value = society.nome;
+    hiddenTeamInput.value = society[0].nome;
   }
 
   var hiddenCodeInput = document.getElementsByName("hidden-code")[0];
   if (hiddenCodeInput) {
-    hiddenCodeInput.value = society.code;
+    hiddenCodeInput.value = society[0].code;
   }
 }
 
