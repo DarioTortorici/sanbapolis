@@ -112,9 +112,19 @@ if (empty($errors)) {
             $_SESSION['userID'] = $con->lastInsertId();
 
             if ($userType == "allenatore") {
-                addCoach($con, $email, $societyCode);
+                if(checkPending($con, $email)){
+                    addCoach($con, $email, $societyCode);
+                }
+                else{
+                    $errors[] = "Il tuo indirizzo mail non risulta tra gli inviti, contatta la tua società per risolvere il problema.";
+                }
             } elseif ($userType == "giocatore") {
-                addPlayer($con, $email, $teamCode);
+                if(checkPending($con, $email)){
+                    addPlayer($con, $email, $teamCode);
+                }
+                else{
+                    $errors[] = "Il tuo indirizzo mail non risulta tra gli inviti, contatta il tuo allenatore per risolvere il problema.";
+                }
             } elseif ($userType == "società") {
                 $p_iva = $_POST['p_iva'];
                 $societyName = $_POST['societyName'];

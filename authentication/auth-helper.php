@@ -352,3 +352,23 @@ function get_user_info($con, $userID)
 
     return $row;
 }
+
+function checkPending($con, $email) {
+    $query = "SELECT email FROM pending WHERE email = :email";
+    $stmt = $con->prepare($query);
+    $stmt->execute([':email' => $email]);
+
+    return $stmt->rowCount() > 0;
+}
+
+function generateActivationCode() {
+    // Genera un codice di attivazione univoco
+    $length = 32; // Lunghezza del codice
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $activationCode = '';
+    for ($i = 0; $i < $length; $i++) {
+        $randomIndex = rand(0, strlen($characters) - 1);
+        $activationCode .= $characters[$randomIndex];
+    }
+    return $activationCode;
+}
