@@ -6,12 +6,21 @@ use PHPMailer\PHPMailer\Exception;
 // Load Composer's autoloader
 require '../vendor/autoload.php';
 require_once '../authentication/db_connection.php';
-require '../authentication/auth-helper.php';
 
 if (isset($_POST['invited-email'])) {
     $invitedEmail = $_POST['invited-email'];
-    $teamName = $_POST['hidden-title-name'];
-    $code = $_POST['hidden-code'];
+
+    if (isset($_POST['hidden-society-name']) and isset($_POST['hidden-society-code'])) {
+        $teamName = $_POST['hidden-society-name'];
+        $code = $_POST['hidden-society-code'];
+    }
+    elseif (isset($_POST['hidden-team-name']) and isset($_POST['hidden-team-code'])) {
+        $teamName = $_POST['hidden-team-name'];
+        $code = $_POST['hidden-team-code'];
+    }
+    else{
+        echo "Impossibile inviare la mail";
+    }
 
     $con = get_connection();
     $query = "INSERT INTO pending (email) VALUES (:email)";
@@ -22,10 +31,9 @@ if (isset($_POST['invited-email'])) {
     inviteByEmail($invitedEmail, $teamName, $code);
 }
 
-function authEmail($userEmail)
+function authEmail($userEmail,$activationCode)
 {
-    $activationCode = generateActivationCode(); // Genera un codice di attivazione univoco
-    $activationLink = 'https://istar.disi.unitn.it/activation.php?code=' . urlencode($activationCode); // URL della pagina di attivazione con il codice come parametro
+    $activationLink = 'https://istar.disi.unitn.it/authentication/activation.php?code=' . urlencode($activationCode); // URL della pagina di attivazione con il codice come parametro
 
     // Create an instance of PHPMailer
     $mail = new PHPMailer(true);

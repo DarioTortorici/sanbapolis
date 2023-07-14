@@ -41,7 +41,8 @@ if (!isset($_SESSION['userID'])) {
         <label for="email">Invita tramite indirizzo email</label>
         <input type="email" class="form-control" id="invited-email" name="invited-email" placeholder="Inserisci l'indirizzo email">
         <!-- Aggiungi un campo nascosto per memorizzare il nome del team -->
-        <input type="hidden" name="hidden-title-name" value="My team Name">
+        <input type="hidden" name="hidden-team-name" value="My team Name">
+        <input type="hidden" name="hidden-team-code" value="code">
       </div>
       <button type="submit" class="btn btn-primary">Invita</button>
     </form>
