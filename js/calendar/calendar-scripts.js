@@ -341,8 +341,6 @@ function loadCalendar(data) {
         dateClick: function (info) {
             // Verifica il tipo di utente
             getUserType().then(function (userType) {
-                console.log(userType);
-
                 // Gestisci il click sulla data solo se l'usertype è "società" o "manutentore"
                 if (userType === 'società' || userType === 'manutentore') {
                     // Gestisce il click su una data nel calendario

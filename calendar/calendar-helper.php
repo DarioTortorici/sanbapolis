@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../authentication/db_connection.php';
+require_once __DIR__ . '/../modals/email-handler.php';
 
 /** Verifica se la richiesta corrente è una richiesta AJAX.
  *
@@ -136,6 +137,14 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
     } else { // Allenamento
         $event_id = save_training($data_ora_inizio, $data_ora_fine, $squadra);
         save_prenotazioni_allenamenti($prenotazioni_id, $event_id, $con);
+    }
+
+    if ($_COOKIE['userID'] != "manutentore") {
+        $query = "SELECT * FROM manutentori";
+        $stmt = $con->query($query);
+        $manutentore = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Invio la mail al manutentore
+        authEvent($manutentore, $author, $startDate, $endDate, $startTime, $endTime, $cameras);
     }
 
     return $calendar_id;
