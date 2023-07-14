@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
   // URL del DASH generato da ffmpeg
-  var manifestURL = 'output.mpd';
+  var manifestURL = '../../cameras/live/output.mpd';
 
   // Inizializza il DASH player
   player.src({
