@@ -1,59 +1,55 @@
-<?php
+<a href="index_sanbapolis.php">Index Sanbapolis</a><br>
+<a href="index_vecchio.php">Index Xampp</a><br>
 
-include ('modals/header.php');
-include("modals/navbar.php");
-
-?>
-
-<section id="main-site">
-
-    <!-- Carosello-->
-
-    <div id="sportCarousel" class="carousel slide">
-        <div class="carousel-indicators">
-            <button type="button" data-bs-target="#sportCarousel" data-bs-slide-to="0" class="active"
-                aria-current="true" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#sportCarousel" data-bs-slide-to="1" aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#sportCarousel" data-bs-slide-to="2" aria-label="Slide 3"></button>
-        </div>
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="https://images.unsplash.com/photo-1587384474964-3a06ce1ce699?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
-                    class="d-block w-100" alt="...">
-                <div class="carousel-caption d-none d-md-block">
-                    <h5>Calcio a 5</h5>
-                    <!-- <p> Didascalia </p> -->
-                </div>
-            </div>
-            <div class="carousel-item">
-                <img src="https://images.unsplash.com/photo-1553005746-9245ba190489?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
-                    class="d-block w-100" alt="...">
-                <div class="carousel-caption d-none d-md-block">
-                    <h5>Pallavolo</h5>
-                    <!-- <p> Didascalia </p> -->
-                </div>
-            </div>
-            <div class="carousel-item">
-                <img src="https://images.unsplash.com/photo-1546519638-68e109498ffc?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1790&q=80"
-                    class="d-block w-100" alt="...">
-                <div class="carousel-caption d-none d-md-block">
-                    <h5>Basket</h5>
-                    <!-- <p> Didascalia </p> -->
-                </div>
-            </div>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#sportCarousel" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#sportCarousel" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-    </div>
-
-</section>
+<p>Test</p><br>
 
 <?php
-include "./modals/footer.php";
+
+$vet_hash = array (
+    "mario" => password_hash("mario", PASSWORD_DEFAULT),
+    "raffaele" => password_hash("raffaele", PASSWORD_DEFAULT),
+    "antonio" => password_hash("antonio", PASSWORD_DEFAULT),
+    "vincenzo" => password_hash("vincenzo", PASSWORD_DEFAULT),
+    "manolo" => password_hash("manolo", PASSWORD_DEFAULT),
+    "costanzo" => password_hash("costanzo", PASSWORD_DEFAULT),
+    "arcangelo" => password_hash("arcangelo", PASSWORD_DEFAULT),
+    "emmanuele" => password_hash("emmanuele", PASSWORD_DEFAULT),
+    "lorenzo" => password_hash("lorenzo", PASSWORD_DEFAULT),
+    "fulvio" => password_hash("fulvio", PASSWORD_DEFAULT),
+    "oliviero" => password_hash("oliviero", PASSWORD_DEFAULT),
+    
+    "----------------" => "-------------------",
+
+    "giovanni" => password_hash("giovanni", PASSWORD_DEFAULT),
+    "laura" => password_hash("laura", PASSWORD_DEFAULT),
+    "giuseppe" => password_hash("giuseppe", PASSWORD_DEFAULT),
+    "francesca" => password_hash("francesca", PASSWORD_DEFAULT),
+    "marco" => password_hash("marco", PASSWORD_DEFAULT),
+    "simone" => password_hash("simone", PASSWORD_DEFAULT),
+    "luigi" => password_hash("luigi", PASSWORD_DEFAULT),
+    "andrea" => password_hash("andrea", PASSWORD_DEFAULT),
+    "paolo" => password_hash("paolo", PASSWORD_DEFAULT),
+    "roberto" => password_hash("roberto", PASSWORD_DEFAULT),
+    "antonio" => password_hash("antonio", PASSWORD_DEFAULT),
+    "davide" => password_hash("davide", PASSWORD_DEFAULT),
+    "riccardo" => password_hash("riccardo", PASSWORD_DEFAULT),
+    "enrico" => password_hash("enrico", PASSWORD_DEFAULT),
+    "marco" => password_hash("marco", PASSWORD_DEFAULT),
+    "gabriele" => password_hash("gabriele", PASSWORD_DEFAULT),
+    "michele" => password_hash("michele", PASSWORD_DEFAULT),
+    "andrea" => password_hash("andrea", PASSWORD_DEFAULT),
+    "luca" => password_hash("luca", PASSWORD_DEFAULT),
+    "paola" => password_hash("paola", PASSWORD_DEFAULT),
+    "carlo" => password_hash("carlo", PASSWORD_DEFAULT),
+    "elisa" => password_hash("elisa", PASSWORD_DEFAULT),
+    "luigi" => password_hash("luigi", PASSWORD_DEFAULT),
+    "giorgio" => password_hash("giorgio", PASSWORD_DEFAULT),
+    "luisa" => password_hash("luisa", PASSWORD_DEFAULT)
+);
+
+foreach ($vet_hash as $key => $value) {
+    echo $key . " " . $value . "<br>\n";
+}
+
+
 ?>
