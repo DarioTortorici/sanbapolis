@@ -14,7 +14,10 @@ if (!isset($_SESSION['userID'])) {
     exit();
 }
 
-if ($user['userType'] == "allenatore") {
+$userType = $user['userType']; // Ottenere il tipo di utente dalla variabile $user['userType']
+setcookie('userID', $_SESSION['userID'], time() + 3600, '/'); 
+
+if ($userType == "allenatore" || $userType == "società") {
     // Chiamata alla funzione JavaScript per il calendario degli allenatori
     echo '<script>';
     echo 'fetchCoachEvents("' . $user['email'] . '");';
@@ -22,7 +25,7 @@ if ($user['userType'] == "allenatore") {
     $delete = true;
     $modify = false;
     $add = true;
-} elseif ($user['userType'] == "manutentore") {
+} elseif ($userType == "manutentore") {
     // Chiamata alla funzione JavaScript per il calendario dei manutentori
     echo '<script>';
     echo 'fetchEvents();';

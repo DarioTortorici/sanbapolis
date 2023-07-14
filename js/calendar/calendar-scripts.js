@@ -301,7 +301,6 @@ function saveCameras() {
  * @param {Array} data - Gli eventi da visualizzare nel calendario.
  */
 function loadCalendar(data) {
-    console.log(data);
     var calendarEl = document.getElementById('calendar');
 
     if (calendar) {
@@ -340,9 +339,20 @@ function loadCalendar(data) {
         firstDay: 1, // Inizializza il calendario a Lunedì
         navLinks: true, // Abilita la navigazione ai giorni/settimane/mesi
         dateClick: function (info) {
-            // Gestisce il click su una data nel calendario
-            createCalendarEvent(info.dateStr); // Triggera modal nuovo evento
-            handleDateClick(info); //Aggiunge automaticamente la data cliccata nel form
+            // Verifica il tipo di utente
+            getUserType().then(function (userType) {
+                console.log(userType);
+
+                // Gestisci il click sulla data solo se l'usertype è "società" o "manutentore"
+                if (userType === 'società' || userType === 'manutentore') {
+                    // Gestisce il click su una data nel calendario
+                    createCalendarEvent(info.dateStr); // Triggera modal nuovo evento
+                    handleDateClick(info); // Aggiunge automaticamente la data cliccata nel form
+                }
+            }).catch(function (error) {
+                // Gestisci eventuali errori nella risoluzione della Promise
+                console.error(error);
+            });
         },
         eventClick: function (info) {
             if (window.location.href != "http://localhost/cameras/video_storage.php") {
@@ -579,15 +589,17 @@ function createCalendarEvent(currentDate) {
     }, 0);
 }
 
+// ...
+
 /** Funzione per gestire il click su una data nel calendario.
  * 
- * La funzione viene chiamata quando l'utente fa clic su una data nel calendario.
+ * La funzione viene chiamata quando un utente abilitato fa clic su una data nel calendario.
  * Prende come parametro l'oggetto `date` che contiene informazioni sulla data clickata.
- * Con questo aggiorna i valori dei campi "start-date", "end-date" e "startRecur" nel modulo
- * @param {object} date - L'oggetto che contiene informazioni sulla data selezionata.
  */
 function handleDateClick(date) {
     var clickedDate = date.dateStr;
+
+
     $('#start-date').val(clickedDate);
     $('#end-date').val(clickedDate);
 
@@ -595,5 +607,23 @@ function handleDateClick(date) {
     $('#save-form input[name="start-date"]').val(clickedDate);
     $('#save-form input[name="end-date"]').val(clickedDate);
     $('#save-form input[name="startRecur"]').val(clickedDate);
-
 }
+
+
+function getUserType() {
+    return new Promise(function (resolve, reject) {
+        jQuery.ajax({
+            url: 'http://localhost/calendar/calendar-helper.php?action=get-user-type',
+            type: 'POST',
+            dataType: 'json',
+            success: function (response) {
+                resolve(response);
+            },
+            error: function (xhr, status, error) {
+                console.log(xhr.responseText);
+                reject(error);
+            }
+        });
+    });
+}
+
