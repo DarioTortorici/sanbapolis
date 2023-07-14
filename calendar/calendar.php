@@ -9,13 +9,12 @@ include_once("../modals/navbar.php");
 include_once('../authentication/auth-helper.php');
 include("./calendar-helper.php");
 
-if (!isset($_SESSION['userID'])) {
+if (!isset($_COOKIE['userID'])) {
     header("Location: ../authentication/login.php");
     exit();
 }
 
 $userType = $user['userType']; // Ottenere il tipo di utente dalla variabile $user['userType']
-setcookie('userID', $_SESSION['userID'], time() + 3600, '/'); 
 
 if ($userType == "allenatore" || $userType == "società") {
     // Chiamata alla funzione JavaScript per il calendario degli allenatori

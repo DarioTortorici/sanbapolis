@@ -103,5 +103,10 @@ function checkRecordtoEnd()
             $query->bindParam(':dir', $directory);
             $query->bindParam(':idCalendar', $idCalendar);
             $query->execute();
+
+            $query = "INSERT INTO video (locazione) VALUES (:dir)";
+            $stmt = $con->prepare($query);
+            $stmt->bindParam(':dir', $directory);
+            $stmt->execute();
     }
 }

@@ -1,14 +1,9 @@
 <?php
-// Avvia la sessione
-session_start();
-
-// Elimina tutte le variabili di sessione
-session_unset();
-
-// Distruggi la sessione
-session_destroy();
+// Elimina il cookie di autenticazione
+setcookie('userID', '', time() - 3600, '/'); // Imposta il tempo di scadenza al passato per eliminare il cookie
 
 // Reindirizza alla pagina di login
 header("Location: login.php");
 exit();
+
 ?>

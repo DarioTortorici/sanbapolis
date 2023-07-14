@@ -2,7 +2,7 @@
 include('../modals/header.php');
 include_once("../modals/navbar.php");
 
-if (!isset($_SESSION['userID'])) {
+if (!isset($_COOKIE['userID'])) {
   header("Location: ../authentication/login.php");
   exit();
 }
