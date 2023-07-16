@@ -1,16 +1,13 @@
 <!-- PHP session init -->
 <?php
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
-}
 
 $user = array();
 require(__DIR__ . '/../authentication/db_connection.php');
 include(__DIR__ . '/../authentication/auth-helper.php');
 
-if (isset($_SESSION['userID'])) {
-    $user_id = $_SESSION['userID'];
-    $user = get_user_info($con, $_SESSION['userID']);
+if (isset($_COOKIE['userID'])) {
+    $user_id = $_COOKIE['userID'];
+    $user = get_user_info($con, $_COOKIE['userID']);
 }
 ?>
 

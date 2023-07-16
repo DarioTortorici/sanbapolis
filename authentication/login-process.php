@@ -47,9 +47,10 @@ if (empty($error)) {
     if (!empty($row)) {
         // Verifica password
         if (password_verify($password, $row['digest_password'])) {
-            session_start();
-            // Imposta la variabile di sessione con l'ID dell'utente
-            $_SESSION['userID'] = $row['session_id'];
+           
+            $cookieCode = password_hash($email, PASSWORD_DEFAULT); //Ricalcolo cookie
+            setcookie('userID', $cookieCode, time() + 86400, '/'); // Cookie scade in 24 ore
+
             // Credenziali corrette, reindirizza l'utente alla pagina successiva
             $response = array('success' => true);
             echo json_encode($response);

@@ -84,10 +84,11 @@ if (empty($errors)) {
     // Registra un nuovo utente
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     $activationCode = generateActivationCode(); // Genera un codice di attivazione univoco
+    $cookieCode = password_hash($email, PASSWORD_DEFAULT); // Genera un codice cookie identificativo
 
     try {
         // Crea una query
-        $query = "INSERT INTO persone (nome, cognome, email, data_nascita, citta, indirizzo, telefono, digest_password, locazione_immagine_profilo, data_registrazione, session_id,activation_code)";
+        $query = "INSERT INTO persone (nome, cognome, email, data_nascita, citta, indirizzo, telefono, digest_password, locazione_immagine_profilo, data_registrazione,activation_code)";
         $query .= " VALUES (:firstName, :lastName, :email, :dataNascita, :citta, :indirizzo, :telefono, :password, :profileImage, NOW(), NULL, :code)";
 
         // Prepara la dichiarazione
@@ -112,11 +113,8 @@ if (empty($errors)) {
         authEmail($email,$activationCode);
 
         if ($stmt->rowCount() == 1) {
-            // Inizia una nuova sessione
-            session_start();
-
-            // Crea la variabile di sessione
-            $_SESSION['userID'] = $con->lastInsertId();
+            
+            setcookie('userID', $cookieCode, time() + 86400, '/'); // Cookie scade in 24 hours
 
             if ($userType == "allenatore") {
                 if(checkPending($con, $email)){
