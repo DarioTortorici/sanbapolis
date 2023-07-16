@@ -5,9 +5,13 @@ $user = array();
 require(__DIR__ . '/../authentication/db_connection.php');
 include(__DIR__ . '/../authentication/auth-helper.php');
 
-if (isset($_COOKIE['userID'])) {
-    $user_id = $_COOKIE['userID'];
-    $user = get_user_info($con, $_COOKIE['userID']);
+if (isset($_COOKIE['email'])) {
+    $user_email = $_COOKIE['email'];
+    $user = get_user_info($con, $_COOKIE['email']);
+
+    if (!$user['verificato']){
+        header("Location: /modals/suggest.php");
+    }
 }
 ?>
 
@@ -24,7 +28,7 @@ if (isset($_COOKIE['userID'])) {
                     <li class="nav-item">
                         <a class="nav-link active" aria-current="page" href="/index.php">Home</a>
                     </li>
-                    <?php if (isset($user_id)) : ?>
+                    <?php if (isset($user_email)) : ?>
                         <li class="nav-item">
                             <a class="nav-link" href="../calendar/calendar.php">Calendario</a>
                         </li>
@@ -53,7 +57,7 @@ if (isset($_COOKIE['userID'])) {
                 </ul>
 
                 <ul class="navbar-nav grid gap-1">
-                    <?php if (isset($user_id)) : ?>
+                    <?php if (isset($user_email)) : ?>
                         <a href="../profile/user-dashboard.php"><img class="img rounded-circle" style="width: 20px; height: 20px;" src="<?php echo isset($user['locazione_immagine_profilo']) ? substr($user['locazione_immagine_profilo'], 2) : '../assets/profileimg/beard.png'; ?>" alt=""></a>
                     <?php else : ?>
                         <li> <a class="btn btn-primary" href="/authentication/login.php" role="button">Accedi</a> </li>

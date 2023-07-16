@@ -8,7 +8,7 @@ include('../modals/header.php');
 include_once("../modals/navbar.php");
 include_once('../authentication/auth-helper.php');
 
-if (!isset($_COOKIE['userID'])) {
+if (!isset($_COOKIE['email'])) {
   header("Location: ../authentication/login.php");
   exit();
 }

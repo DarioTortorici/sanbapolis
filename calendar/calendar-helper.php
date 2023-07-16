@@ -1,6 +1,7 @@
 <?php
 
 require_once __DIR__ . '/../authentication/db_connection.php';
+require_once __DIR__ . '/../authentication/auth-helper.php';
 require_once __DIR__ . '/../modals/email-handler.php';
 
 /** Verifica se la richiesta corrente è una richiesta AJAX.
@@ -142,7 +143,9 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
         save_prenotazioni_allenamenti($prenotazioni_id, $event_id, $con);
     }
 
-    if ($_COOKIE['userID'] != "manutentore") {
+    $userInfo = get_user_info($con,$_COOKIE['email']);
+
+    if ($userInfo['userType'] != "manutentore") {
         $query = "SELECT * FROM manutentori";
         $stmt = $con->query($query);
         $manutentore = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -591,42 +594,8 @@ function getCameras($id)
 function getUserType()
 {
     $con = get_connection();
-    $id = $_COOKIE['userID'];
-    $query = "SELECT p.*,
-        g.email AS giocatore_email,
-        a.email AS allenatore_email,
-        m.email AS manutentore_email,
-        s.*,
-        cam_privileges 
-        FROM persone AS p
-        LEFT JOIN societa_sportive AS s ON p.email = s.responsabile
-        LEFT JOIN allenatori AS a ON p.email = a.email
-        LEFT JOIN giocatori AS g ON p.email = g.email
-        LEFT JOIN manutentori AS m ON p.email = m.email
-        WHERE session_id = :userID";
-
-    $stmt = $con->prepare($query);
-    $stmt->bindParam(':userID', $id, PDO::PARAM_INT);
-    $stmt->execute();
-
-    $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (empty($row)) {
-        return false;
-    }
-
-    // Aggiungi il campo "userType" al risultato in base alla presenza dell'ID dell'allenatore
-    if (!empty($row['allenatore_email'])) {
-        return 'allenatore';
-    } else if (!empty($row['giocatore_email'])) {
-        return 'giocatore';
-    } else if (!empty($row['manutentore_email'])) {
-        return 'manutentore';
-    } else if (!empty($row['responsabile'])) {
-        return 'società';
-    } else {
-        return 'tifoso';
-    }
+    $userInfo = get_user_info($con, $_COOKIE['email']);
+    return $userInfo['userType'];
 }
 
 /**

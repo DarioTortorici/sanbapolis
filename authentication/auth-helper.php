@@ -312,7 +312,7 @@ function generateUniqueCode()
  * @param mixed $userID Id utente selezionato
  * @return mixed colonna del record se presente, false altrimenti
  */
-function get_user_info($con, $userID)
+function get_user_info($con, $email)
 {
     $query = "SELECT p.*,
     g.email AS giocatore_email,
@@ -325,10 +325,10 @@ function get_user_info($con, $userID)
     LEFT JOIN allenatori AS a ON p.email = a.email
     LEFT JOIN giocatori AS g ON p.email = g.email
     LEFT JOIN manutentori AS m ON p.email = m.email
-    WHERE session_id = :userID";
+    WHERE p.email = :email";
 
     $stmt = $con->prepare($query);
-    $stmt->bindParam(':userID', $userID, PDO::PARAM_INT);
+    $stmt->bindParam(':email', $email);
     $stmt->execute();
 
     $row = $stmt->fetch(PDO::FETCH_ASSOC);

@@ -14,6 +14,7 @@ if (isset($_GET['code'])) {
 
         // Mostra un messaggio di conferma
         echo "Account attivato con successo!";
+        header("Location: ../authentication/login.php");
     } else {
         // Codice di attivazione non valido
         echo "Codice di attivazione non valido!";
@@ -25,7 +26,7 @@ if (isset($_GET['code'])) {
 
 function checkActivationCode($activationCode) {
     $con = get_connection();
-    $query = "SELECT * FROM persone WHERE activation_code = :code";
+    $query = "SELECT * FROM persone WHERE codice_attivazione = :code";
     $stmt = $con->prepare($query);
     $stmt->execute([':code' => $activationCode]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -34,7 +35,7 @@ function checkActivationCode($activationCode) {
 
 function activateAccount($activationCode) {
     $con = get_connection();
-    $query = "UPDATE persone SET is_active = 1 WHERE activation_code = :code";
+    $query = "UPDATE persone SET verificato = 1 WHERE codice_attivazione = :code";
     $stmt = $con->prepare($query);
     $stmt->bindParam(':code', $activationCode);
     $stmt->execute();

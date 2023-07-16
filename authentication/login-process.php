@@ -48,8 +48,7 @@ if (empty($error)) {
         // Verifica password
         if (password_verify($password, $row['digest_password'])) {
            
-            $cookieCode = password_hash($email, PASSWORD_DEFAULT); //Ricalcolo cookie
-            setcookie('userID', $cookieCode, time() + 86400, '/'); // Cookie scade in 24 ore
+            setcookie('email', $email, time() + 86400, '/'); // Cookie scade in 24 ore
 
             // Credenziali corrette, reindirizza l'utente alla pagina successiva
             $response = array('success' => true);
