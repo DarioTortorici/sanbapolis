@@ -14,6 +14,7 @@ CREATE TABLE persone(
 	telefono VARCHAR(64),
 	digest_password VARCHAR(255) NOT NULL, /*password_hash() fuinzione php: "...it is recommended to store the result in a database column that can expand beyond 60 characters (255 characters would be a good choice)" */
 	locazione_immagine_profilo VARCHAR(255),
+	verificato BOOLEAN NOT NULL,
 	
 	PRIMARY KEY(email)
 );
@@ -77,7 +78,7 @@ CREATE TABLE video(
 	locazione VARCHAR(255) NOT NULL, /*255 in teoria lunghezza massima per una path in linux*/
 	nome VARCHAR(64) NOT NULL,
 	autore VARCHAR(64) NOT NULL,
-	nota VARCHAR(64),
+	nota TEXT,
 	
 	CONSTRAINT fk_email_autore FOREIGN KEY (autore) REFERENCES persone(email) ON UPDATE CASCADE ON DELETE CASCADE,
 	
@@ -184,6 +185,7 @@ CREATE TABLE prenotazioni (
 	/*sport VARCHAR(64) NOT NULL, serve? lo posso ricavare dalla squadra*/
 	id_squadra INTEGER NOT NULL,
 	id_calendar_events INTEGER NOT NULL,
+	nota TEXT,
 	
 	CONSTRAINT fk_email_autore_prenotazione FOREIGN KEY (autore_prenotazione) REFERENCES persone(email) ON UPDATE CASCADE ON DELETE CASCADE,
 	/*CONSTRAINT fk_sport_prenotazione FOREIGN KEY (sport) REFERENCES sport(nome_sport) ON UPDATE CASCADE ON DELETE CASCADE,*/
@@ -315,6 +317,24 @@ CREATE TABLE inviti_giocatori (
 	email VARCHAR(320) PRIMARY KEY
 );
 
+CREATE TABLE telecamere (
+	id INTEGER NOT NULL,
+	indirizzo_ipv4 VARCHAR(15),
+	indirizzo_ipv6 VARCHAR(39),
+	
+	UNIQUE(indirizzo_ipv4, indirizzo_ipv6),	
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE telecamere_prenotazioni (
+	telecamera INTEGER NOT NULL,
+	prenotazione INTEGER NOT NULL,
+	
+	CONSTRAINT fk_telecamera_prenotazione FOREIGN KEY (telecamera) REFERENCES telecamere(id) ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT fk_prenotazione_telecamera FOREIGN KEY (prenotazione) REFERENCES prenotazioni(id) ON UPDATE CASCADE ON DELETE CASCADE,
+	
+	PRIMARY KEY (telecamera, prenotazione)
+);
 
 
 COMMIT;
