@@ -74,6 +74,11 @@ CREATE TABLE manutentori(
 	PRIMARY KEY(email)
 );
 
+
+CREATE TABLE tag_rfid(
+	id INTEGER PRIMARY KEY
+)
+
 CREATE TABLE video(
 	locazione VARCHAR(255) NOT NULL, /*255 in teoria lunghezza massima per una path in linux*/
 	nome VARCHAR(64) NOT NULL,
@@ -286,23 +291,25 @@ CREATE TABLE formazione_giocatori (
 	titolare BOOLEAN,
 	minuto_ingresso DATETIME, /*null se non subentra*/
 	minuto_uscita DATETIME, /*null se non esce prima della partita*/
+	tag_giocatore INTEGER NOT NULL,
 
 	CONSTRAINT fk_giocatore_formazione_giocatore FOREIGN KEY (giocatore) REFERENCES giocatori(email) ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT fk_formazione_formazione_giocatore FOREIGN KEY (id_formazione) REFERENCES formazioni(id) ON UPDATE CASCADE ON DELETE CASCADE,
-
+	CONSTRAINT fk_partita_giocatore_tag FOREIGN KEY (tag_giocatore) REFERENCES tag_rfid(id) ON UPDATE CASCADE ON DELETE CASCADE,
 
 	UNIQUE (id_formazione, giocatore),
 	PRIMARY KEY (id)
 );
 
-CREATE TABLE allenamento_giocatori (
+CREATE TABLE allenamenti_giocatori (
 	id INTEGER AUTO_INCREMENT NOT NULL,
 	id_allenamento INTEGER NOT NULL,
 	giocatore VARCHAR(320) NOT NULL,
+	tag_giocatore INTEGER NOT NULL,
 
 	CONSTRAINT fk_giocatore_allenamento_giocatore FOREIGN KEY (giocatore) REFERENCES giocatori(email) ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT fk_allenameno_allenamento_giocatore FOREIGN KEY (id_allenamento) REFERENCES allenamenti(id) ON UPDATE CASCADE ON DELETE CASCADE,
-
+	CONSTRAINT fk_allenamento_giocatore_tag FOREIGN KEY (tag_giocatore) REFERENCES tag_rfid(id) ON UPDATE CASCADE ON DELETE CASCADE,
 
 	UNIQUE (id_allenamento, giocatore),
 	PRIMARY KEY (id)
