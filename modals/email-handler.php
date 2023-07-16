@@ -68,6 +68,8 @@ function authEmail($userEmail, $activationCode)
         $mail->send();
         echo 'Message has been sent';
 
+        header('Location: ../profile/user-dashboard.php');
+
         exit();
     } catch (Exception $e) {
         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";

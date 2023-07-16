@@ -18,8 +18,8 @@ if (!isset($_COOKIE['email'])) {
                         <img class="img rounded-circle" style="width: 200px; height: 200px;" src="<?php echo isset($user['locazione_immagine_profilo']) ? $user['locazione_immagine_profilo'] : './assets/profile/beard.png'; ?>" alt="">
                         <h4 class="py-3">
                             <?php
-                            if (isset($user['firstName'])) {
-                                printf('%s %s', $user['firstName'], $user['lastName']);
+                            if (isset($user['nome'])) {
+                                printf('%s %s', $user['nome'], $user['cognome']);
                             }
                             ?>
                         </h4>

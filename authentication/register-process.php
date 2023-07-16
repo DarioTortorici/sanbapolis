@@ -116,14 +116,14 @@ if (empty($errors)) {
             setcookie('email', $email, time() + 86400, '/'); // Cookie scade in 24 hours
 
             if ($userType == "allenatore") {
-                if(checkPending($con, $email)){
+                if(checkPending($con,"allenatori", $email)){
                     addCoach($con, $email, $societyCode);
                 }
                 else{
                     $errors[] = "Il tuo indirizzo mail non risulta tra gli inviti, contatta la tua società per risolvere il problema.";
                 }
             } elseif ($userType == "giocatore") {
-                if(checkPending($con, $email)){
+                if(checkPending($con,"giocatori", $email)){
                     addPlayer($con, $email, $teamCode);
                 }
                 else{
@@ -138,7 +138,6 @@ if (empty($errors)) {
                 addFan($con, $email);
             }
 
-            header('Location: ../profile/user-dashboard.php');
             exit();
         } else {
             print "Error while registration...!";

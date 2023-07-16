@@ -78,7 +78,7 @@ function validate_password($password)
 function validate_society_code($con, $societyCode)
 {
     try {
-        $query = "SELECT COUNT(*) as count FROM societa_sportive WHERE code = :societyCode";
+        $query = "SELECT COUNT(*) as count FROM societa_sportive WHERE codice = :societyCode";
         $stmt = $con->prepare($query);
         $stmt->bindParam(':societyCode', $societyCode);
         $stmt->execute();
@@ -104,7 +104,7 @@ function validate_society_code($con, $societyCode)
 function validate_team_code($con, $teamCode)
 {
     try {
-        $query = "SELECT COUNT(*) as count FROM squadre WHERE code = :teamCode";
+        $query = "SELECT COUNT(*) as count FROM squadre WHERE codice = :teamCode";
         $stmt = $con->prepare($query);
         $stmt->bindParam(':teamCode', $teamCode);
         $stmt->execute();
@@ -173,7 +173,7 @@ function addCoach($con, $email, $code)
         $stmt->bindParam(':email', $email);
         $stmt->execute();
 
-        $query = "SELECT id FROM squadre INNER JOIN societa_sportive as sp ON partita_iva = societa WHERE sp.code = :code";
+        $query = "SELECT id FROM squadre INNER JOIN societa_sportive as sp ON partita_iva = societa WHERE sp.codice = :codice";
         $stmt = $con->prepare($query);
         $stmt->bindParam(':code', $code);
         $stmt->execute();
@@ -209,7 +209,7 @@ function addPlayer($con, $email, $code)
         $stmt->bindParam(':email', $email);
         $stmt->execute();
 
-        $query = "SELECT id FROM squadre WHERE code = :code";
+        $query = "SELECT id FROM squadre WHERE codice = :code";
         $stmt = $con->prepare($query);
         $stmt->bindParam(':code', $code);
         $stmt->execute();
@@ -256,11 +256,10 @@ function addCompany($con, $email, $p_iva, $societyName, $address)
     $teamcode = generateUniqueCode();
 
     try {
-        $con->beginTransaction();
 
-        $query = "INSERT INTO societa_sportive (responsabile, partita_iva, nome, indirizzo, code) VALUES (:email, :iva, :nome, :addr, :code)";
+        $query = "INSERT INTO societa_sportive (responsabile, partita_iva, nome, indirizzo, codice) VALUES (:email, :iva, :nome, :addr, :code)";
         $stmt = $con->prepare($query);
-        $stmt->execute([
+        $result = $stmt->execute([
             ':email' => $email,
             ':iva' => $p_iva,
             ':nome' => $societyName,
@@ -268,18 +267,24 @@ function addCompany($con, $email, $p_iva, $societyName, $address)
             ':code' => $code
         ]);
 
-        $query = "INSERT INTO squadre (nome, societa, sport, code) VALUES (:nome, :iva, 'Basket', :teamcode)";
+        if (!$result) {
+            throw new Exception("Errore durante l'inserimento dei dati nella tabella societa_sportive.");
+        }
+
+        $query = "INSERT INTO squadre (nome, societa, sport, codice) VALUES (:nome, :iva, 'Basket', :teamcode)";
         $stmt = $con->prepare($query);
-        $stmt->execute([
+        $result = $stmt->execute([
             ':nome' => $societyName,
             ':iva' => $p_iva,
             ':teamcode' => $teamcode
         ]);
 
-        $con->commit();
+        if (!$result) {
+            throw new Exception("Errore durante l'inserimento dei dati nella tabella squadre.");
+        }
+
         return true;
     } catch (PDOException $e) {
-        $con->rollBack();
         echo "Error: " . $e->getMessage();
         return false;
     }
@@ -353,8 +358,9 @@ function get_user_info($con, $email)
     return $row;
 }
 
-function checkPending($con, $email) {
-    $query = "SELECT email FROM pending WHERE email = :email";
+function checkPending($con, $userType, $email) {
+    $tabella = 'inviti_'.$userType;
+    $query = "SELECT email FROM".$tabella."WHERE email = :email";
     $stmt = $con->prepare($query);
     $stmt->execute([':email' => $email]);
 
