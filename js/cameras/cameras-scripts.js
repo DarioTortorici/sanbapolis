@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ cameraRTSP: 'rtsp://' + username + ':'.password + '@' + cameraip + '/profile2/media.smp' })
+    body: JSON.stringify({ cameraRTSP: 'rtsp://' + username + ':' + password + '@' + cameraip + '/profile2/media.smp' })
   })
     .catch(function (error) {
       console.error('Errore durante la chiamata a ffmpegLive:', error);

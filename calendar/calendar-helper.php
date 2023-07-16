@@ -124,11 +124,14 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
     $data_ora_inizio = accorpaTime($startDate, $startTime);
     $data_ora_fine = accorpaTime($endDate, $endTime);
 
-    $sql = "INSERT INTO prenotazioni (`data_ora_inizio`,`data_ora_fine`, `autore_prenotazione`, `note`, `id_squadra`, `id_calendar_events`, `cams`) 
+    $sql = "INSERT INTO prenotazioni (`data_ora_inizio`,`data_ora_fine`, `autore_prenotazione`, `note`, `id_squadra`, `id_calendar_events`) 
         VALUES (?,?,?,?,?,?,?)";
     $query = $con->prepare($sql);
-    $query->execute([$data_ora_inizio, $data_ora_fine, $author, $note, $squadra['id'], $calendar_id, $cameras]);
+    $query->execute([$data_ora_inizio, $data_ora_fine, $author, $note, $squadra['id'], $calendar_id]);
     $prenotazioni_id = $con->lastInsertId();
+
+    // Salva le informazioni della telecamera
+    save_cameras($cameras, $calendar_id);
 
     if ($eventTypeBoolean) { // Partita
         $sport = getSportbyTeam($squadra);
@@ -226,10 +229,26 @@ function save_cameras($cameras, $id)
     $con = get_connection();
 
     if ($id) {
-        $sql = "UPDATE prenotazioni SET `cams`=? WHERE id_calendar_events=?";
+        $sql = "SELECT id FROM prenotazioni WHERE id_calendar_events=?";
         $query = $con->prepare($sql);
-        $query->execute([$cameras, $id]);
-        return $id;
+        $query->execute([$id]);
+        $prenotazioni_id = $query->fetchColumn();
+
+        $cams_array = explode(',', $cameras);
+
+        $sql = "INSERT INTO prenotazioni_telecamere (telecamera, prenotazione) VALUES (?,?)";
+        $query = $con->prepare($sql);
+        foreach ($cams_array as $camera) {
+            $query->execute([$camera, $prenotazioni_id]);
+        }
+
+        $sql = "INSERT INTO telecamere (prenotazione) VALUES (?)";
+        $query = $con->prepare($sql);
+        foreach ($cams_array as $camera) {
+            $query->execute([$camera, $prenotazioni_id]);
+        }
+
+        return $prenotazioni_id;
     } else {
         echo ("Errore, nessun ID specificato: " . $id);
     }
@@ -549,12 +568,24 @@ function getEventColor($sport)
 function getCameras($id)
 {
     $con = get_connection();
-    $query = "SELECT cams FROM prenotazioni WHERE id_calendar_events = :id";
-    $statement = $con->prepare($query);
-    $statement->bindParam(':id', $id);
-    $statement->execute();
-    $cams = $statement->fetch(PDO::FETCH_ASSOC);
-    return json_encode($cams);
+
+    $sql = "SELECT id FROM prenotazioni WHERE id_calendar_events=?";
+    $query = $con->prepare($sql);
+    $query->execute([$id]);
+    $prenotazioni_id = $query->fetchColumn();
+
+    // Controlla se $prenotazioni_id ha un valore valido prima di procedere
+    if ($prenotazioni_id) {
+        $query = "SELECT telecamera FROM telecamere_prenotazioni WHERE prenotazione = :id";
+        $statement = $con->prepare($query);
+        $statement->bindParam(':id', $prenotazioni_id);
+        $statement->execute();
+        $cams = $statement->fetchAll(PDO::FETCH_ASSOC);
+
+        return json_encode($cams);
+    } else {
+        return json_encode([]);
+    }
 }
 
 function getUserType()

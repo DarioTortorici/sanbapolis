@@ -16,15 +16,23 @@ function checkRecordtoStart()
 {
     $con = get_connection();
 
-    $sql = "SELECT *, COUNT(*) as count FROM prenotazioni WHERE data_ora_inizio >= DATE_SUB(NOW(), INTERVAL 5 MINUTE);";
+    $sql = "SELECT p.*, GROUP_CONCAT(t.indirizzo_ipv4) as IPv4 COUNT(*) as count 
+        FROM prenotazioni as p 
+        INNER JOIN telecamere_prenotazioni as tp ON tp.prenotazione = p.id 
+        INNER JOIN telecamere as t on t.id = tp.telecamera
+        WHERE p.data_ora_inizio >= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+        GROUP BY p.id"; // Utilizziamo GROUP BY per ottenere il conteggio e le telecamere associate a ciascuna prenotazione
     $query = $con->prepare($sql);
     $query->execute();
-    $result = $query->fetch(PDO::FETCH_ASSOC);
+    $result = $query->fetchAll(PDO::FETCH_ASSOC);
 
-    $count = $result['count'];
-    $squadra = $result['id_squadra'];
-    $cams = $result['cams'];
-    $data = $result['data_ora_inizio'];
+    foreach ($result as $row) {
+        $count = $row['count'];
+        $squadra = $row['id_squadra'];
+        $cams = $row['IPv4']; // $cams conterrà un elenco di telecamere separate da virgole
+        $data = $row['data_ora_inizio'];
+    }
+
 
     if ($count > 0) {
 
@@ -35,12 +43,10 @@ function checkRecordtoStart()
         $query->execute();
         $coaches = $query->fetchAll(PDO::FETCH_COLUMN); // Utilizziamo FETCH_COLUMN per ottenere solo la colonna 'email_allenatore'
 
-        //Retrieve ip selected cameras [TO DO]
-        $cameraRTSP = $cams; // Simulo $cams come array deglii indirizzi RTSP delle telecamere
-
         //ffmpeg parte video-rec per ogni telecamera
-        foreach ($cameraRTSP as $rtsp) {
-            ffmpegRec($rtsp,$squadra,$data);
+        foreach ($cams as $Camerartsp) {
+            $rtsp =  'rtsp://istar:password@'. $Camerartsp + '/profile2/media.smp';          
+            ffmpegRec($rtsp, $squadra, $data);
         }
 
         // Aggiorna permessi dello staff per ogni allenatore
@@ -62,16 +68,22 @@ function checkRecordtoEnd()
 {
     $con = get_connection();
 
-    $sql = "SELECT *, COUNT(*) as count FROM prenotazioni WHERE data_ora_fine <= DATE_SUB(NOW(), INTERVAL 5 MINUTE)";
+    $sql = "SELECT p.*, GROUP_CONCAT(tp.telecamera) as telecamere, COUNT(*) as count 
+        FROM prenotazioni as p 
+        INNER JOIN telecamere_prenotazioni as tp ON tp.prenotazione = p.id 
+        WHERE p.data_ora_fine <= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+        GROUP BY p.id";
     $query = $con->prepare($sql);
     $query->execute();
-    $result = $query->fetch(PDO::FETCH_ASSOC);
+    $result = $query->fetchAll(PDO::FETCH_ASSOC);
 
-    $count = $result['count'];
-    $squadra = $result['id_squadra'];
-    $cams = $result['cams'];
-    $data = $result['data_ora_inizio'];
-    $idCalendar = $result['id_calendar_events'];
+    foreach ($result as $row) {
+        $count = $row['count'];
+        $squadra = $row['id_squadra'];
+        $cams = $row['telecamere']; // $cams conterrà un elenco di telecamere separate da virgole
+        $data = $row['data_ora_inizio'];
+        $idCalendar = $row['id_calendar_events'];
+    }
 
     if ($count > 0) {
         //Retrieve allenatori
@@ -86,7 +98,7 @@ function checkRecordtoEnd()
 
         //ffmpeg parte video-rec per ogni telecamera
         foreach ($cameraRTSP as $rtsp) {
-            $directory = ffmpegStopRec($rtsp,$squadra,$data);
+            $directory = ffmpegStopRec($rtsp, $squadra, $data);
         }
 
         // Aggiorna permessi dello staff per ogni allenatore
@@ -99,14 +111,14 @@ function checkRecordtoEnd()
 
         //Imposta la directory dove sono presenti i file
         $sql = "UPDATE calendar_events SET url = :dir WHERE id = :idCalendar";
-            $query = $con->prepare($sql);
-            $query->bindParam(':dir', $directory);
-            $query->bindParam(':idCalendar', $idCalendar);
-            $query->execute();
+        $query = $con->prepare($sql);
+        $query->bindParam(':dir', $directory);
+        $query->bindParam(':idCalendar', $idCalendar);
+        $query->execute();
 
-            $query = "INSERT INTO video (locazione) VALUES (:dir)";
-            $stmt = $con->prepare($query);
-            $stmt->bindParam(':dir', $directory);
-            $stmt->execute();
+        $query = "INSERT INTO video (locazione) VALUES (:dir)";
+        $stmt = $con->prepare($query);
+        $stmt->bindParam(':dir', $directory);
+        $stmt->execute();
     }
 }
