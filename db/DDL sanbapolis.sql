@@ -83,7 +83,7 @@ CREATE TABLE manutentori(
 
 CREATE TABLE tag_rfid(
 	id INTEGER PRIMARY KEY
-)
+);
 
 CREATE TABLE video(
 	locazione VARCHAR(255) NOT NULL, /*255 in teoria lunghezza massima per una path in linux*/
