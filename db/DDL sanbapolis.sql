@@ -15,6 +15,7 @@ CREATE TABLE persone(
 	digest_password VARCHAR(255) NOT NULL, /*password_hash() fuinzione php: "...it is recommended to store the result in a database column that can expand beyond 60 characters (255 characters would be a good choice)" */
 	locazione_immagine_profilo VARCHAR(255),
 	verificato BOOLEAN NOT NULL,
+	data_ora_registrazione DATETIME NOT NULL,
 	
 	PRIMARY KEY(email)
 );
@@ -40,12 +41,17 @@ CREATE TABLE utenti(
 
 /*Tipi di persone*/
 
+CREATE TABLE tipi_allenatori (
+	nome_tipo VARCHAR(64) PRIMARY KEY
+);
+
 CREATE TABLE allenatori(
 	email VARCHAR(320) NOT NULL,
-	/*volendo si può aggiungere un attributo tipo (allenatore, viceallenatore...)*/
-	abilitato BOOLEAN NOT NULL,
+	tipo VARCHAR(64) NOT NULL,
+	privilegi_cam BOOLEAN NOT NULL,
 
 	CONSTRAINT fk_email_allenatore FOREIGN KEY (email) REFERENCES persone(email) ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT fk_tipo_allenatore FOREIGN KEY (tipo) REFERENCES tipi_allenatori(nome_tipo) ON UPDATE CASCADE ON DELETE CASCADE,
 	
 	PRIMARY KEY(email)
 );
@@ -284,7 +290,7 @@ CREATE TABLE prenotazioni_partite (
 );*/
 
 /*giocatori che fanno parte di una formazione*/
-CREATE TABLE formazione_giocatori (
+CREATE TABLE formazioni_giocatori (
 	id INTEGER AUTO_INCREMENT NOT NULL,
 	id_formazione INTEGER NOT NULL,
 	giocatore VARCHAR(320) NOT NULL,
