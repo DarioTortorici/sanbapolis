@@ -3,7 +3,7 @@ Internship @ UniTN, business logic development of the management system of the s
 
 # Come utilizzarlo
 ## Prerequisiti
-Per utilizzare il sistema bisogna avere apache, una database relazionale sql, wisenet server e composer
+Per utilizzare il sistema bisogna avere apache, una database relazionale sql e composer
 
 ## Scaricarlo
 Si può clonare l'intera repository direttamente nella propria cartella apache, solitamente `\var\www\html` oppure `xampp\htdocs` se si utilizza un ambiente in locale tramite xampp.
@@ -13,7 +13,10 @@ git clone https://github.com/SportTech-UniTN/Sanbapolis.git
 ```
 
 ## Impostazioni esterne alla repository
-È importante per assicurarsi che il sistema funzioni correttamente scaricare l'ultima versione del database ed impostare un _chronjob_ nel seguente modo:
+Bisogna apportare alcune aggiunte al vostro sistema per far si che il sistema funzioni correttamente
+### Chronjob
+#### Unix o MacOS
+Potete impostare un _chronjob_ nel seguente modo:
 1. aprire la tabella dei chronjob
 
 ``` bash
@@ -24,6 +27,14 @@ crontab -e
 ``` bash
 */5 * * * * php /var/www/html/modals/ABAC.php
 ```
+#### Windows
+Per ottenere un chronjob su Windows bisogna impostare un task scheduler nel seguente modo:
+1. Apri il "Task Scheduler" o "Utilità di pianificazione" cercandolo nel menu Start o nel Pannello di controllo.
+2. Click su "Create Basic Task" o "Create Task" nella sezione "Actions" che si trova sulla destra.
+3. Segui la procedura guidata per configurare il task, specificando il trigger di 5 minuti.
+
+### Database
+Popola il tuo database connettendoti al tuo mysql e lanciando gli script presenti nella cartella `db`
 
 # API Reference
 ## Get
