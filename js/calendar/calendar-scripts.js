@@ -78,9 +78,9 @@ function fetchCoachEvents(coach) {
  * @param {string} user_id - L'ID dell'utente a cui associare l'evento nel calendario.
  * @return {void}
 */
-function saveEvent(user_id) {
+function saveEvent(email) {
     var formData = $('#save-form').serialize();
-    formData += '&user_id=' + user_id;
+    formData += '&author=' + email;
 
     // Verifica se i campi richiesti sono stati compilati prima di inviare la richiesta
     if (validateForm()) {
@@ -341,8 +341,8 @@ function loadCalendar(data) {
         dateClick: function (info) {
             // Verifica il tipo di utente
             getUserType().then(function (userType) {
-                // Gestisci il click sulla data solo se l'usertype √® "societ√†" o "manutentore"
-                if (userType === 'societ√†' || userType === 'manutentore') {
+                // Gestisci il click sulla data solo se l'usertype √® "societ‡†" o "manutentore"
+                if (userType === 'societ‡†' || userType === 'manutentore') {
                     // Gestisce il click su una data nel calendario
                     createCalendarEvent(info.dateStr); // Triggera modal nuovo evento
                     handleDateClick(info); // Aggiunge automaticamente la data cliccata nel form
@@ -400,7 +400,7 @@ function updateEventModal(date, startTime, endTime, title, note, id) {
 /** Funzione per aggiornare i campi del modal di modifica evento.
  *
  * @param {string} title - Il titolo dell'evento.
- * @param {string} society - La societ√† relativa all'evento.
+ * @param {string} society - La societ‡† relativa all'evento.
  * @param {string} startDate - La data di inizio dell'evento.
  * @param {string} endDate - La data di fine dell'evento.
  * @param {string} startTime - L'orario di inizio dell'evento.

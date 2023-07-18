@@ -2,10 +2,8 @@
 <script src="../js/authentication/register.js"></script>
 <?php
 require('auth-helper.php');
-require('db_connection.php');
+require_once('db_connection.php');
 require ('../modals/email-handler.php');
-// Array per gli errori
-$errors = array();
 
 /**
  * Gestisce la validazione dei campi dell'utente e l'upload dell'immagine del profilo.
@@ -19,10 +17,13 @@ $errors = array();
  * @param string $_POST['dataNascita'] La data di nascita fornita dall'utente.
  * @param string $_POST['citta'] La citta fornita dall'utente.
  * @param string $_POST['telefono'] Il numero di telefono dell'utente
- * @param string $_POST['societyCode'] Il codice associato alla societÃ 
+ * @param string $_POST['societyCode'] Il codice associato alla società 
  * @param string $_POST['teamCode'] Il codice associato alla squadra
  * @param array $_FILES['profileUpload'] I dettagli dell'immagine del profilo da caricare.
  */
+// Array per gli errori
+$errors = array();
+
 $firstName = validate_input_text($_POST['firstName']);
 if (empty($firstName)) {
     $errors[] = "Hai dimenticato di inserire il tuo nome.";
@@ -87,7 +88,7 @@ if (empty($errors)) {
 
     try {
         // Crea una query
-        $query = "INSERT INTO persone (nome, cognome, email, data_nascita, citta, indirizzo, telefono, digest_password, locazione_immagine_profilo, data_registrazione,codice_attivazione,verificato)";
+        $query = "INSERT INTO persone (nome, cognome, email, data_nascita, citta, indirizzo, telefono, digest_password, locazione_immagine_profilo, data_ora_registrazione,codice_attivazione,verificato)";
         $query .= " VALUES (:firstName, :lastName, :email, :dataNascita, :citta, :indirizzo, :telefono, :password, :profileImage, NOW(), :code,0)";
 
         // Prepara la dichiarazione
@@ -120,7 +121,7 @@ if (empty($errors)) {
                     addCoach($con, $email, $societyCode);
                 }
                 else{
-                    $errors[] = "Il tuo indirizzo mail non risulta tra gli inviti, contatta la tua societÃ  per risolvere il problema.";
+                    $errors[] = "Il tuo indirizzo mail non risulta tra gli inviti, contatta la tua società  per risolvere il problema.";
                 }
             } elseif ($userType == "giocatore") {
                 if(checkPending($con,"giocatori", $email)){
@@ -129,7 +130,7 @@ if (empty($errors)) {
                 else{
                     $errors[] = "Il tuo indirizzo mail non risulta tra gli inviti, contatta il tuo allenatore per risolvere il problema.";
                 }
-            } elseif ($userType == "societÃ ") {
+            } elseif ($userType == "società ") {
                 $p_iva = $_POST['p_iva'];
                 $societyName = $_POST['societyName'];
                 $address = $_POST['address'];

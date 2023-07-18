@@ -9,7 +9,7 @@ checkRecordtoEnd();
 
 /**
  * Verifica se ci sono record nella tabella 'prenotazioni' che hanno raggiunto il loro orario di inizio
- * e aggiorna il campo 'cam_privileges' degli allenatori corrispondenti a 1.
+ * e aggiorna il campo 'privilegi_cam' degli allenatori corrispondenti a 1.
  * @return void
  */
 function checkRecordtoStart()
@@ -51,7 +51,7 @@ function checkRecordtoStart()
 
         // Aggiorna permessi dello staff per ogni allenatore
         foreach ($coaches as $coach) {
-            $sql = "UPDATE allenatori SET cam_privileges = 1 WHERE email = :allenatore";
+            $sql = "UPDATE allenatori SET privilegi_cam = 1 WHERE email = :allenatore";
             $query = $con->prepare($sql);
             $query->bindParam(':allenatore', $coach);
             $query->execute();
@@ -61,7 +61,7 @@ function checkRecordtoStart()
 
 /**
  * Verifica se ci sono record nella tabella 'prenotazioni' che hanno raggiunto il loro orario di fine
- * e aggiorna il campo 'cam_privileges' degli allenatori corrispondenti a 0.
+ * e aggiorna il campo 'privilegi_cam' degli allenatori corrispondenti a 0.
  * @return void
  */
 function checkRecordtoEnd()
@@ -103,7 +103,7 @@ function checkRecordtoEnd()
 
         // Aggiorna permessi dello staff per ogni allenatore
         foreach ($coaches as $coach) {
-            $sql = "UPDATE allenatori SET cam_privileges = 0 WHERE email = :allenatore";
+            $sql = "UPDATE allenatori SET privilegi_cam = 0 WHERE email = :allenatore";
             $query = $con->prepare($sql);
             $query->bindParam(':allenatore', $coach);
             $query->execute();

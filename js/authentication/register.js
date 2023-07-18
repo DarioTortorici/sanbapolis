@@ -1,5 +1,6 @@
 /** Gestisce la selezione del tipo di utente e mostra/nasconde le righe dei codici assegnazione.
  */
+
 function handleUserType() {
     // Ottieni il riferimento all'elemento select per il tipo di utente
     var userTypeSelect = document.getElementById('userType');
@@ -16,6 +17,13 @@ function handleUserType() {
     var userSocietyRow = document.getElementById('userSocietyRow');
     var pIvaInput = document.getElementById('p_iva');
     var societyNameInput = document.getElementById('societyName');
+
+    // Ottieni il riferimento al campo "Sport"
+    var sportInput = document.getElementById('sport');
+
+    // Ottieni il riferimento al campo "Tipo Allenatore"
+    var coachTypeInput = document.getElementById('coachType');
+
 
     // Verifica il valore selezionato nel tipo di utente
     if (userTypeSelect.value === 'giocatore') {
@@ -40,7 +48,8 @@ function handleUserType() {
         teamCodeInput.required = false;
         pIvaInput.required = false;
         societyNameInput.required = false;
-    } else if (userTypeSelect.value === 'società') {
+        coachTypeInput.required = true;
+    } else if (userTypeSelect.value === 'societa') {
         // Se il tipo di utente è "società", mostra la riga dell'IVA e del nome società
         societyCodeRow.style.display = 'none';
         teamCodeRow.style.display = 'none';
@@ -51,6 +60,7 @@ function handleUserType() {
         societyNameInput.required = true;
         teamCodeInput.required = false;
         societyCodeInput.required = false;
+        sportInput.required = true;
     } else {
         // Altrimenti, nascondi entrambe le righe
         teamCodeRow.style.display = 'none';
@@ -71,17 +81,17 @@ function handleUserType() {
  * @param {string} password - la password da controlalre.
  * @returns {boolean} - True se rispetta i vincoli, False altrimenti.
  */
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     var form = document.getElementById('reg-form');
     var passwordInput = document.getElementById('password');
     var passwordError = document.getElementById('confirm_error');
 
-    form.addEventListener('submit', function(event) {
+    form.addEventListener('submit', function (event) {
         if (!isPasswordValid(passwordInput.value)) {
             event.preventDefault(); // Impedisce l'invio del modulo
             passwordError.textContent = 'La password non rispetta i vincoli richiesti.';
             passwordError.style.display = 'block'; // Rendi visibile il messaggio di errore
-            
+
         }
     });
 });
@@ -95,14 +105,14 @@ document.addEventListener('DOMContentLoaded', function() {
  * @param {string} password - la password da controlalre.
  * @returns {boolean} - True se rispetta i vincoli, False altrimenti.
  */
-    function isPasswordValid(password) {
-        var minLength = 8;
-        var hasUppercase = /[A-Z]/.test(password);
-        var hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
+function isPasswordValid(password) {
+    var minLength = 8;
+    var hasUppercase = /[A-Z]/.test(password);
+    var hasSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(password);
 
-        return (
-            password.length >= minLength &&
-            hasUppercase &&
-            hasSpecialChar
-        );
-    }
+    return (
+        password.length >= minLength &&
+        hasUppercase &&
+        hasSpecialChar
+    );
+}

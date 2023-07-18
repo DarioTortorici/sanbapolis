@@ -1,16 +1,14 @@
 <?php
-// header.php
 include('../modals/header.php');
+require('auth-helper.php');
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require('register-process.php');
 }
 
-// Set default values from URL parameters
-$userType = $_GET['userType'] ?? '';
-$teamcode = $_GET['teamcode'] ?? '';
-$societycode = $_GET['societycode'] ?? '';
-
+$userType = $_POST['userType'] ?? '';
+$teamcode = $_POST['teamCode'] ?? '';
+$societycode = $_POST['societyCode'] ?? '';
 ?>
 
 <!-- registration scripts -->
@@ -69,7 +67,7 @@ $societycode = $_GET['societycode'] ?? '';
                         <div class="col">
                             <select required name="userType" id="userType" class="form-control" onchange="handleUserType()">
                                 <option value="">Select your role*</option>
-                                <option value="società" <?php if ($userType === 'società') echo 'selected'; ?>>Società</option>
+                                <option value="societa" <?php if ($userType === 'societ�') echo 'selected'; ?>>societa</option>
                                 <option value="allenatore" <?php if ($userType === 'allenatore') echo 'selected'; ?>>Allenatore</option>
                                 <option value="giocatore" <?php if ($userType === 'giocatore') echo 'selected'; ?>>Giocatore</option>
                                 <option value="altro" <?php if ($userType === 'tifoso') echo 'selected'; ?>>Tifoso</option>
@@ -79,8 +77,9 @@ $societycode = $_GET['societycode'] ?? '';
                     <div class="form-row my-4" id="userSocietyRow" style="display: none;">
                         <div class="col">
                             <input type="text" name="p_iva" id="p_iva" class="form-control" placeholder="Partita Iva*">
-                            <input type="text" name="societyName" id="societyName" class="form-control" placeholder="Nome Società*">
+                            <input type="text" name="societyName" id="societyName" class="form-control" placeholder="Nome Societ�*">
                             <input type="text" name="address" id="address" class="form-control" placeholder="Indirizzo">
+
                         </div>
                     </div>
                     <div class="form-row my-4" id="teamCodeRow" style="display: none;">
@@ -91,8 +90,12 @@ $societycode = $_GET['societycode'] ?? '';
                     </div>
                     <div class="form-row my-4" id="societyCodeRow" style="display: none;">
                         <div class="col">
-                            <input type="text" value="<?php echo $societycode;?>" name="societyCode" id="societyCode" class="form-control" placeholder="Society Code">
+                            <input type="text" value="<?php echo $societycode; ?>" name="societyCode" id="societyCode" class="form-control" placeholder="Society Code">
                             <p id="societyCodeError" class="error-message">Codice societario non esistente</p>
+                            <select name="coachType" id="coachType" class="form-control">
+                                <option value="" disabled selected>Tipo Allenatore*</option>
+                                <?php echo getCoachTypes(); ?>
+                            </select>
                         </div>
                     </div>
 

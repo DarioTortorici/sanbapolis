@@ -32,7 +32,7 @@ if (isset($_COOKIE['email'])) {
                         <li class="nav-item">
                             <a class="nav-link" href="../calendar/calendar.php">Calendario</a>
                         </li>
-                        <?php if (isset($user) && $user['cam_privileges'] == 1) : ?>
+                        <?php if (isset($user) && $user['privilegi_cam'] == 1) : ?>
                             <li class="nav-item">
                                 <a class="nav-link" href="../cameras/video_storage.php">Filmati</a>
                             </li>

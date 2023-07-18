@@ -38,16 +38,15 @@ function is_ajax_request()
  * @param string $startRecur La data di inizio della ricorrenza dell'evento nel formato "YYYY-MM-DD".
  * @param string $endRecur La data di fine della ricorrenza dell'evento nel formato "YYYY-MM-DD".
  * @param string $url L'URL associato all'evento.
- * @param string $society Il nome della societÃ  sportiva associata all'evento.
+ * @param string $society Il nome della società  sportiva associata all'evento.
  * @param string $sport Lo sport associato all'evento.
  * @param string $coach L'email dell'allenatore associato all'evento.
  * @param string $note Le note aggiuntive sull'evento.
  * @param string $eventType Il tipo di evento ("match" per una partita, "training" per un allenamento).
  * @param string $cameras Le telecamere preselezionate da attivare durante l'evento.
- * @param string $sessionId L'ID della sessione dell'utente che sta creando l'evento.
  * @return int L'ID dell'evento appena creato nel calendario.
  */
-function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras, $sessionId)
+function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras, $author)
 {
     // missing premium parameter `resourceEditable`=?, `resourceId`=?, `resourceIds`=?
 
@@ -121,7 +120,6 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
 
     $calendar_id = $con->lastInsertId();
 
-    $author = getAuthorEvent($sessionId);
     $data_ora_inizio = accorpaTime($startDate, $startTime);
     $data_ora_fine = accorpaTime($endDate, $endTime);
 
@@ -136,11 +134,9 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
 
     if ($eventTypeBoolean) { // Partita
         $sport = getSportbyTeam($squadra);
-        $event_id = save_match($data_ora_inizio, $data_ora_fine, $squadra, $sport);
-        save_prenotazioni_partita($prenotazioni_id, $event_id, $con);
+        $event_id = save_match($data_ora_inizio, $data_ora_fine, $squadra, $sport,$prenotazioni_id);
     } else { // Allenamento
-        $event_id = save_training($data_ora_inizio, $data_ora_fine, $squadra);
-        save_prenotazioni_allenamenti($prenotazioni_id, $event_id, $con);
+        $event_id = save_training($data_ora_inizio, $data_ora_fine, $squadra,$prenotazioni_id);
     }
 
     $userInfo = get_user_info($con,$_COOKIE['email']);
@@ -183,7 +179,7 @@ function accorpaTime($date, $time)
  * @param string|null $startRecur La data di inizio della ricorrenza del training.
  * @param string|null $endRecur La data di fine della ricorrenza del training.
  * @param string $url L'URL associato al training.
- * @param string $society Il nome dell'associazione/societÃ  associata al training.
+ * @param string $society Il nome dell'associazione/società  associata al training.
  * @param string $sport Lo sport del training.
  * @param string $coach Il nome dell'allenatore associato al training.
  * @param string $note La nota relativa al training.
@@ -267,14 +263,15 @@ function save_cameras($cameras, $id)
  * @param array $squadra L'array contenente l'ID della squadra associata all'allenamento.
  * @return int L'ID dell'allenamento appena inserito nel database.
  */
-function save_training($inizio, $fine, $squadra)
+function save_training($inizio, $fine, $squadra,$prenotazioni_id)
 {
     $con = get_connection();
-    $sql = "INSERT INTO allenamenti (`data_ora_inizio`, `data_ora_fine`, `id_squadra`) VALUES (:inizio, :fine, :squadra)";
+    $sql = "INSERT INTO allenamenti (`data_ora_inizio`, `data_ora_fine`, `id_squadra`, `prenotazione`) VALUES (:inizio, :fine, :squadra,:prenotazione)";
     $query = $con->prepare($sql);
     $query->bindParam(':inizio', $inizio);
     $query->bindParam(':fine', $fine);
     $query->bindParam(':squadra', $squadra['id']);
+    $query->bindParam(':prenotazione',$prenotazioni_id);
     $query->execute();
     return $con->lastInsertId();
 }
@@ -290,15 +287,16 @@ function save_training($inizio, $fine, $squadra)
  * @param string $sport Il nome dello sport associato alla partita.
  * @return int L'ID della partita appena inserita nel database.
  */
-function save_match($inizio, $fine, $squadra, $sport)
+function save_match($inizio, $fine, $squadra, $sport,$prenotazioni_id)
 {
     $con = get_connection();
-    $sql = "INSERT INTO partite (`data_ora_inizio`, `data_ora_fine`, `id_squadra_casa`, `sport`) VALUES (:inizio, :fine, :squadra, :sport)";
+    $sql = "INSERT INTO partite (`data_ora_inizio`, `data_ora_fine`, `id_squadra_casa`, `sport`,`prenotazione`) VALUES (:inizio, :fine, :squadra, :sport, :prenotazione)";
     $query = $con->prepare($sql);
     $query->bindParam(':inizio', $inizio);
     $query->bindParam(':fine', $fine);
     $query->bindParam(':squadra', $squadra['id']);
     $query->bindParam(':sport', $sport);
+    $query->bindParam(':prenotazione',$prenotazioni_id);
     $query->execute();
     return $con->lastInsertId();
 }
@@ -326,40 +324,6 @@ function getSportbyTeam($squadra)
 }
 
 /**
- * Salva l'associazione tra un evento di calendario e una prenotazione di partita.
- *
- * Registra nel database l'associazione tra l'ID dell'evento di calendario e l'ID della prenotazione di partita.
- *
- * @param int $calendar_id L'ID dell'evento di calendario.
- * @param int $event_id L'ID della prenotazione di partita.
- * @param PDO $con L'oggetto di connessione al database.
- * @return void
- */
-function save_prenotazioni_partita($calendar_id, $event_id, $con)
-{
-    $sql = "INSERT INTO prenotazioni_partite VALUES (?,?)";
-    $query = $con->prepare($sql);
-    $query->execute([$calendar_id, $event_id]);
-}
-
-/**
- * Salva l'associazione tra un evento di calendario e una prenotazione di allenamento.
- *
- * Registra nel database l'associazione tra l'ID dell'evento di calendario e l'ID della prenotazione di allenamento.
- *
- * @param int $calendar_id L'ID dell'evento di calendario.
- * @param int $event_id L'ID della prenotazione di allenamento.
- * @param PDO $con L'oggetto di connessione al database.
- * @return void
- */
-function save_prenotazioni_allenamenti($calendar_id, $event_id, $con)
-{
-    $sql = "INSERT INTO prenotazioni_allenamenti VALUES (?,?)";
-    $query = $con->prepare($sql);
-    $query->execute([$calendar_id, $event_id]);
-}
-
-/**
  * Elimina un allenamento e tutti i suoi dati correlati dal database.
  *
  * @param int $id_calendar_events ID dell'evento del calendario relativo all'allenamento da eliminare.
@@ -378,22 +342,10 @@ function delete_training($id_calendar_events)
         $query_search_prenotazioni->execute([$id_calendar_events]);
         $id_prenotazioni = $query_search_prenotazioni->fetchColumn();
 
-        // Cerca id allenamento
-        $sql_search_prenotazioni_allenamenti = "SELECT id_allenamento FROM prenotazioni_allenamenti WHERE id_prenotazione = ?";
-        $query_search_prenotazioni_allenamenti = $con->prepare($sql_search_prenotazioni_allenamenti);
-        $query_search_prenotazioni_allenamenti->execute([$id_prenotazioni]);
-        $id_allenamento = $query_search_prenotazioni_allenamenti->fetchColumn();
-
         // Elimina le righe figlie nella tabella "allenamenti"
-        $sql_delete_allenamenti = "DELETE FROM allenamenti WHERE id = ?";
+        $sql_delete_allenamenti = "DELETE FROM allenamenti WHERE prenotazione = ?";
         $query_delete_allenamenti = $con->prepare($sql_delete_allenamenti);
-        $query_delete_allenamenti->execute([$id_allenamento]);
-
-        // Elimina le righe figlie nella tabella "prenotazioni_allenamenti"
-        $sql_delete_prenotazioni_allenamenti = "DELETE FROM prenotazioni_allenamenti WHERE id_prenotazione = ?";
-        $query_delete_prenotazioni_allenamenti = $con->prepare($sql_delete_prenotazioni_allenamenti);
-        $query_delete_prenotazioni_allenamenti->execute([$id_prenotazioni]);
-
+        $query_delete_allenamenti->execute([$id_prenotazioni]);
 
         // Elimina le righe figlie nella tabella "prenotazioni"
         $sql_delete_prenotazioni = "DELETE FROM prenotazioni WHERE id_calendar_events = ?";
@@ -418,11 +370,11 @@ function delete_training($id_calendar_events)
 
 
 /**
- * Ottiene l'ID della squadra associata a una determinata societÃ  sportiva.
+ * Ottiene l'ID della squadra associata a una determinata società  sportiva.
  *
- * Recupera dal database l'ID della squadra che Ã¨ associata alla societÃ  sportiva specificata.
+ * Recupera dal database l'ID della squadra che Ã¨ associata alla società  sportiva specificata.
  *
- * @param string $society Il nome della societÃ  sportiva.
+ * @param string $society Il nome della società  sportiva.
  * @return array|false L'array associativo contenente l'ID della squadra, o false in caso di errore.
  */
 function getSquadra($society)
@@ -433,25 +385,6 @@ function getSquadra($society)
     $query->execute([$society]);
     $squadra = $query->fetch(PDO::FETCH_ASSOC);
     return $squadra;
-}
-
-/**
- * Ottiene l'autore dell'evento corrispondente all'ID della sessione specificato.
- *
- * Recupera dal database l'email dell'autore dell'evento associato all'ID della sessione fornito.
- *
- * @param string $sessionId L'ID della sessione dell'utente.
- * @return string L'email dell'autore dell'evento.
- */
-function getAuthorEvent($sessionId)
-{
-    $con = get_connection();
-    $sql = "SELECT email FROM persone WHERE session_id = :session_id";
-    $statement = $con->prepare($sql);
-    $statement->bindParam(':session_id', $sessionId);
-    $statement->execute();
-    $author = $statement->fetchColumn(); // Ottieni solo il valore della colonna 'email'
-    return $author;
 }
 
 
@@ -506,7 +439,7 @@ function getInfoEvent($id)
 function getMatches()
 {
     $con = get_connection();
-    $query = "SELECT ce.* FROM calendar_events ce INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events INNER JOIN prenotazioni_partite on ei.id = prenotazioni_partite.id_prenotazione";
+    $query = "SELECT ce.* FROM calendar_events ce INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events";
     $statement = $con->query($query);
     $events = $statement->fetchAll(PDO::FETCH_ASSOC);
     return json_encode($events);
@@ -628,12 +561,12 @@ function currentDate()
 }
 
 /**
- * Ottiene elenco delle societÃ  sportive dal database.
+ * Ottiene elenco delle società  sportive dal database.
  *
- * Recupera dal database l'elenco dei nomi delle societÃ  sportive e li restituisce come opzioni
+ * Recupera dal database l'elenco dei nomi delle società  sportive e li restituisce come opzioni
  * per un elemento di selezione HTML.
  *
- * @return string Le opzioni HTML per l'elemento di selezione delle societÃ  sportive.
+ * @return string Le opzioni HTML per l'elemento di selezione delle società  sportive.
  */
 function getSocieties()
 {
@@ -684,12 +617,12 @@ if (isset($_GET['action'])) {
         $cameras = json_encode($cameras);
 
         //GetAuthor parametro necessario
-        $user_id = isset($_POST['user_id']) ? $_POST['user_id'] : null;
+        $author = isset($_POST['author']) ? $_POST['author'] : null;
 
         //Sono obbligatori society e startdate ed effettuiamo il controllo che esistano
         if ($society && $startDate) {
             $id = null;
-            $id = save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras, $user_id);
+            $id = save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras, $author);
             echo json_encode(array('status' => 'success', 'id' => $id));
         } else {
             echo json_encode(array('status' => 'error', 'message' => 'Missing required fields'));
@@ -785,7 +718,7 @@ if (isset($_GET['action'])) {
         if ($id) {
             echo getDatetimeEvent($id);
         }
-    } elseif ($action == 'get-user-type') { // recupero il datetime dell'evento
+    } elseif ($action == 'get-user-type') { // recupero il tipo di utente
         header('Content-Type: application/json');
         $response = getUserType();
         echo json_encode($response);

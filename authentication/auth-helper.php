@@ -1,5 +1,5 @@
 <?php
-
+require_once('db_connection.php');
 /**
  *  Accetta una stringa $textValue come input e la valida per assicurarsi che non sia vuota. 
  *  Se la stringa non Ã¨ vuota, viene effettuata una pulizia dei caratteri illegali tramite la funzione 
@@ -69,7 +69,7 @@ function validate_password($password)
 }
 
 /**
- * Verifica se il codice societario esiste nel database delle societÃ  sportive.
+ * Verifica se il codice societario esiste nel database delle società  sportive.
  *
  * @param PDO $con La connessione al database.
  * @param string $societyCode Il codice societario da verificare.
@@ -168,7 +168,7 @@ function upload_profile($path, $file)
 function addCoach($con, $email, $code)
 {
     try {
-        $query = "INSERT INTO allenatori (email, cam_privileges) VALUES (:email, 0)";
+        $query = "INSERT INTO allenatori (email, privilegi_cam) VALUES (:email, 0)";
         $stmt = $con->prepare($query);
         $stmt->bindParam(':email', $email);
         $stmt->execute();
@@ -324,7 +324,7 @@ function get_user_info($con, $email)
     a.email AS allenatore_email,
     m.email AS manutentore_email,
     s.*,
-    cam_privileges 
+    privilegi_cam 
     FROM persone AS p
     LEFT JOIN societa_sportive AS s ON p.email = s.responsabile
     LEFT JOIN allenatori AS a ON p.email = a.email
@@ -350,7 +350,7 @@ function get_user_info($con, $email)
     } else if (!empty($row['manutentore_email'])) {
         $row['userType'] = 'manutentore';
     } else if (!empty($row['responsabile'])) {
-        $row['userType'] = 'societÃ ';
+        $row['userType'] = 'società ';
     } else {
         $row['userType'] = 'tifoso';
     }
@@ -377,4 +377,36 @@ function generateActivationCode() {
         $activationCode .= $characters[$randomIndex];
     }
     return $activationCode;
+}
+
+function getCoachTypes()
+{
+    $con = get_connection();
+    $query = "SELECT nome_tipo FROM tipi_allenatori";
+    $stmt = $con->query($query);
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $options = '';
+    foreach ($result as $row) {
+        $tipoCoach = $row['nome_tipo'];
+        $options .= "<option value='$tipoCoach'>$tipoCoach</option>";
+    }
+
+    return $options;
+}
+
+function getSports()
+{
+    $con = get_connection();
+    $query = "SELECT nome_sport FROM sport";
+    $stmt = $con->query($query);
+    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $options = '';
+    foreach ($result as $row) {
+        $sport = $row['nome_sport'];
+        $options .= "<option value='$sport'>$sport</option>";
+    }
+
+    return $options;
 }

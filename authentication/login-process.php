@@ -1,6 +1,5 @@
 <?php
 require("auth-helper.php");
-require('db_connection.php');
 
 $error = array();
 

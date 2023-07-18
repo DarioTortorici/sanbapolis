@@ -8,7 +8,6 @@ include "auth-helper.php";
 <?php
 // Inizializza l'array dell'utente
 $user = array();
-require('db_connection.php');
 
 // Controlla se è stata impostata la variabile di sessione per l'ID dell'utente
 if (isset($_SESSION['userID'])) {
