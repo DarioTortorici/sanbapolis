@@ -175,7 +175,7 @@ function ShowForEditEvent() {
             id: id
         }, function (info) {
 
-            updateEventEditModal(event.title, info.society, event.start, event.end, event.startTime, event.endTime, info.coach, event.url, info.note, event.groupID, event.id);
+            updateEventEditModal(event.title, info.id_squadra, event.start, event.end, event.startTime, event.endTime, info.autore_prenotazione, event.url, info.nota, event.groupID, event.id);
 
             // Apre il modal
             $.magnificPopup.open({
@@ -258,13 +258,14 @@ function editEvent() {
  */
 function saveCameras() {
     // Ottieni l'ID delle telecamere
-    var eventId = document.getElementById('id-cams').value;
+    var eventId = document.getElementById('id-cams').innerText;
 
     // Ottieni le telecamere selezionate come un array
     var selectedCameras = $('input[name="camera[]"]:checked').map(function () {
         return $(this).val();
     }).get();
 
+    console.log(eventId);
     // Effettua la chiamata AJAX per salvare le telecamere
     jQuery.ajax({
         url: 'http://localhost/calendar/calendar-helper.php?action=save-cams',
@@ -277,7 +278,7 @@ function saveCameras() {
         success: function (response) {
             // Se la chiamata ha avuto successo, aggiorna gli eventi e chiudi il modal
             if (response.status == 'success') {
-                fetchEvents();
+                //fetchEvents();
                 $.magnificPopup.close();
             }
         },
@@ -435,7 +436,6 @@ function updateEventEditModal(title, society, startDate, endDate, startTime, end
     // Aggiorna le informazioni evento
     document.getElementById("nome-evento").innerText = title;
     document.getElementById("selected-option").value = society;
-    document.getElementById("coach-edit").value = coach;
 
     // Aggiorna il titolo e l'URL dell'evento
     document.getElementById("url-edit").value = url;
@@ -455,11 +455,10 @@ function updateEventEditModal(title, society, startDate, endDate, startTime, end
  */
 function updateAddcameras(response, id) {
     // Imposta l'ID delle telecamere
-    document.getElementById("id-cams").value = id;
+    document.getElementById("id-cams").innerText = id;
 
-    // Decodifica il JSON e converte la stringa in un array di stringhe
-    var selectedCameras = JSON.parse(response.cams).map(function (camera) {
-        return String(camera);
+    var selectedCameras = response.map(function (item) {
+        return item.telecamera.toString(); // Convert to string to ensure correct comparison
     });
 
     // Seleziona le checkbox corrispondenti alle telecamere preselezionate
@@ -467,9 +466,12 @@ function updateAddcameras(response, id) {
     checkboxes.forEach(function (checkbox) {
         if (selectedCameras.includes(checkbox.value)) {
             checkbox.checked = true;
+        } else {
+            checkbox.checked = false; // Ensure unchecked if not found in the response
         }
     });
 }
+
 
 /** Funzione per validare il modulo eventi.
  * 

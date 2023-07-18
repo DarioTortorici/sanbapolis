@@ -16,7 +16,7 @@ if (!isset($_COOKIE['email'])) {
 
 $userType = $user['userType']; // Ottenere il tipo di utente dalla variabile $user['userType']
 
-if ($userType == "allenatore" || $userType == "società ") {
+if ($userType == "allenatore" || $userType == "società") {
     // Chiamata alla funzione JavaScript per il calendario degli allenatori
     echo '<script>';
     echo 'fetchCoachEvents("' . $user['email'] . '");';
@@ -55,9 +55,9 @@ if ($userType == "allenatore" || $userType == "società ") {
     <div style="min-height: 250px;">
         <form id="save-form">
             <input type="hidden" name="id" />
-            società :
+            Societa:
             <select name="society" required>
-                <option value="" disabled selected>Scegli una società </option>
+                <option value="" disabled selected>Scegli una societa</option>
                 <?php echo getSocieties(); ?>
             </select>
             Evento:
@@ -120,7 +120,7 @@ if ($userType == "allenatore" || $userType == "società ") {
                 Tutto il giorno: <input type="checkbox" name="allDay" placeholder="allday"><br>
             </div>
 
-            <button type="button" id="save-event" onclick="saveEvent(<?php echo $_COOKIE['email']; ?>)">Salva</button>
+            <button type="button" id="save-event" onclick="saveEvent('<?php echo $_COOKIE['email']; ?>')">Salva</button>
         </form>
     </div>
     <div id="error-message" style="color: red; display: none;">Si prega di compilare tutti i campi obbligatori.</div>
@@ -164,10 +164,9 @@ if ($userType == "allenatore" || $userType == "società ") {
         <form id="edit-form">
             <input type="text" id="id-edit" style="display: none;"></p>
             <select name="society-edit" required>
-                <option value="" id="selected-option" selected>Scegli una società </option>
+                <option value="" id="selected-option" selected>Scegli una società</option>
                 <?php echo getSocieties(); ?>
             </select>
-            <input type="text" name="society-edit" id="society-edit" placeholder="società *" required /><br>
             <label for="start-date-edit">Data inizio:</label>
             <input id="start-date-edit" type="date" name="start-date-edit" placeholder="Data inizio" autocomplete="off" required /><br>
             <label for="end-date-edit">Data fine:</label>

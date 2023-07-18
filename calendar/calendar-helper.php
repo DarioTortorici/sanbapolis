@@ -40,13 +40,12 @@ function is_ajax_request()
  * @param string $url L'URL associato all'evento.
  * @param string $society Il nome della società  sportiva associata all'evento.
  * @param string $sport Lo sport associato all'evento.
- * @param string $coach L'email dell'allenatore associato all'evento.
  * @param string $note Le note aggiuntive sull'evento.
  * @param string $eventType Il tipo di evento ("match" per una partita, "training" per un allenamento).
  * @param string $cameras Le telecamere preselezionate da attivare durante l'evento.
  * @return int L'ID dell'evento appena creato nel calendario.
  */
-function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras, $author)
+function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $note, $eventType, $cameras, $author)
 {
     // missing premium parameter `resourceEditable`=?, `resourceId`=?, `resourceIds`=?
 
@@ -123,8 +122,8 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
     $data_ora_inizio = accorpaTime($startDate, $startTime);
     $data_ora_fine = accorpaTime($endDate, $endTime);
 
-    $sql = "INSERT INTO prenotazioni (`data_ora_inizio`,`data_ora_fine`, `autore_prenotazione`, `note`, `id_squadra`, `id_calendar_events`) 
-        VALUES (?,?,?,?,?,?,?)";
+    $sql = "INSERT INTO prenotazioni (`data_ora_inizio`,`data_ora_fine`, `autore_prenotazione`, `nota`, `id_squadra`, `id_calendar_events`) 
+        VALUES (?,?,?,?,?,?)";
     $query = $con->prepare($sql);
     $query->execute([$data_ora_inizio, $data_ora_fine, $author, $note, $squadra['id'], $calendar_id]);
     $prenotazioni_id = $con->lastInsertId();
@@ -206,7 +205,7 @@ function edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $ur
         $query = $con->prepare($sql);
         $query->execute([$groupId, $startDate, $endDate, $startTime, $endTime, $startRecur, $endRecur, $url, $id]);
 
-        $sql = "UPDATE prenotazioni SET `id_squadra`=?, `data_ora_inizio`=?, `data_ora_fine`=?, `note`=? WHERE id_calendar_events=?";
+        $sql = "UPDATE prenotazioni SET `id_squadra`=?, `data_ora_inizio`=?, `data_ora_fine`=?, `nota`=? WHERE id_calendar_events=?";
         $query = $con->prepare($sql);
         $query->execute([$squadra['id'], $startDate, $endDate, $note, $id]);
 
@@ -232,16 +231,11 @@ function save_cameras($cameras, $id)
         $query = $con->prepare($sql);
         $query->execute([$id]);
         $prenotazioni_id = $query->fetchColumn();
+        delete_cameras($prenotazioni_id);
+        $arrayInt = json_decode($cameras);
+        $cams_array = array_map('intval', $arrayInt);
 
-        $cams_array = explode(',', $cameras);
-
-        $sql = "INSERT INTO prenotazioni_telecamere (telecamera, prenotazione) VALUES (?,?)";
-        $query = $con->prepare($sql);
-        foreach ($cams_array as $camera) {
-            $query->execute([$camera, $prenotazioni_id]);
-        }
-
-        $sql = "INSERT INTO telecamere (prenotazione) VALUES (?)";
+        $sql = "INSERT INTO telecamere_prenotazioni (telecamera, prenotazione) VALUES (?,?)";
         $query = $con->prepare($sql);
         foreach ($cams_array as $camera) {
             $query->execute([$camera, $prenotazioni_id]);
@@ -250,6 +244,19 @@ function save_cameras($cameras, $id)
         return $prenotazioni_id;
     } else {
         echo ("Errore, nessun ID specificato: " . $id);
+    }
+}
+
+function delete_cameras($prenotazioni_id)
+{
+    $con = get_connection();
+
+    if ($prenotazioni_id) {
+        $sql = "DELETE FROM telecamere_prenotazioni WHERE prenotazione=?";
+        $query = $con->prepare($sql);
+        $query->execute([$prenotazioni_id]);
+    } else {
+        echo ("Errore, nessun ID specificato: " . $prenotazioni_id);
     }
 }
 
@@ -471,7 +478,7 @@ function getCoachEvents($coach)
 function getNote($id)
 {
     $con = get_connection();
-    $query = "SELECT note FROM prenotazioni WHERE id_calendar_events = :id";
+    $query = "SELECT nota FROM prenotazioni WHERE id_calendar_events = :id";
     $statement = $con->prepare($query);
     $statement->bindParam(':id', $id);
     $statement->execute();
@@ -610,7 +617,6 @@ if (isset($_GET['action'])) {
         //tabella prenotazioni
         $society = isset($_POST['society']) ? $_POST['society'] : null;
         $sport = isset($_POST['sport']) ? $_POST['sport'] : null;
-        $coach = isset($_POST['coach']) ? $_POST['coach'] : null;
         $note = isset($_POST['description']) ? $_POST['description'] : null;
         $eventType = isset($_POST['event_type']) ? $_POST['event_type'] : null;
         $cameras = isset($_POST['camera']) ? $_POST['camera'] : null;
@@ -622,7 +628,7 @@ if (isset($_GET['action'])) {
         //Sono obbligatori society e startdate ed effettuiamo il controllo che esistano
         if ($society && $startDate) {
             $id = null;
-            $id = save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $coach, $note, $eventType, $cameras, $author);
+            $id = save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $note, $eventType, $cameras, $author);
             echo json_encode(array('status' => 'success', 'id' => $id));
         } else {
             echo json_encode(array('status' => 'error', 'message' => 'Missing required fields'));
@@ -641,7 +647,7 @@ if (isset($_GET['action'])) {
         if ($id) {
             $note = getNote($id);
             if ($note) {
-                echo $note['note'];
+                echo $note['nota'];
             } else {
                 return " ";
             }
