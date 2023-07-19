@@ -66,8 +66,8 @@ $societycode = $_POST['societyCode'] ?? '';
                     <div class="form-row my-4">
                         <div class="col">
                             <select required name="userType" id="userType" class="form-control" onchange="handleUserType()">
-                                <option value="">Select your role*</option>
-                                <option value="societa" <?php if ($userType === 'societ�') echo 'selected'; ?>>societa</option>
+                                <option value="" selected disabled>Seleziona il tuo ruolo*</option>
+                                <option value="società" <?php if ($userType === 'società') echo 'selected'; ?>>Società</option>
                                 <option value="allenatore" <?php if ($userType === 'allenatore') echo 'selected'; ?>>Allenatore</option>
                                 <option value="giocatore" <?php if ($userType === 'giocatore') echo 'selected'; ?>>Giocatore</option>
                                 <option value="altro" <?php if ($userType === 'tifoso') echo 'selected'; ?>>Tifoso</option>
@@ -77,9 +77,13 @@ $societycode = $_POST['societyCode'] ?? '';
                     <div class="form-row my-4" id="userSocietyRow" style="display: none;">
                         <div class="col">
                             <input type="text" name="p_iva" id="p_iva" class="form-control" placeholder="Partita Iva*">
-                            <input type="text" name="societyName" id="societyName" class="form-control" placeholder="Nome Societ�*">
+                            <input type="text" name="societyName" id="societyName" class="form-control" placeholder="Nome Società*">
                             <input type="text" name="address" id="address" class="form-control" placeholder="Indirizzo">
-
+                            <p id="societyCodeError" class="error-message">Codice societario non esistente</p>
+                            <select name="sportType" id="sportType" class="form-control">
+                                <option value="" disabled selected>Tipo Sport*</option>
+                                <?php echo getSports(); ?>
+                            </select>
                         </div>
                     </div>
                     <div class="form-row my-4" id="teamCodeRow" style="display: none;">

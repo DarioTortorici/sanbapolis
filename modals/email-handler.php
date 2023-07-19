@@ -27,14 +27,27 @@ if (isset($_POST['invited-email'])) {
 
 function insertInvitedEmail($userType, $invitedEmail)
 {
-    $con = get_connection();
-    $tabella = 'inviti_'.$userType;
-    if ($userType == "allenatori") {
-        $query = "INSERT INTO ".$tabella." (email) VALUES (:email)";
+    // Verifica se il $userType è valido
+    $validUserTypes = array("allenatori", "giocatori");
+    if (!in_array($userType, $validUserTypes)) {
+        throw new InvalidArgumentException("Tipo di utente non valido.");
+    }
 
-        $stmt = $con->prepare($query);
-        $stmt->bindParam(':email', $invitedEmail);
+    $con = get_connection();
+    $tabella = 'inviti_' . $userType;
+
+    // Utilizzo della stessa query per entrambi i tipi di utente
+    $query = "INSERT INTO " . $tabella . " (email) VALUES (:email)";
+    $stmt = $con->prepare($query);
+    $stmt->bindParam(':email', $invitedEmail);
+
+    try {
         $stmt->execute();
+        return true; // Ritorno true in caso di successo
+    } catch (PDOException $e) {
+        // Puoi gestire l'errore in base alle tue esigenze, es. log del messaggio di errore
+        error_log("Errore nell'inserimento dell'email: " . $e->getMessage());
+        return false; // Ritorno false in caso di errore
     }
 }
 

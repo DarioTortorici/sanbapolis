@@ -69,7 +69,7 @@ function validate_password($password)
 }
 
 /**
- * Verifica se il codice societario esiste nel database delle societ� sportive.
+ * Verifica se il codice societario esiste nel database delle società sportive.
  *
  * @param PDO $con La connessione al database.
  * @param string $societyCode Il codice societario da verificare.
@@ -165,30 +165,39 @@ function upload_profile($path, $file)
  * @param string $code Codice della squadra
  * @return bool True se l'inserimento è avvenuto con successo, altrimenti False
  */
-function addCoach($con, $email, $code)
+function addCoach($con, $email, $coachtype, $code)
 {
     try {
-        $query = "INSERT INTO allenatori (email, privilegi_cam) VALUES (:email, 0)";
+        // Valida i dati di input
+        if (empty($email) || empty($coachtype) || empty($code)) {
+            throw new InvalidArgumentException('I parametri non possono essere vuoti.');
+        }
+
+        // Inserisci l'allenatore nella tabella "allenatori"
+        $query = "INSERT INTO allenatori (`email`, `tipo`, `privilegi_cam`) VALUES (:coach_email, :coachtype, 0)";
         $stmt = $con->prepare($query);
-        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':coach_email', $email);
+        $stmt->bindParam(':coachtype', $coachtype);
         $stmt->execute();
 
-        $query = "SELECT id FROM squadre INNER JOIN societa_sportive as sp ON partita_iva = societa WHERE sp.codice = :codice";
+        // Ottieni l'ID della squadra associata al codice società
+        $query = "SELECT id FROM squadre INNER JOIN societa_sportive as sp ON partita_iva = societa WHERE sp.codice = :code";
         $stmt = $con->prepare($query);
         $stmt->bindParam(':code', $code);
         $stmt->execute();
         $row = $stmt->fetch();
         $id = $row['id'];
 
-        $query = "INSERT INTO allenatori_squadre (email_allenatore, id_squadra) VALUES (:email, :id)";
+        // Associa l'allenatore alla squadra nella tabella "allenatori_squadre"
+        $query = "INSERT INTO allenatori_squadre (`email_allenatore`, `id_squadra`, `data_inizio`) VALUES (:coach_email, :id, NOW())";
         $stmt = $con->prepare($query);
-        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':coach_email', $email);
         $stmt->bindParam(':id', $id);
         $stmt->execute();
 
         return true;
     } catch (PDOException $e) {
-        echo "Error: " . $e->getMessage();
+        throw new Exception("Errore durante l'aggiunta dell'allenatore: " . $e->getMessage());
         return false;
     }
 }
@@ -204,11 +213,18 @@ function addCoach($con, $email, $code)
 function addPlayer($con, $email, $code)
 {
     try {
+        // Verifica la validità dell'email e del codice
+        if (empty($email) || empty($code)) {
+            throw new InvalidArgumentException('I parametri non possono essere vuoti.');
+        }
+
+        // Inserisci il giocatore nella tabella "giocatori"
         $query = "INSERT INTO giocatori (email) VALUES (:email)";
         $stmt = $con->prepare($query);
         $stmt->bindParam(':email', $email);
         $stmt->execute();
 
+        // Ottieni l'ID della squadra associata al codice squadra
         $query = "SELECT id FROM squadre WHERE codice = :code";
         $stmt = $con->prepare($query);
         $stmt->bindParam(':code', $code);
@@ -216,7 +232,8 @@ function addPlayer($con, $email, $code)
         $row = $stmt->fetch();
         $id = $row['id'];
 
-        $query = "INSERT INTO giocatori_squadre (email_giocatore, id_squadra) VALUES (:email, :id)";
+        // Associa il giocatore alla squadra nella tabella "giocatori_squadre"
+        $query = "INSERT INTO giocatori_squadre (email_giocatore, id_squadra, data_inizio) VALUES (:email, :id, NOW())";
         $stmt = $con->prepare($query);
         $stmt->bindParam(':email', $email);
         $stmt->bindParam(':id', $id);
@@ -224,7 +241,9 @@ function addPlayer($con, $email, $code)
 
         return true;
     } catch (PDOException $e) {
-        echo "Error: " . $e->getMessage();
+        // In caso di errore rollback
+        $con->rollback();
+        throw new Exception("Errore durante l'aggiunta del giocatore: " . $e->getMessage());
         return false;
     }
 }
@@ -250,7 +269,7 @@ function addFan($con, $email)
     }
 }
 
-function addCompany($con, $email, $p_iva, $societyName, $address)
+function addCompany($con, $email, $p_iva, $societyName, $sport, $address)
 {
     $code = generateUniqueCode();
     $teamcode = generateUniqueCode();
@@ -271,12 +290,13 @@ function addCompany($con, $email, $p_iva, $societyName, $address)
             throw new Exception("Errore durante l'inserimento dei dati nella tabella societa_sportive.");
         }
 
-        $query = "INSERT INTO squadre (nome, societa, sport, codice) VALUES (:nome, :iva, 'Basket', :teamcode)";
+        $query = "INSERT INTO squadre (nome, societa, sport, codice) VALUES (:nome, :iva, :sport , :teamcode)";
         $stmt = $con->prepare($query);
         $result = $stmt->execute([
             ':nome' => $societyName,
             ':iva' => $p_iva,
-            ':teamcode' => $teamcode
+            ':teamcode' => $teamcode,
+            ':sport' => $sport
         ]);
 
         if (!$result) {
@@ -297,7 +317,7 @@ function generateUniqueCode()
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $code = '';
 
-    for ($i = 0; $i < 5; $i++) {
+    for ($i = 0; $i < 6; $i++) {
         $randomIndex = rand(0, strlen($characters) - 1);
         $code .= $characters[$randomIndex];
     }
@@ -319,19 +339,12 @@ function generateUniqueCode()
  */
 function get_user_info($con, $email)
 {
-    $query = "SELECT p.*,
-    g.email AS giocatore_email,
-    a.email AS allenatore_email,
-    m.email AS manutentore_email,
-    s.*,
-    privilegi_cam 
-    FROM persone AS p
-    LEFT JOIN societa_sportive AS s ON p.email = s.responsabile
-    LEFT JOIN allenatori AS a ON p.email = a.email
-    LEFT JOIN giocatori AS g ON p.email = g.email
-    LEFT JOIN manutentori AS m ON p.email = m.email
-    WHERE p.email = :email";
-
+    $query = "SELECT p.*, p.nome as 'username', g.email AS giocatore_email, 
+            a.email AS allenatore_email, m.email AS manutentore_email, s.*, privilegi_cam 
+            FROM persone AS p LEFT JOIN societa_sportive AS s ON p.email = s.responsabile 
+            LEFT JOIN allenatori AS a ON p.email = a.email LEFT JOIN giocatori AS g ON p.email = g.email 
+            LEFT JOIN manutentori AS m ON p.email = m.email 
+            WHERE p.email = :email";
     $stmt = $con->prepare($query);
     $stmt->bindParam(':email', $email);
     $stmt->execute();
@@ -350,7 +363,7 @@ function get_user_info($con, $email)
     } else if (!empty($row['manutentore_email'])) {
         $row['userType'] = 'manutentore';
     } else if (!empty($row['responsabile'])) {
-        $row['userType'] = 'societ�';
+        $row['userType'] = 'società';
     } else {
         $row['userType'] = 'tifoso';
     }
@@ -358,16 +371,19 @@ function get_user_info($con, $email)
     return $row;
 }
 
-function checkPending($con, $userType, $email) {
-    $tabella = 'inviti_'.$userType;
-    $query = "SELECT email FROM".$tabella."WHERE email = :email";
+function checkPending($con, $userType, $email)
+{
+    $tabella = 'inviti_' . $userType;
+    $query = "SELECT email FROM " . $tabella . " WHERE email = :email";
     $stmt = $con->prepare($query);
-    $stmt->execute([':email' => $email]);
+    $stmt->bindParam(':email', $email);
+    $stmt->execute();
 
     return $stmt->rowCount() > 0;
 }
 
-function generateActivationCode() {
+function generateActivationCode()
+{
     // Genera un codice di attivazione univoco
     $length = 32; // Lunghezza del codice
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';

@@ -5,76 +5,57 @@ function handleUserType() {
     // Ottieni il riferimento all'elemento select per il tipo di utente
     var userTypeSelect = document.getElementById('userType');
 
-    // Ottieni il riferimento alla riga del codice squadra
+    // Ottieni il riferimento alle righe del form
     var teamCodeRow = document.getElementById('teamCodeRow');
-    var teamCodeInput = document.getElementById('teamCode');
-
-    // Ottieni il riferimento alla riga del codice società
     var societyCodeRow = document.getElementById('societyCodeRow');
-    var societyCodeInput = document.getElementById('societyCode');
-
-    // Ottieni il riferimento alla riga dell'IVA e del nome società
     var userSocietyRow = document.getElementById('userSocietyRow');
+
+    // Ottieni i campi input del form
+    var teamCodeInput = document.getElementById('teamCode');
+    var societyCodeInput = document.getElementById('societyCode');
     var pIvaInput = document.getElementById('p_iva');
     var societyNameInput = document.getElementById('societyName');
-
-    // Ottieni il riferimento al campo "Sport"
-    var sportInput = document.getElementById('sport');
-
-    // Ottieni il riferimento al campo "Tipo Allenatore"
+    var sportInput = document.getElementById('sportType');
     var coachTypeInput = document.getElementById('coachType');
 
+    // Nascondi tutte le righe del form
+    teamCodeRow.style.display = 'none';
+    societyCodeRow.style.display = 'none';
+    userSocietyRow.style.display = 'none';
+
+    // Imposta tutti i campi input come non obbligatori
+    teamCodeInput.required = false;
+    societyCodeInput.required = false;
+    pIvaInput.required = false;
+    societyNameInput.required = false;
+    sportInput.required = false;
+    coachTypeInput.required = false;
 
     // Verifica il valore selezionato nel tipo di utente
-    if (userTypeSelect.value === 'giocatore') {
-        // Se il tipo di utente è "giocatore", mostra la riga del codice squadra
-        teamCodeRow.style.display = 'block';
-        societyCodeRow.style.display = 'none';
-        userSocietyRow.style.display = 'none';
-
-        // Rendi il campo del codice squadra obbligatorio
-        teamCodeInput.required = true;
-        societyCodeInput.required = false;
-        pIvaInput.required = false;
-        societyNameInput.required = false;
-    } else if (userTypeSelect.value === 'allenatore') {
-        // Se il tipo di utente è "allenatore", mostra la riga del codice società
-        societyCodeRow.style.display = 'block';
-        teamCodeRow.style.display = 'none';
-        userSocietyRow.style.display = 'none';
-
-        // Rendi il campo del codice società obbligatorio
-        societyCodeInput.required = true;
-        teamCodeInput.required = false;
-        pIvaInput.required = false;
-        societyNameInput.required = false;
-        coachTypeInput.required = true;
-    } else if (userTypeSelect.value === 'societa') {
-        // Se il tipo di utente è "società", mostra la riga dell'IVA e del nome società
-        societyCodeRow.style.display = 'none';
-        teamCodeRow.style.display = 'none';
-        userSocietyRow.style.display = 'block';
-
-        // Rendi il campo dell'IVA e del nome società obbligatori
-        pIvaInput.required = true;
-        societyNameInput.required = true;
-        teamCodeInput.required = false;
-        societyCodeInput.required = false;
-        sportInput.required = true;
-    } else {
-        // Altrimenti, nascondi entrambe le righe
-        teamCodeRow.style.display = 'none';
-        societyCodeRow.style.display = 'none';
-        userSocietyRow.style.display = 'none';
-
-        // Rimuovi l'attributo required da tutti i campi
-        teamCodeInput.required = false;
-        societyCodeInput.required = false;
-        pIvaInput.required = false;
-        societyNameInput.required = false;
+    switch (userTypeSelect.value) {
+        case 'giocatore':
+            // Se il tipo di utente è "giocatore", mostra la riga del codice squadra
+            teamCodeRow.style.display = 'block';
+            teamCodeInput.required = true;
+            break;
+        case 'allenatore':
+            // Se il tipo di utente è "allenatore", mostra la riga del codice società
+            societyCodeRow.style.display = 'block';
+            societyCodeInput.required = true;
+            coachTypeInput.required = true;
+            break;
+        case 'società':
+            // Se il tipo di utente è "società", mostra la riga dell'IVA e del nome società
+            userSocietyRow.style.display = 'block';
+            pIvaInput.required = true;
+            societyNameInput.required = true;
+            sportInput.required = true;
+            break;
+        default:
+            // Altrimenti, non mostrare alcuna riga e non rendere obbligatorio nessun campo
+            break;
     }
 }
-
 
 /**
  * Event listener che controlla che la password inserita rispetti i vincoli
@@ -89,11 +70,14 @@ document.addEventListener('DOMContentLoaded', function () {
     form.addEventListener('submit', function (event) {
         if (!isPasswordValid(passwordInput.value)) {
             event.preventDefault(); // Impedisce l'invio del modulo
-            passwordError.textContent = 'La password non rispetta i vincoli richiesti.';
-            passwordError.style.display = 'block'; // Rendi visibile il messaggio di errore
-
+            displayErrorMessage('La password non rispetta i vincoli richiesti.');
         }
     });
+
+    function displayErrorMessage(message) {
+        passwordError.textContent = message;
+        passwordError.style.display = 'block'; // Rendi visibile il messaggio di errore
+    }
 });
 
 

@@ -18,8 +18,8 @@ if (!isset($_COOKIE['email'])) {
                         <img class="img rounded-circle" style="width: 200px; height: 200px;" src="<?php echo isset($user['locazione_immagine_profilo']) ? $user['locazione_immagine_profilo'] : './assets/profile/beard.png'; ?>" alt="">
                         <h4 class="py-3">
                             <?php
-                            if (isset($user['nome'])) {
-                                printf('%s %s', $user['nome'], $user['cognome']);
+                            if (isset($user['username'])) {
+                                printf('%s %s', $user['username'], $user['cognome']);
                             }
                             ?>
                         </h4>
@@ -28,7 +28,7 @@ if (!isset($_COOKIE['email'])) {
 
                 <div class="user-info px-3">
                     <ul class="font-ubuntu navbar-nav">
-                        <li class="nav-link"><b>First Name: </b><span><?php echo $user['nome']; ?></span></li>
+                        <li class="nav-link"><b>First Name: </b><span><?php echo $user['username']; ?></span></li>
                         <li class="nav-link"><b>Last Name: </b><span><?php echo $user['cognome']; ?></span></li>
                         <li class="nav-link"><b>Email: </b><span><?php echo $user['email']; ?></span></li>
                         <li class="nav-link"><b>User Type: </b><span><?php echo $user['userType']; ?></span></li>

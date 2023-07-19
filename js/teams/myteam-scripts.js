@@ -120,7 +120,7 @@ function updateMyTeampage(team) {
 
   var teamCodeElement = document.getElementById("team-code");
   if (teamCodeElement) {
-    teamCodeElement.textContent = team.code;
+    teamCodeElement.innerText = team.codice;
   }
 
   var hiddenTeamInput = document.getElementsByName("hidden-title-name")[0];
@@ -130,7 +130,7 @@ function updateMyTeampage(team) {
 
   var hiddenCodeInput = document.getElementsByName("hidden-code")[0];
   if (hiddenCodeInput) {
-    hiddenCodeInput.value = team.code;
+    hiddenCodeInput.value = team.codice;
   }
 }
 
@@ -142,7 +142,7 @@ function updateMyStaffpage(society) {
 
   var societyCodeElement = document.getElementById("society-code");
   if (societyCodeElement) {
-    societyCodeElement.textContent = society[0].code;
+    societyCodeElement.textContent = society[0].codice;
   }
 
   var hiddenTeamInput = document.getElementsByName("hidden-title-name")[0];
@@ -152,7 +152,7 @@ function updateMyStaffpage(society) {
 
   var hiddenCodeInput = document.getElementsByName("hidden-code")[0];
   if (hiddenCodeInput) {
-    hiddenCodeInput.value = society[0].code;
+    hiddenCodeInput.value = society[0].codice;
   }
 }
 

@@ -3,7 +3,7 @@
 <?php
 require('auth-helper.php');
 require_once('db_connection.php');
-require ('../modals/email-handler.php');
+require('../modals/email-handler.php');
 
 /**
  * Gestisce la validazione dei campi dell'utente e l'upload dell'immagine del profilo.
@@ -17,7 +17,7 @@ require ('../modals/email-handler.php');
  * @param string $_POST['dataNascita'] La data di nascita fornita dall'utente.
  * @param string $_POST['citta'] La citta fornita dall'utente.
  * @param string $_POST['telefono'] Il numero di telefono dell'utente
- * @param string $_POST['societyCode'] Il codice associato alla societ‡†
+ * @param string $_POST['societyCode'] Il codice associato alla societÔøΩ
  * @param string $_POST['teamCode'] Il codice associato alla squadra
  * @param array $_FILES['profileUpload'] I dettagli dell'immagine del profilo da caricare.
  */
@@ -113,32 +113,31 @@ if (empty($errors)) {
         authEmail($email,$activationCode);
 
         if ($stmt->rowCount() == 1) {
-            
+
             setcookie('email', $email, time() + 86400, '/'); // Cookie scade in 24 hours
 
             if ($userType == "allenatore") {
-                if(checkPending($con,"allenatori", $email)){
-                    addCoach($con, $email, $societyCode);
-                }
-                else{
-                    $errors[] = "Il tuo indirizzo mail non risulta tra gli inviti, contatta la tua societ‡† per risolvere il problema.";
+                if (checkPending($con, "allenatori", $email)) {
+                    $coachtype = $_POST['coachType'];
+                    addCoach($con, $email, $coachtype, $societyCode);
+                } else {
+                    $errors[] = "Il tuo indirizzo mail non risulta tra gli inviti, contatta la tua societ√† per risolvere il problema.";
                 }
             } elseif ($userType == "giocatore") {
-                if(checkPending($con,"giocatori", $email)){
+                if (checkPending($con, "giocatori", $email)) {
                     addPlayer($con, $email, $teamCode);
-                }
-                else{
+                } else {
                     $errors[] = "Il tuo indirizzo mail non risulta tra gli inviti, contatta il tuo allenatore per risolvere il problema.";
                 }
-            } elseif ($userType == "societ‡†") {
+            } elseif ($userType == "societ√†") {
                 $p_iva = $_POST['p_iva'];
                 $societyName = $_POST['societyName'];
                 $address = $_POST['address'];
-                addCompany($con, $email, $p_iva, $societyName, $address);
+                $sport = $_POST['sportType'];
+                addCompany($con, $email, $p_iva, $societyName, $sport, $address);
             } else {
                 addFan($con, $email);
             }
-
             exit();
         } else {
             print "Error while registration...!";
