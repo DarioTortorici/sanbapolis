@@ -16,7 +16,7 @@ if (!isset($_COOKIE['email'])) {
 
 $userType = $user['userType']; // Ottenere il tipo di utente dalla variabile $user['userType']
 
-if ($userType == "allenatore" || $userType == "società") {
+if ($userType == "allenatore") {
     // Chiamata alla funzione JavaScript per il calendario degli allenatori
     echo '<script>';
     echo 'fetchCoachEvents("' . $user['email'] . '");';
@@ -24,6 +24,10 @@ if ($userType == "allenatore" || $userType == "società") {
     $delete = true;
     $modify = false;
     $add = true;
+}elseif ($userType == "societÃ ") {
+    echo '<script>';
+    echo 'fetchSocietyEvents("' . $user['email'] . '");';
+    echo '</script>';
 } elseif ($userType == "manutentore") {
     // Chiamata alla funzione JavaScript per il calendario dei manutentori
     echo '<script>';
@@ -164,7 +168,7 @@ if ($userType == "allenatore" || $userType == "società") {
         <form id="edit-form">
             <input type="text" id="id-edit" style="display: none;"></p>
             <select name="society-edit" required>
-                <option value="" id="selected-option" selected>Scegli una società</option>
+                <option value="" id="selected-option" selected>Scegli una societï¿½</option>
                 <?php echo getSocieties(); ?>
             </select>
             <label for="start-date-edit">Data inizio:</label>

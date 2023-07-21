@@ -76,7 +76,8 @@ if ($userType === "allenatore") {
     $address = validate_input_text($_POST['address']);
     $sportType = validate_input_text($_POST['sportType']);
 
-    if (!$p_iva || !$societyName || !$address || !$sportType) {
+    // Controllo campi fondamentali siano inseriti
+    if (!$p_iva || !$societyName || !$sportType) {
         addError($errors, "Alcuni campi dati per la società mancano o sono invalidi.");
     }
 }

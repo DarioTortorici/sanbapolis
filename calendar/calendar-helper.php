@@ -386,9 +386,8 @@ function getSportbyTeam($squadra)
     $con = get_connection();
 
     try {
-        $sql = "SELECT sport.nome_sport
-                FROM sport
-                INNER JOIN squadre ON sport.nome_sport = squadre.sport
+        $sql = "SELECT sport
+                FROM squadre
                 WHERE squadre.id = :squadra";
         $query = $con->prepare($sql);
         $query->bindParam(':squadra', $squadra['id']);
@@ -555,7 +554,9 @@ function getMatches()
     $con = get_connection();
 
     try {
-        $query = "SELECT ce.* FROM calendar_events ce INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events";
+        $query = "SELECT ce.* FROM calendar_events ce 
+                    INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events
+                    INNER JOIN partite ON partite.prenotazione = ei.id";
         $statement = $con->query($query);
         $events = $statement->fetchAll(PDO::FETCH_ASSOC);
         return json_encode($events);
@@ -583,6 +584,37 @@ function getCoachEvents($coach)
                   WHERE allenatori_squadre.email_allenatore = :coach";
         $statement = $con->prepare($query);
         $statement->bindParam(':coach', $coach);
+        $statement->execute();
+        $events = $statement->fetchAll(PDO::FETCH_ASSOC);
+        return json_encode($events);
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il recupero degli eventi dell'allenatore: " . $e->getMessage());
+    }
+}
+
+/**
+ * Recupera gli eventi associati alle società sportive gestite da un responsabile (manager).
+ *
+ * Questa funzione accetta come parametro l'indirizzo email del responsabile e restituisce
+ * tutti gli eventi presenti nel calendario associati alle squadre delle società gestite da tale responsabile.
+ * Gli eventi vengono restituiti nel formato JSON.
+ *
+ * @param string $manager L'indirizzo email del responsabile.
+ * @return string|null Una stringa JSON contenente gli eventi associati alle società sportive gestite dal responsabile.
+ *                    Restituisce NULL in caso di errori o nessun risultato.
+ * @throws PDOException Se si verifica un errore durante l'esecuzione della query.
+ */
+function getSocietyEvents($manager) {
+    $con = get_connection();
+
+    try {
+        $query = "SELECT ce.* FROM calendar_events ce
+                  INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events
+                  INNER JOIN squadre s ON ei.id_squadra = s.id
+                  INNER JOIN societa_sportive sp ON s.societa = sp.partita_iva
+                  WHERE sp.responsabile = :manager";
+        $statement = $con->prepare($query);
+        $statement->bindParam(':manager', $manager);
         $statement->execute();
         $events = $statement->fetchAll(PDO::FETCH_ASSOC);
         return json_encode($events);
@@ -668,18 +700,24 @@ function getCameras($id)
 }
 
 /**
- * Recupera il tipo di utente (userType) associato all'utente corrente.
+ * Recupera il tipo di utente (userType) associato all'utente corrente o all'email fornita.
  *
- * @return string Il tipo di utente dell'utente corrente.
+ * @param string|null $email L'email dell'utente per cui recuperare il tipo di utente. Se non fornita, viene utilizzata l'email memorizzata nel cookie.
+ * @return string Il tipo di utente dell'utente corrente o dell'utente con l'email fornita.
  * 
  * @throws PDOException Se si verifica un errore durante la query al database.
  */
-function getUserType()
+function getUserType($email = null)
 {
     $con = get_connection();
 
     try {
-        $userInfo = get_user_info($con, $_COOKIE['email']);
+        if ($email === null) {
+            // Se l'email non è fornita, utilizza l'email memorizzata nel cookie
+            $email = $_COOKIE['email'];
+        }
+
+        $userInfo = get_user_info($con, $email);
         return $userInfo['userType'];
     } catch (PDOException $e) {
         throw new PDOException("Errore durante il recupero del tipo di utente: " . $e->getMessage());
@@ -790,14 +828,15 @@ if (isset($_GET['action'])) {
             'cameras' => json_encode($_POST['camera'] ?? null),
             'author' => $_POST['author'] ?? null,
         );
-
-        //Controllo che esistano campi obbligatori (society e startdate)
+        // Controllo che esistano campi obbligatori (society e startDate)
         if ($data['society'] && $data['startDate']) {
             $id = save_event($data['groupId'], $data['allDay'], $data['startDate'], $data['endDate'], $data['daysOfWeek'], $data['startTime'], $data['endTime'], $data['startRecur'], $data['endRecur'], $data['url'], $data['society'], $data['sport'], $data['note'], $data['eventType'], $data['cameras'], $data['author']);
-            echo json_encode(array('status' => 'success', 'id' => $id));
+            $response = array('status' => 'success', 'id' => $id);
         } else {
-            echo json_encode(array('status' => 'error', 'message' => 'Missing required fields'));
+            $response = array('status' => 'error', 'message' => 'Missing required fields');
         }
+        header('Content-Type: application/json');
+        echo json_encode($response);        
     } elseif ($action == 'get-events') { // recupero tutti gli eventi da calendar_event
         header('Content-Type: application/json');
         echo getEvents();
@@ -822,6 +861,12 @@ if (isset($_GET['action'])) {
         if ($coach) {
             header('Content-Type: application/json');
             echo getCoachEvents($coach);
+        }
+    }elseif ($action == 'get-society-event') { //recupero tutti gli eventi da calendar_event dove allena coach
+        $manager = isset($_GET['responsabile']) ? $_GET['responsabile'] : null;
+        if ($manager) {
+            header('Content-Type: application/json');
+            echo getSocietyEvents($manager);
         }
     } elseif ($action == 'delete-event') { // Elimino evento con quell'id
         $id = isset($_POST['id']) ? $_POST['id'] : null;
@@ -889,11 +934,23 @@ if (isset($_GET['action'])) {
         if ($id) {
             echo getDatetimeEvent($id);
         }
-    } elseif ($action == 'get-user-type') { // recupero il tipo di utente
+    } elseif ($action == 'get-user-type') { // recupero utente
         header('Content-Type: application/json');
-        $response = getUserType();
+    
+        // Decodifica il payload JSON della richiesta POST
+        $email = isset($_POST['email']) ? $_POST['email'] : null;
+    
+        // Verifica se è stata fornita l'email come parametro nella richiesta POST
+        if ($email) {
+            // Se è presente l'email nel payload JSON, passa l'email alla funzione getUserType()
+            $response = getUserType($email);
+        } else {
+            // Se l'email non è presente, utilizza l'email memorizzata nel cookie come prima
+            $response = getUserType();
+        }
+    
         echo json_encode($response);
     } else {
-        // Missing 'action' parameter
-    }
+        // Parametro 'action' mancante
+    }    
 }

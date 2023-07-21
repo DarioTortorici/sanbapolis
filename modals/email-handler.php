@@ -99,7 +99,7 @@ function authEmail($userEmail, $activationCode)
         $mail->send();
         // L'email è stata inviata con successo, quindi esegui un reindirizzamento alla dashboard dell'utente.
         header('Location: ../profile/user-dashboard.php');
-        exit(); // Termina l'esecuzione dello script dopo il reindirizzamento.
+        
 
     } catch (Exception $e) {
         // In caso di errore nell'invio dell'email, mostra un messaggio di errore.
@@ -229,9 +229,13 @@ function authEvent($manutentore, $author, $startDate, $endDate, $startTime, $end
 
         // Aggiungi gli indirizzi email dei manutentori come destinatari
         foreach ($manutentore as $email) {
-            $mail->addAddress($email);
+            // Verifica se l'indirizzo email è una stringa valida
+            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                // Aggiungi l'indirizzo email come destinatario
+                $mail->addAddress($email);
+            }
         }
-
+        
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Richiesta Evento';

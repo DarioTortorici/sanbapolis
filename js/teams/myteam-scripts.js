@@ -29,7 +29,7 @@ function fetchTeams() {
  * @function fetchTeam
  * @param {number} teamId - L'identificativo unico della squadra di cui si vogliono ottenere i dettagli.
  * @throws {Error} Se la richiesta AJAX fallisce.
- */ 
+ */
 function fetchTeam(teamId) {
 
   jQuery.ajax({
@@ -60,23 +60,23 @@ function fetchTeam(teamId) {
  * @throws {Error} Se la richiesta AJAX fallisce.
  */
 function getSocietyByBoss(boss) {
-  return new Promise(function(resolve, reject) {
-      $.ajax({
-          url: 'http://localhost/profile/myteam-helper.php',
-          method: 'GET',
-          data: {
-              action: 'get-society-by-boss',
-              boss: boss
-          },
-          dataType: "json",
-          success: function(response) {
-              updateMyStaffpage(response.society);
-              resolve(response.society);
-          },
-          error: function(xhr, status, error) {
-              reject(error);
-          }
-      });
+  return new Promise(function (resolve, reject) {
+    $.ajax({
+      url: 'http://localhost/profile/myteam-helper.php',
+      method: 'GET',
+      data: {
+        action: 'get-society-by-boss',
+        boss: boss
+      },
+      dataType: "json",
+      success: function (response) {
+        updateMyStaffpage(response.society);
+        resolve(response.society);
+      },
+      error: function (xhr, status, error) {
+        reject(error);
+      }
+    });
   });
 }
 
@@ -173,39 +173,39 @@ function getCoachesByBoss(mail) {
  */
 function updateMyTeampage(team) {
   // Estrai le proprietà 'nome' e 'codice' dall'oggetto 'team' utilizzando il destructuring
-const { nome, codice } = team;
+  const { nome, codice } = team;
 
-// Trova l'elemento con l'ID "team-name" nella pagina
-const teamNameElement = document.getElementById("team-name");
-// Se l'elemento esiste
-if (teamNameElement) {
-  // Imposta il contenuto di testo dell'elemento con il valore della proprietà 'nome'
-  teamNameElement.textContent = nome;
-}
+  // Trova l'elemento con l'ID "team-name" nella pagina
+  const teamNameElement = document.getElementById("team-name");
+  // Se l'elemento esiste
+  if (teamNameElement) {
+    // Imposta il contenuto di testo dell'elemento con il valore della proprietà 'nome'
+    teamNameElement.textContent = nome;
+  }
 
-// Trova l'elemento con l'ID "team-code" nella pagina
-const teamCodeElement = document.getElementById("team-code");
-// Se l'elemento esiste
-if (teamCodeElement) {
-  // Imposta il testo dell'elemento con il valore della proprietà 'codice'
-  teamCodeElement.innerText = codice;
-}
+  // Trova l'elemento con l'ID "team-code" nella pagina
+  const teamCodeElement = document.getElementById("team-code");
+  // Se l'elemento esiste
+  if (teamCodeElement) {
+    // Imposta il testo dell'elemento con il valore della proprietà 'codice'
+    teamCodeElement.innerText = codice;
+  }
 
-// Trova il primo elemento input con attributo 'name' uguale a 'hidden-title-name'
-const hiddenTeamInput = document.querySelector("input[name='hidden-title-name']");
-// Se l'elemento esiste
-if (hiddenTeamInput) {
-  // Imposta il valore dell'elemento input con il valore della proprietà 'nome'
-  hiddenTeamInput.value = nome;
-}
+  // Trova il primo elemento input con attributo 'name' uguale a 'hidden-title-name'
+  const hiddenTeamInput = document.querySelector("input[name='hidden-title-name']");
+  // Se l'elemento esiste
+  if (hiddenTeamInput) {
+    // Imposta il valore dell'elemento input con il valore della proprietà 'nome'
+    hiddenTeamInput.value = nome;
+  }
 
-// Trova il primo elemento input con attributo 'name' uguale a 'hidden-code'
-const hiddenCodeInput = document.querySelector("input[name='hidden-code']");
-// Se l'elemento esiste
-if (hiddenCodeInput) {
-  // Imposta il valore dell'elemento input con il valore della proprietà 'codice'
-  hiddenCodeInput.value = codice;
-}
+  // Trova il primo elemento input con attributo 'name' uguale a 'hidden-code'
+  const hiddenCodeInput = document.querySelector("input[name='hidden-code']");
+  // Se l'elemento esiste
+  if (hiddenCodeInput) {
+    // Imposta il valore dell'elemento input con il valore della proprietà 'codice'
+    hiddenCodeInput.value = codice;
+  }
 }
 
 /**
@@ -265,8 +265,12 @@ function updateCardVisibility(players) {
 
   const cards = document.querySelectorAll('.col-md-4');
 
+  // Controlla se almeno una card è visibile
+  let isAnyCardVisible = false;
+
   for (let i = 0; i < cards.length; i++) {
     if (conditions[i]) {
+      isAnyCardVisible = true;
       const cardTitle = cards[i].querySelector('.card-title');
       const email = players[i]?.email || '';
       const cardImage = cards[i].querySelector('.card-img-top');
@@ -281,6 +285,10 @@ function updateCardVisibility(players) {
       cards[i].style.display = "none";
     }
   }
+  // Se almeno una card è visibile, mostra la .row impostando lo stile a "block"
+  // Altrimenti, nascondi la .row impostando lo stile a "none"
+  const rowElement = document.querySelector('.row');
+  rowElement.style.display = isAnyCardVisible ? 'block' : 'none';
 }
 
 

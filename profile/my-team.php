@@ -48,6 +48,13 @@ if (!isset($_COOKIE['email'])) {
     </form>
   </div>
 
+    <!-- Aggiunto CSS temporaneo per non far flashare al caricamento della pagina le carte se la squadra è vuota -->
+    <style>
+    .row {
+      display: none;
+    }
+  </style>
+
   <!-- Partecipanti -->
   <div class="row">
     <div class="col-md-4">

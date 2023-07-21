@@ -67,7 +67,29 @@ function fetchCoachEvents(coach) {
         .fail(function (jqXHR, textStatus, errorThrown) {
             // Recupero degli eventi fallito
             console.error('Impossibile recuperare gli eventi del coach:', textStatus, errorThrown);
-            // Gestisci l'errore o visualizza un messaggio di errore all'utente
+        });
+}
+
+/** Funzione per ottenere gli eventi di un responsabile di una società.
+ * 
+ * La funzione effettua una richiesta AJAX di tipo GET al file "calendar-helper.php" con il parametro "action" impostato su "get-society-event" e il parametro "responsabile" impostato con il valore specificato.
+ * Se la richiesta ha successo, i dati dell'evento vengono passati alla funzione "loadCalendar" per caricare il calendario.
+ * In caso di errore, viene visualizzato un messaggio di errore nella console e è possibile gestire l'errore o mostrare un messaggio di errore all'utente.
+ * 
+ * @param {string} coach - L'allenatore per il quale ottenere gli eventi.
+ */
+function fetchSocietyEvents(responsabile) {
+    // Effettua una richiesta AJAX per ottenere gli eventi dell'allenatore
+    jQuery.get('http://localhost/calendar/calendar-helper.php?action=get-society-event', {
+        responsabile: responsabile
+    })
+        .done(function (event) {
+            // Recupero degli eventi avvenuto con successo
+            loadCalendar(event);
+        })
+        .fail(function (jqXHR, textStatus, errorThrown) {
+            // Recupero degli eventi fallito
+            console.error('Impossibile recuperare gli eventi del responsabile:', textStatus, errorThrown);
         });
 }
 
@@ -88,20 +110,47 @@ function saveEvent(email) {
             url: 'http://localhost/calendar/calendar-helper.php?action=save-event',
             type: 'POST',
             data: formData,
-            dataType: 'json',
-            success: function (response) {
-                if (response.status === 'success') {
-                    fetchEvents();
-                    $.magnificPopup.close();
-                }
-            },
-            error: function (xhr, status, error) {
-                console.log(xhr.responseText);
+            dataType: 'json'
+        })
+        .done(function (response) {
+            if (response.status === 'success') {
+                getUserType(email);
             }
+        })
+        .fail(function (xhr, status, error) {
+            console.log(xhr.responseText);
         });
     } else {
         $('#error-message').show();
     }
+}
+
+/**
+ * Effettua una chiamata AJAX per ottenere il tipo di utente associato all'indirizzo email specificato.
+ * Il tipo di utente determinerà quale azione deve essere intrapresa successivamente.
+ *
+ * @param {string} email - L'indirizzo email dell'utente per il quale si desidera ottenere il tipo.
+ *
+ * @returns {void}
+ */
+function getUserType(email) {
+    $.ajax({
+        url: 'http://localhost/calendar/calendar-helper.php?action=get-user-type',
+        type: 'POST',
+        data: { email: email },
+        dataType: 'text',
+        success: function (userType) {
+            if (userType === "manutentore") {
+                fetchEvents();
+            } else {
+                fetchCoachEvents(email);
+            }
+            $.magnificPopup.close();
+        },
+        error: function (xhr, status, error) {
+            console.log(xhr.responseText);
+        }
+    });
 }
 
 
@@ -342,14 +391,13 @@ function loadCalendar(data) {
         dateClick: function (info) {
             // Verifica il tipo di utente
             getUserType().then(function (userType) {
-                // Gestisci il click sulla data solo se l'usertype è "societ�" o "manutentore"
-                if (userType === 'societ�' || userType === 'manutentore') {
+                // Gestisci il click sulla data solo se l'usertype è "società" o "manutentore"
+                if (userType === 'società' || userType === 'manutentore') {
                     // Gestisce il click su una data nel calendario
                     createCalendarEvent(info.dateStr); // Triggera modal nuovo evento
                     handleDateClick(info); // Aggiunge automaticamente la data cliccata nel form
                 }
             }).catch(function (error) {
-                // Gestisci eventuali errori nella risoluzione della Promise
                 console.error(error);
             });
         },
@@ -401,7 +449,7 @@ function updateEventModal(date, startTime, endTime, title, note, id) {
 /** Funzione per aggiornare i campi del modal di modifica evento.
  *
  * @param {string} title - Il titolo dell'evento.
- * @param {string} society - La societ� relativa all'evento.
+ * @param {string} society - La società relativa all'evento.
  * @param {string} startDate - La data di inizio dell'evento.
  * @param {string} endDate - La data di fine dell'evento.
  * @param {string} startTime - L'orario di inizio dell'evento.
@@ -609,17 +657,26 @@ function handleDateClick(date) {
     $('#save-form input[name="startRecur"]').val(clickedDate);
 }
 
-
+/**
+ * Ottiene il tipo di utente dell'utente corrente tramite una chiamata AJAX a un'API.
+ *
+ * @return {Promise} Una Promise che restituisce il tipo di utente dell'utente corrente.
+ *                   Se la chiamata AJAX ha successo, la Promise viene risolta con il tipo di utente.
+ *                   Se si verifica un errore durante la chiamata AJAX, la Promise viene rifiutata con l'errore.
+ */
 function getUserType() {
     return new Promise(function (resolve, reject) {
+        // Effettua una chiamata AJAX per ottenere il tipo di utente dell'utente corrente
         jQuery.ajax({
             url: 'http://localhost/calendar/calendar-helper.php?action=get-user-type',
             type: 'POST',
             dataType: 'json',
             success: function (response) {
+                // La chiamata AJAX ha avuto successo, risolvi la Promise con il tipo di utente
                 resolve(response);
             },
             error: function (xhr, status, error) {
+                // Si è verificato un errore durante la chiamata AJAX, rifiuta la Promise con l'errore
                 console.log(xhr.responseText);
                 reject(error);
             }

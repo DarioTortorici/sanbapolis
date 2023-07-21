@@ -17,12 +17,12 @@ if (!isset($_COOKIE['email'])) {
 
 
 <script>
-var societyPromise = getSocietyByBoss("<?php echo $user['email']; ?>");
-societyPromise
-  .then(function(society) {
-    // Elabora la società ottenuta (successo)
-    return getCoachesByBoss("<?php echo $user['email']; ?>");
-  })
+  var societyPromise = getSocietyByBoss("<?php echo $user['email']; ?>");
+  societyPromise
+    .then(function(society) {
+      // Elabora la società ottenuta (successo)
+      return getCoachesByBoss("<?php echo $user['email']; ?>");
+    })
 </script>
 
 
@@ -44,6 +44,13 @@ societyPromise
       <button type="submit" class="btn btn-primary">Invita</button>
     </form>
   </div>
+
+  <!-- Aggiunto CSS temporaneo per non far flashare al caricamento della pagina le carte se la squadra è vuota -->
+  <style>
+    .row {
+      display: none;
+    }
+  </style>
 
   <!-- Partecipanti -->
   <div class="row">
