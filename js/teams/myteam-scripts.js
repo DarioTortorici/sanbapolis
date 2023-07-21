@@ -2,7 +2,13 @@
 // Chiamate al database //
 //////////////////////////
 
-
+/**
+ * Effettua una richiesta AJAX al server per ottenere un elenco di squadre.
+ * La risposta dal server viene interpretata come JSON.
+ * 
+ * @function fetchTeams
+ * @throws {Error} Se la richiesta AJAX fallisce.
+ */
 function fetchTeams() {
   jQuery.ajax({
     url: 'http://localhost/profile/myteam-helper.php?action=get-teams',
@@ -16,7 +22,14 @@ function fetchTeams() {
     }
   });
 }
-
+/**
+ * Effettua una richiesta AJAX al server per ottenere i dettagli di una squadra specifica identificata tramite teamId.
+ * La risposta dal server viene interpretata come JSON.
+ * 
+ * @function fetchTeam
+ * @param {number} teamId - L'identificativo unico della squadra di cui si vogliono ottenere i dettagli.
+ * @throws {Error} Se la richiesta AJAX fallisce.
+ */ 
 function fetchTeam(teamId) {
 
   jQuery.ajax({
@@ -35,6 +48,17 @@ function fetchTeam(teamId) {
   });
 }
 
+/**
+ * Ottiene i dettagli di una società in base al nome del boss.
+ * Effettua una richiesta AJAX al server per ottenere i dettagli della società.
+ * La risposta dal server viene interpretata come JSON.
+ * 
+ * @function getSocietyByBoss
+ * @param {string} boss - Il nome del boss della società di cui si vogliono ottenere i dettagli.
+ * @returns {Promise} Una promessa che si risolverà con l'oggetto JSON contenente i dettagli della società
+ *                    o verrà rifiutata con un errore in caso di problemi durante la richiesta AJAX.
+ * @throws {Error} Se la richiesta AJAX fallisce.
+ */
 function getSocietyByBoss(boss) {
   return new Promise(function(resolve, reject) {
       $.ajax({
@@ -56,7 +80,17 @@ function getSocietyByBoss(boss) {
   });
 }
 
-
+/**
+ * Ottiene i dettagli di una squadra in base al nome dell'allenatore.
+ * Effettua una richiesta AJAX al server per ottenere i dettagli della squadra.
+ * La risposta dal server viene interpretata come JSON.
+ * 
+ * @function getTeambyCoach
+ * @param {string} coach - Il nome dell'allenatore della squadra di cui si vogliono ottenere i dettagli.
+ * @returns {Promise} Una promessa che si risolverà con l'identificativo unico della squadra (team ID) ricevuto dalla risposta,
+ *                    o verrà rifiutata con un errore in caso di problemi durante la richiesta AJAX.
+ * @throws {Error} Se la richiesta AJAX fallisce.
+ */
 function getTeambyCoach(coach) {
   return new Promise(function (resolve, reject) {
     $.ajax({
@@ -78,6 +112,15 @@ function getTeambyCoach(coach) {
   });
 }
 
+/**
+ * Ottiene i giocatori di una squadra in base al nome della squadra.
+ * Effettua una richiesta AJAX al server per ottenere i dettagli dei giocatori della squadra.
+ * La risposta dal server viene interpretata come JSON.
+ * 
+ * @function getPlayersbyTeam
+ * @param {string} team - Il nome della squadra di cui si vogliono ottenere i giocatori.
+ * @throws {Error} Se la richiesta AJAX fallisce.
+ */
 function getPlayersbyTeam(team) {
   $.ajax({
     url: 'http://localhost/profile/myteam-helper.php?action=get-players-by-team',
@@ -95,6 +138,15 @@ function getPlayersbyTeam(team) {
   });
 }
 
+/**
+ * Ottiene gli allenatori in base all'email del capo.
+ * Effettua una richiesta AJAX al server per ottenere i dettagli degli allenatori associati all'email del capo.
+ * La risposta dal server viene interpretata come JSON.
+ * 
+ * @function getCoachesByBoss
+ * @param {string} mail - L'email del capo per cui si vogliono ottenere gli allenatori associati.
+ * @throws {Error} Se la richiesta AJAX fallisce.
+ */
 function getCoachesByBoss(mail) {
   $.ajax({
     url: 'http://localhost/profile/myteam-helper.php?action=get-coaches-by-boss',
@@ -112,75 +164,119 @@ function getCoachesByBoss(mail) {
   });
 }
 
+/**
+ * Aggiorna la pagina della squadra con i dettagli della squadra ricevuti come parametro.
+ * 
+ * @function updateMyTeampage
+ * @param {object} team - L'oggetto JSON contenente i dettagli della squadra da aggiornare sulla pagina.
+ * @throws {Error} Se l'oggetto team non è valido o se gli elementi HTML specificati non sono presenti sulla pagina.
+ */
 function updateMyTeampage(team) {
-  var teamNameElement = document.getElementById("team-name");
-  if (teamNameElement) {
-    teamNameElement.textContent = team.nome;
-  }
+  // Estrai le proprietà 'nome' e 'codice' dall'oggetto 'team' utilizzando il destructuring
+const { nome, codice } = team;
 
-  var teamCodeElement = document.getElementById("team-code");
-  if (teamCodeElement) {
-    teamCodeElement.innerText = team.codice;
-  }
-
-  var hiddenTeamInput = document.getElementsByName("hidden-title-name")[0];
-  if (hiddenTeamInput) {
-    hiddenTeamInput.value = team.nome;
-  }
-
-  var hiddenCodeInput = document.getElementsByName("hidden-code")[0];
-  if (hiddenCodeInput) {
-    hiddenCodeInput.value = team.codice;
-  }
+// Trova l'elemento con l'ID "team-name" nella pagina
+const teamNameElement = document.getElementById("team-name");
+// Se l'elemento esiste
+if (teamNameElement) {
+  // Imposta il contenuto di testo dell'elemento con il valore della proprietà 'nome'
+  teamNameElement.textContent = nome;
 }
 
+// Trova l'elemento con l'ID "team-code" nella pagina
+const teamCodeElement = document.getElementById("team-code");
+// Se l'elemento esiste
+if (teamCodeElement) {
+  // Imposta il testo dell'elemento con il valore della proprietà 'codice'
+  teamCodeElement.innerText = codice;
+}
+
+// Trova il primo elemento input con attributo 'name' uguale a 'hidden-title-name'
+const hiddenTeamInput = document.querySelector("input[name='hidden-title-name']");
+// Se l'elemento esiste
+if (hiddenTeamInput) {
+  // Imposta il valore dell'elemento input con il valore della proprietà 'nome'
+  hiddenTeamInput.value = nome;
+}
+
+// Trova il primo elemento input con attributo 'name' uguale a 'hidden-code'
+const hiddenCodeInput = document.querySelector("input[name='hidden-code']");
+// Se l'elemento esiste
+if (hiddenCodeInput) {
+  // Imposta il valore dell'elemento input con il valore della proprietà 'codice'
+  hiddenCodeInput.value = codice;
+}
+}
+
+/**
+ * Aggiorna le informazioni relative a una società all'interno della pagina web.
+ * 
+ * @param {Object[]} society - Un array contenente le informazioni sulla società.
+ *                             Ogni elemento deve avere le proprietà 'nome' e 'codice',
+ *                             rappresentanti rispettivamente il nome e il codice della società.
+ * @returns {void} - La funzione non restituisce alcun valore.
+ */
 function updateMyStaffpage(society) {
-  var societyNameElement = document.getElementById("society-name");
-  if (societyNameElement) {
-    societyNameElement.textContent = society[0].nome;
-  }
+  // Verifica se l'array 'society' ha almeno un elemento
+  if (society.length > 0) {
+    // Destructuring per estrarre 'nome' e 'codice' dal primo elemento dell'array 'society'
+    const { nome, codice } = society[0];
 
-  var societyCodeElement = document.getElementById("society-code");
-  if (societyCodeElement) {
-    societyCodeElement.textContent = society[0].codice;
-  }
+    // Trova l'elemento con l'ID "society-name" e imposta il contenuto di testo con 'nome'
+    const societyNameElement = document.getElementById("society-name");
+    if (societyNameElement) {
+      societyNameElement.textContent = nome;
+    }
 
-  var hiddenTeamInput = document.getElementsByName("hidden-title-name")[0];
-  if (hiddenTeamInput) {
-    hiddenTeamInput.value = society[0].nome;
-  }
+    // Trova l'elemento con l'ID "society-code" e imposta il contenuto di testo con 'codice'
+    const societyCodeElement = document.getElementById("society-code");
+    if (societyCodeElement) {
+      societyCodeElement.textContent = codice;
+    }
 
-  var hiddenCodeInput = document.getElementsByName("hidden-code")[0];
-  if (hiddenCodeInput) {
-    hiddenCodeInput.value = society[0].codice;
+    // Trova il primo elemento input con attributo 'name' uguale a 'hidden-title-name' e imposta il valore con 'nome'
+    const hiddenTeamInput = document.querySelector("input[name='hidden-title-name']");
+    if (hiddenTeamInput) {
+      hiddenTeamInput.value = nome;
+    }
+
+    // Trova il primo elemento input con attributo 'name' uguale a 'hidden-code' e imposta il valore con 'codice'
+    const hiddenCodeInput = document.querySelector("input[name='hidden-code']");
+    if (hiddenCodeInput) {
+      hiddenCodeInput.value = codice;
+    }
   }
 }
 
 
 
+/**
+ * Aggiorna la visibilità delle card dei giocatori all'interno della pagina web.
+ * 
+ * @param {Object[]} players - Un array contenente le informazioni sui giocatori.
+ *                             Ogni elemento deve avere almeno la proprietà 'email'
+ *                             e può avere la proprietà 'locazione_immagine_profilo'.
+ * @returns {void} - La funzione non restituisce alcun valore.
+ */
 function updateCardVisibility(players) {
-  var n_players = 0;
-  if (typeof players != 'undefined' && typeof players.length != 'undefined') {
-    n_players = players.length;
-  }
+  let n_players = players ? players.length : 0;
 
-  var conditions = [];
+  const conditions = new Array(n_players).fill(true);
 
-  for (var i = 0; i < n_players; i++) {
-    conditions.push(true);
-  }
+  const cards = document.querySelectorAll('.col-md-4');
 
-  var cards = document.querySelectorAll('.col-md-4');
-
-  for (var i = 0; i < cards.length; i++) {
+  for (let i = 0; i < cards.length; i++) {
     if (conditions[i]) {
-      var cardTitle = cards[i].querySelector('.card-title');
-      var email = players[i].email;
-      var cardImage = cards[i].querySelector('.card-img-top');
+      const cardTitle = cards[i].querySelector('.card-title');
+      const email = players[i]?.email || '';
+      const cardImage = cards[i].querySelector('.card-img-top');
 
       cardTitle.textContent = email;
       cards[i].style.display = "block";
-      cardImage.src = players[i].locazione_immagine_profilo;
+
+      if (players[i]?.locazione_immagine_profilo) {
+        cardImage.src = players[i].locazione_immagine_profilo;
+      }
     } else {
       cards[i].style.display = "none";
     }

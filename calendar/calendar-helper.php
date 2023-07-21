@@ -23,27 +23,29 @@ function is_ajax_request()
 }
 
 /**
- * Salva un evento nel calendario.
+ * Salva un nuovo evento nel calendario.
  *
- * Questa funzione salva un nuovo evento nel calendario. Riceve diversi parametri che descrivono l'evento
- * e esegue le operazioni necessarie per salvare l'evento nel database.
+ * Questa funzione inserisce un nuovo evento nel calendario, includendo il salvataggio delle prenotazioni,
+ * delle informazioni sulla telecamera e altre impostazioni correlate.
  *
- * @param int $groupId L'ID del gruppo di calendari a cui l'evento appartiene.
- * @param bool $allDay Indica se l'evento dura l'intera giornata o ha un'ora specifica.
- * @param string $startDate La data di inizio dell'evento nel formato "YYYY-MM-DD".
- * @param string $endDate La data di fine dell'evento nel formato "YYYY-MM-DD".
- * @param string $daysOfWeek I giorni della settimana in cui si ripete l'evento.
- * @param string $startTime L'ora di inizio dell'evento nel formato "HH:MM:SS".
- * @param string $endTime L'ora di fine dell'evento nel formato "HH:MM:SS".
- * @param string $startRecur La data di inizio della ricorrenza dell'evento nel formato "YYYY-MM-DD".
- * @param string $endRecur La data di fine della ricorrenza dell'evento nel formato "YYYY-MM-DD".
- * @param string $url L'URL associato all'evento.
- * @param string $society Il nome della societ� sportiva associata all'evento.
+ * @param int $groupId L'ID del gruppo associato all'evento.
+ * @param bool $allDay Indica se l'evento dura tutto il giorno.
+ * @param string $startDate La data di inizio dell'evento nel formato "Y-m-d".
+ * @param string $endDate La data di fine dell'evento nel formato "Y-m-d".
+ * @param string|null $daysOfWeek I giorni della settimana in cui l'evento si ripete.
+ * @param string|null $startTime L'ora di inizio dell'evento nel formato "H:i:s".
+ * @param string|null $endTime L'ora di fine dell'evento nel formato "H:i:s".
+ * @param string|null $startRecur La data di inizio della ricorrenza dell'evento nel formato "Y-m-d".
+ * @param string|null $endRecur La data di fine della ricorrenza dell'evento nel formato "Y-m-d".
+ * @param string $url L'URL della cartella dove verranno salvati i file.
+ * @param string $society Il nome della società associata all'evento.
  * @param string $sport Lo sport associato all'evento.
- * @param string $note Le note aggiuntive sull'evento.
- * @param string $eventType Il tipo di evento ("match" per una partita, "training" per un allenamento).
- * @param string $cameras Le telecamere preselezionate da attivare durante l'evento.
- * @return int L'ID dell'evento appena creato nel calendario.
+ * @param string $note La nota o descrizione dell'evento.
+ * @param string $eventType Il tipo di evento (partita o allenamento).
+ * @param string|null $cameras Le telecamere associate all'evento in formato JSON.
+ * @param string $author L'autore dell'evento.
+ *
+ * @return int L'ID dell'evento creato nel calendario.
  */
 function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $note, $eventType, $cameras, $author)
 {
@@ -122,23 +124,20 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
     $data_ora_inizio = accorpaTime($startDate, $startTime);
     $data_ora_fine = accorpaTime($endDate, $endTime);
 
-    $sql = "INSERT INTO prenotazioni (`data_ora_inizio`,`data_ora_fine`, `autore_prenotazione`, `nota`, `id_squadra`, `id_calendar_events`) 
-        VALUES (?,?,?,?,?,?)";
-    $query = $con->prepare($sql);
-    $query->execute([$data_ora_inizio, $data_ora_fine, $author, $note, $squadra['id'], $calendar_id]);
-    $prenotazioni_id = $con->lastInsertId();
+    // Salva le informazioni nella tabella prenotazioni
+    $prenotazioni_id = save_prenotazione($con, $data_ora_inizio, $data_ora_fine, $author, $note, $squadra, $calendar_id);
 
     // Salva le informazioni della telecamera
     save_cameras($cameras, $calendar_id);
 
     if ($eventTypeBoolean) { // Partita
         $sport = getSportbyTeam($squadra);
-        $event_id = save_match($data_ora_inizio, $data_ora_fine, $squadra, $sport,$prenotazioni_id);
+        $event_id = save_match($data_ora_inizio, $data_ora_fine, $squadra, $sport, $prenotazioni_id);
     } else { // Allenamento
-        $event_id = save_training($data_ora_inizio, $data_ora_fine, $squadra,$prenotazioni_id);
+        $event_id = save_training($data_ora_inizio, $data_ora_fine, $squadra, $prenotazioni_id);
     }
 
-    $userInfo = get_user_info($con,$_COOKIE['email']);
+    $userInfo = get_user_info($con, $_COOKIE['email']);
 
     if ($userInfo['userType'] != "manutentore") {
         $query = "SELECT * FROM manutentori";
@@ -152,38 +151,55 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
 }
 
 /**
- * Accorpa la data e l'ora in un unico valore di data e ora.
+ * Salva una nuova prenotazione nel database.
  *
- * Prende una data nel formato "YYYY-MM-DD" e un'ora nel formato "HH:MM:SS"
- * e le unisce in un unico valore di data e ora nel formato "YYYY-MM-DD HH:MM:SS".
+ * Questa funzione inserisce una nuova prenotazione nel database utilizzando le informazioni fornite.
  *
- * @param string $date La data nel formato "YYYY-MM-DD".
- * @param string $time L'ora nel formato "HH:MM:SS".
- * @return string Il valore di data e ora accorpato nel formato "YYYY-MM-DD HH:MM:SS".
+ * @param PDO $con L'oggetto di connessione al database.
+ * @param string $data_ora_inizio La data e ora di inizio della prenotazione nel formato "Y-m-d H:i:s".
+ * @param string $data_ora_fine La data e ora di fine della prenotazione nel formato "Y-m-d H:i:s".
+ * @param string $author L'autore della prenotazione.
+ * @param string $note La nota o descrizione della prenotazione.
+ * @param array $squadra Le informazioni sulla squadra associata alla prenotazione.
+ * @param int $calendar_id L'ID dell'evento nel calendario associato alla prenotazione.
+ *
+ * @return int L'ID della prenotazione appena inserita nel database.
+ *
+ * @throws PDOException Se si verifica un errore durante l'esecuzione dell'inserimento.
  */
-function accorpaTime($date, $time)
+function save_prenotazione($con, $data_ora_inizio, $data_ora_fine, $author, $note, $squadra, $calendar_id)
 {
-    $datetime = $date . ' ' . $time;
-    return $datetime;
+    try {
+        $sql = "INSERT INTO prenotazioni (`data_ora_inizio`, `data_ora_fine`, `autore_prenotazione`, `nota`, `id_squadra`, `id_calendar_events`) 
+            VALUES (?, ?, ?, ?, ?, ?)";
+        $query = $con->prepare($sql);
+        $query->execute([$data_ora_inizio, $data_ora_fine, $author, $note, $squadra['id'], $calendar_id]);
+
+        return $con->lastInsertId();
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il salvataggio della prenotazione: " . $e->getMessage());
+    }
 }
 
-
-/** Modifica un training nella tabella "calendar_events" insieme alle informazioni correlate nella tabella "prenotazioni".
+/**
+ * Modifica un allenamento esistente nel calendario.
  *
- * @param int $groupId L'ID del gruppo associato all'evento.
- * @param string $startDate La data di inizio dell'evento.
- * @param string $endDate La data di fine del training.
- * @param string|null $startTime L'orario di inizio del training.
- * @param string|null $endTime L'orario di fine del training.
- * @param string|null $startRecur La data di inizio della ricorrenza del training.
- * @param string|null $endRecur La data di fine della ricorrenza del training.
- * @param string $url L'URL associato al training.
- * @param string $society Il nome dell'associazione/societ� associata al training.
- * @param string $sport Lo sport del training.
- * @param string $coach Il nome dell'allenatore associato al training.
- * @param string $note La nota relativa al training.
- * @param int|null $id L'ID del training da modificare.
- * @return int L'ID del training modificato.
+ * Questa funzione aggiorna le informazioni di un allenamento esistente nel calendario, inclusi i dettagli
+ * della prenotazione e altri attributi correlati.
+ *
+ * @param int $groupId L'ID del gruppo associato all'allenamento.
+ * @param string $startDate La nuova data di inizio dell'allenamento nel formato "Y-m-d".
+ * @param string $endDate La nuova data di fine dell'allenamento nel formato "Y-m-d".
+ * @param string|null $startTime La nuova ora di inizio dell'allenamento nel formato "H:i:s".
+ * @param string|null $endTime La nuova ora di fine dell'allenamento nel formato "H:i:s".
+ * @param string $url Il nuovo URL associato all'allenamento.
+ * @param string $society Il nome della società associata all'allenamento.
+ * @param string $note La nuova nota o descrizione dell'allenamento.
+ * @param int $id L'ID dell'allenamento da modificare.
+ *
+ * @return int L'ID dell'allenamento modificato nel calendario.
+ *
+ * @throws Exception Se l'ID specificato è nullo o se si verifica un errore durante l'esecuzione dell'aggiornamento.
  */
 function edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $url, $society, $note, $id)
 {
@@ -199,64 +215,95 @@ function edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $ur
 
     // Se è presente un ID, esegui l'aggiornamento nelle due tabelle
     if ($id) {
-        $sql = "UPDATE calendar_events 
-                SET `groupId` = ?, `start` = ?, `end` = ?, `startTime` = ?, `endTime` = ?, `startRecur` = ?, `endRecur` = ?, `url` = ? 
-                WHERE id = ?";
-        $query = $con->prepare($sql);
-        $query->execute([$groupId, $startDate, $endDate, $startTime, $endTime, $startRecur, $endRecur, $url, $id]);
+        try {
+            // Aggiorna le informazioni sull'evento nel calendario
+            $sql = "UPDATE calendar_events 
+                    SET `groupId` = ?, `start` = ?, `end` = ?, `startTime` = ?, `endTime` = ?, `startRecur` = ?, `endRecur` = ?, `url` = ? 
+                    WHERE id = ?";
+            $query = $con->prepare($sql);
+            $query->execute([$groupId, $startDate, $endDate, $startTime, $endTime, $startRecur, $endRecur, $url, $id]);
 
-        $sql = "UPDATE prenotazioni SET `id_squadra`=?, `data_ora_inizio`=?, `data_ora_fine`=?, `nota`=? WHERE id_calendar_events=?";
-        $query = $con->prepare($sql);
-        $query->execute([$squadra['id'], $startDate, $endDate, $note, $id]);
+            // Aggiorna le informazioni sulla prenotazione
+            $sql = "UPDATE prenotazioni SET `id_squadra`=?, `data_ora_inizio`=?, `data_ora_fine`=?, `nota`=? WHERE id_calendar_events=?";
+            $query = $con->prepare($sql);
+            $query->execute([$squadra['id'], $startDate, $endDate, $note, $id]);
 
-        return $id;
+            return $id;
+        } catch (PDOException $e) {
+            throw new Exception("Errore durante l'aggiornamento dell'allenamento: " . $e->getMessage());
+        }
     } else {
         throw new Exception("Errore, nessun ID specificato.");
     }
 }
 
-
 /**
  * Salva le telecamere selezionate nel database per un determinato evento.
- * @param string $cameras - Le telecamere selezionate da salvare (formato JSON o array).
- * @param int $id - L'ID dell'evento a cui associare le telecamere.
- * @return int|null - L'ID dell'evento se l'aggiornamento ha avuto successo, altrimenti null.
+ *
+ * @param mixed $cameras Le telecamere selezionate da salvare (formato JSON o array).
+ * @param int $id L'ID dell'evento a cui associare le telecamere.
+ *
+ * @return int|null L'ID dell'evento se l'aggiornamento ha avuto successo, altrimenti null.
+ *
+ * @throws PDOException Se si verifica un errore durante l'aggiornamento delle telecamere.
  */
 function save_cameras($cameras, $id)
 {
     $con = get_connection();
 
-    if ($id) {
-        $sql = "SELECT id FROM prenotazioni WHERE id_calendar_events=?";
-        $query = $con->prepare($sql);
-        $query->execute([$id]);
-        $prenotazioni_id = $query->fetchColumn();
-        delete_cameras($prenotazioni_id);
-        $arrayInt = json_decode($cameras);
-        $cams_array = array_map('intval', $arrayInt);
+    try {
+        if ($id) {
+            // Ottieni l'ID della prenotazione associata all'evento
+            $sql = "SELECT id FROM prenotazioni WHERE id_calendar_events=?";
+            $query = $con->prepare($sql);
+            $query->execute([$id]);
+            $prenotazioni_id = $query->fetchColumn();
 
-        $sql = "INSERT INTO telecamere_prenotazioni (telecamera, prenotazione) VALUES (?,?)";
-        $query = $con->prepare($sql);
-        foreach ($cams_array as $camera) {
-            $query->execute([$camera, $prenotazioni_id]);
+            // Elimina le telecamere esistenti associate alla prenotazione
+            delete_cameras($prenotazioni_id);
+
+            // Converti le telecamere in un array di interi
+            $cams_array = is_array($cameras) ? array_map('intval', $cameras) : json_decode($cameras, true);
+
+            // Inserisci le nuove telecamere associate alla prenotazione
+            $sql = "INSERT INTO telecamere_prenotazioni (telecamera, prenotazione) VALUES (?,?)";
+            $query = $con->prepare($sql);
+            foreach ($cams_array as $camera) {
+                $query->execute([$camera, $prenotazioni_id]);
+            }
+
+            return $id;
+        } else {
+            throw new PDOException("Errore, nessun ID specificato.");
         }
-
-        return $prenotazioni_id;
-    } else {
-        echo ("Errore, nessun ID specificato: " . $id);
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il salvataggio delle telecamere: " . $e->getMessage());
     }
 }
 
+/**
+ * Elimina le telecamere associate a una prenotazione dal database.
+ *
+ * @param int $prenotazioni_id L'ID della prenotazione di cui eliminare le telecamere.
+ *
+ * @return void
+ * 
+ * @throws PDOException Se si verifica un errore durante l'eliminazione delle telecamere.
+ */
 function delete_cameras($prenotazioni_id)
 {
     $con = get_connection();
 
-    if ($prenotazioni_id) {
-        $sql = "DELETE FROM telecamere_prenotazioni WHERE prenotazione=?";
-        $query = $con->prepare($sql);
-        $query->execute([$prenotazioni_id]);
-    } else {
-        echo ("Errore, nessun ID specificato: " . $prenotazioni_id);
+    try {
+        if ($prenotazioni_id) {
+            $sql = "DELETE FROM telecamere_prenotazioni WHERE prenotazione=?";
+            $query = $con->prepare($sql);
+            $query->execute([$prenotazioni_id]);
+        } else {
+            throw new PDOException("Errore, nessun ID specificato.");
+        }
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante l'eliminazione delle telecamere: " . $e->getMessage());
     }
 }
 
@@ -265,22 +312,30 @@ function delete_cameras($prenotazioni_id)
  *
  * Registra un nuovo allenamento nel database con le informazioni specificate.
  *
- * @param string $inizio La data e l'ora di inizio dell'allenamento.
- * @param string $fine La data e l'ora di fine dell'allenamento.
+ * @param string $inizio La data e l'ora di inizio dell'allenamento nel formato 'YYYY-MM-DD HH:mm:ss'.
+ * @param string $fine La data e l'ora di fine dell'allenamento nel formato 'YYYY-MM-DD HH:mm:ss'.
  * @param array $squadra L'array contenente l'ID della squadra associata all'allenamento.
+ * @param int $prenotazioni_id L'ID della prenotazione associata all'allenamento.
  * @return int L'ID dell'allenamento appena inserito nel database.
+ * 
+ * @throws PDOException Se si verifica un errore durante l'inserimento dell'allenamento nel database.
  */
-function save_training($inizio, $fine, $squadra,$prenotazioni_id)
+function save_training($inizio, $fine, $squadra, $prenotazioni_id)
 {
     $con = get_connection();
-    $sql = "INSERT INTO allenamenti (`data_ora_inizio`, `data_ora_fine`, `id_squadra`, `prenotazione`) VALUES (:inizio, :fine, :squadra,:prenotazione)";
-    $query = $con->prepare($sql);
-    $query->bindParam(':inizio', $inizio);
-    $query->bindParam(':fine', $fine);
-    $query->bindParam(':squadra', $squadra['id']);
-    $query->bindParam(':prenotazione',$prenotazioni_id);
-    $query->execute();
-    return $con->lastInsertId();
+
+    try {
+        $sql = "INSERT INTO allenamenti (`data_ora_inizio`, `data_ora_fine`, `id_squadra`, `prenotazione`) VALUES (:inizio, :fine, :squadra, :prenotazione)";
+        $query = $con->prepare($sql);
+        $query->bindParam(':inizio', $inizio);
+        $query->bindParam(':fine', $fine);
+        $query->bindParam(':squadra', $squadra['id']);
+        $query->bindParam(':prenotazione', $prenotazioni_id);
+        $query->execute();
+        return $con->lastInsertId();
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante l'inserimento dell'allenamento nel database: " . $e->getMessage());
+    }
 }
 
 /**
@@ -288,24 +343,32 @@ function save_training($inizio, $fine, $squadra,$prenotazioni_id)
  *
  * Registra una nuova partita nel database con le informazioni specificate.
  *
- * @param string $inizio La data e l'ora di inizio della partita.
- * @param string $fine La data e l'ora di fine della partita.
- * @param array $squadra L'array contenente l'ID della squadra di casa.
+ * @param string $inizio La data e l'ora di inizio della partita nel formato 'YYYY-MM-DD HH:mm:ss'.
+ * @param string $fine La data e l'ora di fine della partita nel formato 'YYYY-MM-DD HH:mm:ss'.
+ * @param array $squadra L'array contenente l'ID della squadra di casa associata alla partita.
  * @param string $sport Il nome dello sport associato alla partita.
+ * @param int $prenotazioni_id L'ID della prenotazione associata alla partita.
  * @return int L'ID della partita appena inserita nel database.
+ * 
+ * @throws PDOException Se si verifica un errore durante l'inserimento della partita nel database.
  */
-function save_match($inizio, $fine, $squadra, $sport,$prenotazioni_id)
+function save_match($inizio, $fine, $squadra, $sport, $prenotazioni_id)
 {
     $con = get_connection();
-    $sql = "INSERT INTO partite (`data_ora_inizio`, `data_ora_fine`, `id_squadra_casa`, `sport`,`prenotazione`) VALUES (:inizio, :fine, :squadra, :sport, :prenotazione)";
-    $query = $con->prepare($sql);
-    $query->bindParam(':inizio', $inizio);
-    $query->bindParam(':fine', $fine);
-    $query->bindParam(':squadra', $squadra['id']);
-    $query->bindParam(':sport', $sport);
-    $query->bindParam(':prenotazione',$prenotazioni_id);
-    $query->execute();
-    return $con->lastInsertId();
+
+    try {
+        $sql = "INSERT INTO partite (`data_ora_inizio`, `data_ora_fine`, `id_squadra_casa`, `sport`, `prenotazione`) VALUES (:inizio, :fine, :squadra, :sport, :prenotazione)";
+        $query = $con->prepare($sql);
+        $query->bindParam(':inizio', $inizio);
+        $query->bindParam(':fine', $fine);
+        $query->bindParam(':squadra', $squadra['id']);
+        $query->bindParam(':sport', $sport);
+        $query->bindParam(':prenotazione', $prenotazioni_id);
+        $query->execute();
+        return $con->lastInsertId();
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante l'inserimento della partita nel database: " . $e->getMessage());
+    }
 }
 
 /**
@@ -314,20 +377,27 @@ function save_match($inizio, $fine, $squadra, $sport,$prenotazioni_id)
  * Recupera il nome dello sport dal database corrispondente all'ID della squadra specificata.
  *
  * @param array $squadra L'array contenente l'ID della squadra.
- * @return string Il nome dello sport associato alla squadra.
+ * @return string|null Il nome dello sport associato alla squadra, o null se non trovato.
+ * 
+ * @throws PDOException Se si verifica un errore durante la query al database.
  */
 function getSportbyTeam($squadra)
 {
     $con = get_connection();
-    $sql = "SELECT sport.nome_sport
-            FROM sport
-            INNER JOIN squadre ON sport.nome_sport = squadre.sport
-            WHERE squadre.id = :squadra";
-    $query = $con->prepare($sql);
-    $query->bindParam(':squadra', $squadra['id']);
-    $query->execute();
-    $result = $query->fetchColumn();
-    return $result;
+
+    try {
+        $sql = "SELECT sport.nome_sport
+                FROM sport
+                INNER JOIN squadre ON sport.nome_sport = squadre.sport
+                WHERE squadre.id = :squadra";
+        $query = $con->prepare($sql);
+        $query->bindParam(':squadra', $squadra['id']);
+        $query->execute();
+        $result = $query->fetchColumn();
+        return $result;
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il recupero del nome dello sport dalla squadra: " . $e->getMessage());
+    }
 }
 
 /**
@@ -335,6 +405,8 @@ function getSportbyTeam($squadra)
  *
  * @param int $id_calendar_events ID dell'evento del calendario relativo all'allenamento da eliminare.
  * @return bool True se l'eliminazione è avvenuta con successo, False altrimenti.
+ * 
+ * @throws PDOException Se si verifica un errore durante la query al database.
  */
 function delete_training($id_calendar_events)
 {
@@ -368,122 +440,179 @@ function delete_training($id_calendar_events)
         $con->commit();
 
         return true;
-    } catch (Exception $e) {
+    } catch (PDOException $e) {
         // Rollback delle modifiche in caso di errore
         $con->rollBack();
-        return false;
+        throw new PDOException("Errore durante l'eliminazione dell'allenamento: " . $e->getMessage());
     }
 }
 
 
 /**
- * Ottiene l'ID della squadra associata a una determinata societ� sportiva.
+ * Ottiene l'ID della squadra associata a una determinata società sportiva.
  *
- * Recupera dal database l'ID della squadra che è associata alla societ� sportiva specificata.
+ * Recupera dal database l'ID della squadra che è associata alla società sportiva specificata.
  *
- * @param string $society Il nome della societ� sportiva.
- * @return array|false L'array associativo contenente l'ID della squadra, o false in caso di errore.
+ * @param string $society Il nome della società sportiva.
+ * @return array|false L'array associativo contenente l'ID della squadra, o false se non trovata o in caso di errore.
+ * 
+ * @throws PDOException Se si verifica un errore durante la query al database.
  */
 function getSquadra($society)
 {
     $con = get_connection();
-    $sql = "SELECT squadre.id FROM squadre INNER JOIN societa_sportive ON societa_sportive.partita_iva = squadre.societa WHERE societa_sportive.nome = ?";
-    $query = $con->prepare($sql);
-    $query->execute([$society]);
-    $squadra = $query->fetch(PDO::FETCH_ASSOC);
-    return $squadra;
+
+    try {
+        $sql = "SELECT squadre.id FROM squadre INNER JOIN societa_sportive ON societa_sportive.partita_iva = squadre.societa WHERE societa_sportive.nome = ?";
+        $query = $con->prepare($sql);
+        $query->execute([$society]);
+        $squadra = $query->fetch(PDO::FETCH_ASSOC);
+        return $squadra;
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il recupero dell'ID della squadra associata alla società sportiva: " . $e->getMessage());
+    }
 }
 
-
-/** Recupera tutti gli eventi dalla tabella "calendar_events" del database e li restituisce come JSON.
+/**
+ * Recupera tutti gli eventi dalla tabella "calendar_events" del database e li restituisce come JSON.
  *
  * @return string Una stringa JSON che rappresenta gli eventi. Se non ci sono eventi, la stringa JSON sarà vuota.
+ * 
+ * @throws PDOException Se si verifica un errore durante la query al database.
  */
 function getEvents()
 {
     $con = get_connection();
-    $query = "SELECT * FROM calendar_events";
-    $statement = $con->query($query);
-    $events = $statement->fetchAll(PDO::FETCH_ASSOC);
-    return json_encode($events);
+
+    try {
+        $query = "SELECT * FROM calendar_events";
+        $statement = $con->query($query);
+        $events = $statement->fetchAll(PDO::FETCH_ASSOC);
+        return json_encode($events);
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il recupero degli eventi: " . $e->getMessage());
+    }
 }
 
-/** Ottiene le informazioni di un singolo evento dalla tabella "calendar_events" in base all'ID fornito e lo restituisce come JSON.
+/**
+ * Ottiene le informazioni di un singolo evento dalla tabella "calendar_events" in base all'ID fornito e lo restituisce come JSON.
  *
  * @param int $id L'ID dell'evento da recuperare.
  * @return string Una stringa JSON che rappresenta l'evento. Se l'evento non viene trovato, la stringa JSON sarà vuota.
+ * 
+ * @throws PDOException Se si verifica un errore durante la query al database.
  */
 function getEvent($id)
 {
     $con = get_connection();
-    $query = "SELECT * FROM calendar_events WHERE id = :id";
-    $statement = $con->prepare($query);
-    $statement->bindParam(':id', $id);
-    $statement->execute();
-    $event = $statement->fetch(PDO::FETCH_ASSOC);
-    return json_encode($event);
+
+    try {
+        $query = "SELECT * FROM calendar_events WHERE id = :id";
+        $statement = $con->prepare($query);
+        $statement->bindParam(':id', $id);
+        $statement->execute();
+        $event = $statement->fetch(PDO::FETCH_ASSOC);
+        return json_encode($event);
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il recupero dell'evento: " . $e->getMessage());
+    }
 }
 
-/** Funzione per ottenere le informazioni di un evento dal database.
- * Recupera le informazioni dell'evento corrispondente all'ID specificato dalla tabella "prenotazioni"
- * @param int $id - L'ID dell'evento da recuperare.
- * @return string - Le informazioni dell'evento nel formato JSON.
+/**
+ * Funzione per ottenere le informazioni di un evento dal database.
+ * Recupera le informazioni dell'evento corrispondente all'ID specificato dalla tabella "prenotazioni".
+ *
+ * @param int $id L'ID dell'evento da recuperare.
+ * @return string Le informazioni dell'evento nel formato JSON. Se l'evento non viene trovato, la stringa JSON sarà vuota.
+ * 
+ * @throws PDOException Se si verifica un errore durante la query al database.
  */
 function getInfoEvent($id)
 {
     $con = get_connection();
-    $query = "SELECT ei.* FROM calendar_events ce INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events WHERE ce.id = :id";
-    $statement = $con->prepare($query);
-    $statement->bindParam(':id', $id);
-    $statement->execute();
-    $event = $statement->fetch(PDO::FETCH_ASSOC);
-    return json_encode($event);
+
+    try {
+        $query = "SELECT ei.* FROM calendar_events ce INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events WHERE ce.id = :id";
+        $statement = $con->prepare($query);
+        $statement->bindParam(':id', $id);
+        $statement->execute();
+        $event = $statement->fetch(PDO::FETCH_ASSOC);
+        return json_encode($event);
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il recupero dell'evento: " . $e->getMessage());
+    }
 }
 
-/** Recupera gli incontri dal database.
- * @return string JSON contenente gli incontri recuperati dal database.
+/**
+ * Recupera gli incontri dal database.
+ *
+ * @return string JSON contenente gli incontri recuperati dal database. Se non ci sono incontri, la stringa JSON sarà vuota.
+ * 
+ * @throws PDOException Se si verifica un errore durante la query al database.
  */
 function getMatches()
 {
     $con = get_connection();
-    $query = "SELECT ce.* FROM calendar_events ce INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events";
-    $statement = $con->query($query);
-    $events = $statement->fetchAll(PDO::FETCH_ASSOC);
-    return json_encode($events);
+
+    try {
+        $query = "SELECT ce.* FROM calendar_events ce INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events";
+        $statement = $con->query($query);
+        $events = $statement->fetchAll(PDO::FETCH_ASSOC);
+        return json_encode($events);
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il recupero degli incontri: " . $e->getMessage());
+    }
 }
 
-/** Recupera gli eventi per un allenatore specifico dal database.
+/**
+ * Recupera gli eventi per un allenatore specifico dal database.
+ *
  * @param string $coach Il nome o l'identificatore dell'allenatore.
- * @return string Stringa JSON contenente gli eventi dell'allenatore.
+ * @return string Stringa JSON contenente gli eventi dell'allenatore. Se non ci sono eventi, la stringa JSON sarà vuota.
+ * 
+ * @throws PDOException Se si verifica un errore durante la query al database.
  */
 function getCoachEvents($coach)
 {
     $con = get_connection();
-    $query = "SELECT ce.* FROM calendar_events ce 
-              INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events 
-              INNER JOIN allenatori_squadre on allenatori_squadre.id_squadra = ei.id_squadra 
-              WHERE allenatori_squadre.email_allenatore = :coach";
-    $statement = $con->prepare($query);
-    $statement->bindParam(':coach', $coach);
-    $statement->execute();
-    $events = $statement->fetchAll(PDO::FETCH_ASSOC);
-    return json_encode($events);
+
+    try {
+        $query = "SELECT ce.* FROM calendar_events ce 
+                  INNER JOIN prenotazioni ei ON ce.id = ei.id_calendar_events 
+                  INNER JOIN allenatori_squadre on allenatori_squadre.id_squadra = ei.id_squadra 
+                  WHERE allenatori_squadre.email_allenatore = :coach";
+        $statement = $con->prepare($query);
+        $statement->bindParam(':coach', $coach);
+        $statement->execute();
+        $events = $statement->fetchAll(PDO::FETCH_ASSOC);
+        return json_encode($events);
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il recupero degli eventi dell'allenatore: " . $e->getMessage());
+    }
 }
 
-/** Recupera la nota associata a un evento dalla tabella "prenotazioni" del database, in base all'ID dell'evento fornito.
+/**
+ * Recupera la nota associata a un evento dalla tabella "prenotazioni" del database, in base all'ID dell'evento fornito.
  *
  * @param int $id L'ID dell'evento per il quale si desidera recuperare la nota.
  * @return array Un array associativo contenente la nota dell'evento. Se la nota non viene trovata, l'array sarà vuoto.
+ * 
+ * @throws PDOException Se si verifica un errore durante la query al database.
  */
 function getNote($id)
 {
     $con = get_connection();
-    $query = "SELECT nota FROM prenotazioni WHERE id_calendar_events = :id";
-    $statement = $con->prepare($query);
-    $statement->bindParam(':id', $id);
-    $statement->execute();
-    $note = $statement->fetch(PDO::FETCH_ASSOC);
-    return $note;
+
+    try {
+        $query = "SELECT nota FROM prenotazioni WHERE id_calendar_events = :id";
+        $statement = $con->prepare($query);
+        $statement->bindParam(':id', $id);
+        $statement->execute();
+        $note = $statement->fetch(PDO::FETCH_ASSOC);
+        return $note;
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il recupero della nota dell'evento: " . $e->getMessage());
+    }
 }
 
 /** Ottiene il colore associato a uno specifico sport.
@@ -503,94 +632,134 @@ function getEventColor($sport)
     return '#378006';
 }
 
-/** Recupera le telecamere associate ad un evento dalla tabella "prenotazioni" del database, in base all'ID dell'evento fornito.
+/**
+ * Recupera le telecamere associate ad un evento dalla tabella "prenotazioni" del database, in base all'ID dell'evento fornito.
  *
- * @param int $id L'ID dell'evento per il quale si desidera recuperare la nota.
- * @return array Una stringa JSON contenente la lista di telecamere.
+ * @param int $id L'ID dell'evento per il quale si desidera recuperare le telecamere.
+ * @return string Una stringa JSON contenente la lista di telecamere associate all'evento.
+ * 
+ * @throws PDOException Se si verifica un errore durante la query al database.
  */
 function getCameras($id)
 {
     $con = get_connection();
 
-    $sql = "SELECT id FROM prenotazioni WHERE id_calendar_events=?";
-    $query = $con->prepare($sql);
-    $query->execute([$id]);
-    $prenotazioni_id = $query->fetchColumn();
+    try {
+        $sql = "SELECT id FROM prenotazioni WHERE id_calendar_events=?";
+        $query = $con->prepare($sql);
+        $query->execute([$id]);
+        $prenotazioni_id = $query->fetchColumn();
 
-    // Controlla se $prenotazioni_id ha un valore valido prima di procedere
-    if ($prenotazioni_id) {
-        $query = "SELECT telecamera FROM telecamere_prenotazioni WHERE prenotazione = :id";
-        $statement = $con->prepare($query);
-        $statement->bindParam(':id', $prenotazioni_id);
-        $statement->execute();
-        $cams = $statement->fetchAll(PDO::FETCH_ASSOC);
+        // Controlla se $prenotazioni_id ha un valore valido prima di procedere
+        if ($prenotazioni_id) {
+            $query = "SELECT telecamera FROM telecamere_prenotazioni WHERE prenotazione = :id";
+            $statement = $con->prepare($query);
+            $statement->bindParam(':id', $prenotazioni_id);
+            $statement->execute();
+            $cams = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-        return json_encode($cams);
-    } else {
-        return json_encode([]);
+            return json_encode($cams);
+        } else {
+            return json_encode([]);
+        }
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il recupero delle telecamere dell'evento: " . $e->getMessage());
     }
 }
 
+/**
+ * Recupera il tipo di utente (userType) associato all'utente corrente.
+ *
+ * @return string Il tipo di utente dell'utente corrente.
+ * 
+ * @throws PDOException Se si verifica un errore durante la query al database.
+ */
 function getUserType()
 {
     $con = get_connection();
-    $userInfo = get_user_info($con, $_COOKIE['email']);
-    return $userInfo['userType'];
+
+    try {
+        $userInfo = get_user_info($con, $_COOKIE['email']);
+        return $userInfo['userType'];
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il recupero del tipo di utente: " . $e->getMessage());
+    }
 }
 
 /**
- * Ottiene la data e l'ora di un evento specifico dal database.
+ * Recupera la data e l'ora di un evento specifico dal database.
  *
  * Recupera dal database la data di inizio e l'ora di un evento corrispondente all'ID specificato.
  * Restituisce i dati in formato JSON.
  *
  * @param int $id L'ID dell'evento di cui ottenere la data e l'ora.
  * @return string I dati della data e dell'ora dell'evento in formato JSON.
+ * 
+ * @throws PDOException Se si verifica un errore durante la query al database.
  */
 function getDatetimeEvent($id)
 {
     $con = get_connection();
-    $query = "SELECT start,startTime FROM calendar_events WHERE id = :id";
-    $statement = $con->prepare($query);
-    $statement->bindParam(':id', $id);
-    $statement->execute();
-    $date = $statement->fetch(PDO::FETCH_ASSOC);
-    return json_encode($date);
+
+    try {
+        $query = "SELECT start, startTime FROM calendar_events WHERE id = :id";
+        $statement = $con->prepare($query);
+        $statement->bindParam(':id', $id);
+        $statement->execute();
+        $date = $statement->fetch(PDO::FETCH_ASSOC);
+        return json_encode($date);
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il recupero della data e dell'ora dell'evento: " . $e->getMessage());
+    }
 }
 
-/** Restituisce la data corrente nel formato "YYYY-MM-DD".
- *
- * @return string La data corrente nel formato YYYY-MM-DD, esempio: 2023-06-28.
- */
-function currentDate()
-{
-    return date('YYYY-MM-DD');
-}
 
 /**
- * Ottiene elenco delle societ� sportive dal database.
+ * Ottiene elenco delle società sportive dal database.
  *
- * Recupera dal database l'elenco dei nomi delle societ� sportive e li restituisce come opzioni
+ * Recupera dal database l'elenco dei nomi delle società sportive e li restituisce come opzioni
  * per un elemento di selezione HTML.
  *
- * @return string Le opzioni HTML per l'elemento di selezione delle societ� sportive.
+ * @return string Le opzioni HTML per l'elemento di selezione delle società sportive.
+ *
+ * @throws PDOException Se si verifica un errore durante la query al database.
  */
 function getSocieties()
 {
     $con = get_connection();
-    $query = "SELECT nome FROM societa_sportive";
-    $stmt = $con->query($query);
-    $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $options = '';
-    foreach ($result as $row) {
-        $nomeSocieta = $row['nome'];
-        $options .= "<option value='$nomeSocieta'>$nomeSocieta</option>";
+    try {
+        $query = "SELECT nome FROM societa_sportive";
+        $stmt = $con->query($query);
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $options = '';
+        foreach ($result as $row) {
+            $nomeSocieta = $row['nome'];
+            $options .= "<option value='$nomeSocieta'>$nomeSocieta</option>";
+        }
+
+        return $options;
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il recupero dell'elenco delle società sportive: " . $e->getMessage());
     }
-
-    return $options;
 }
 
+/**
+ * Accorpa la data e l'ora in un unico valore di data e ora.
+ *
+ * Prende una data nel formato "YYYY-MM-DD" e un'ora nel formato "HH:MM:SS"
+ * e le unisce in un unico valore di data e ora nel formato "YYYY-MM-DD HH:MM:SS".
+ *
+ * @param string $date La data nel formato "YYYY-MM-DD".
+ * @param string $time L'ora nel formato "HH:MM:SS".
+ * @return string Il valore di data e ora accorpato nel formato "YYYY-MM-DD HH:MM:SS".
+ */
+function accorpaTime($date, $time)
+{
+    $datetime = $date . ' ' . $time;
+    return $datetime;
+}
 
 ///////////////////////////
 // GET e POST Management //
@@ -600,35 +769,31 @@ if (isset($_GET['action'])) {
     $action = $_GET['action'];
 
     if ($action == 'save-event') { // salvataggio di un evento
-        //tabella calendar_event
-        $groupId = isset($_POST['groupId']) ? $_POST['groupId'] : null;
-        $allDay = isset($_POST['allDay']) ? $_POST['allDay'] : null;
-        $startDate = isset($_POST['start-date']) ? $_POST['start-date'] : null;
-        $endDate = isset($_POST['end-date']) ? $_POST['end-date'] : null;
-        $daysOfWeek = isset($_POST['daysOfWeek']) ? $_POST['daysOfWeek'] : null;
-        $startTime = isset($_POST['startTime']) ? $_POST['startTime'] : null;
-        $endTime = isset($_POST['endTime']) ? $_POST['endTime'] : null;
-        $startRecur = isset($_POST['startRecur']) ? $_POST['startRecur'] : null;
-        $endRecur = isset($_POST['endRecur']) ? $_POST['endRecur'] : null;
-        $url = isset($_POST['url']) ? $_POST['url'] : null;
-        // parsato daysOfWeek in JSON in modo da salvarlo nel database come stringa
-        $daysOfWeek = json_encode($daysOfWeek);
+        $data = array(
+            // Tabella calendar_events
+            'groupId' => $_POST['groupId'] ?? null,
+            'allDay' => $_POST['allDay'] ?? null,
+            'startDate' => $_POST['start-date'] ?? null,
+            'endDate' => $_POST['end-date'] ?? null,
+            'daysOfWeek' => json_encode($_POST['daysOfWeek'] ?? null),
+            'startTime' => $_POST['startTime'] ?? null,
+            'endTime' => $_POST['endTime'] ?? null,
+            'startRecur' => $_POST['startRecur'] ?? null,
+            'endRecur' => $_POST['endRecur'] ?? null,
+            'url' => $_POST['url'] ?? null,
+            // Tabella prenotazioni
+            'society' => $_POST['society'] ?? null,
+            'sport' => $_POST['sport'] ?? null,
+            'note' => $_POST['description'] ?? null,
+            'eventType' => $_POST['event_type'] ?? null,
+            // Tabella telecamere
+            'cameras' => json_encode($_POST['camera'] ?? null),
+            'author' => $_POST['author'] ?? null,
+        );
 
-        //tabella prenotazioni
-        $society = isset($_POST['society']) ? $_POST['society'] : null;
-        $sport = isset($_POST['sport']) ? $_POST['sport'] : null;
-        $note = isset($_POST['description']) ? $_POST['description'] : null;
-        $eventType = isset($_POST['event_type']) ? $_POST['event_type'] : null;
-        $cameras = isset($_POST['camera']) ? $_POST['camera'] : null;
-        $cameras = json_encode($cameras);
-
-        //GetAuthor parametro necessario
-        $author = isset($_POST['author']) ? $_POST['author'] : null;
-
-        //Sono obbligatori society e startdate ed effettuiamo il controllo che esistano
-        if ($society && $startDate) {
-            $id = null;
-            $id = save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $note, $eventType, $cameras, $author);
+        //Controllo che esistano campi obbligatori (society e startdate)
+        if ($data['society'] && $data['startDate']) {
+            $id = save_event($data['groupId'], $data['allDay'], $data['startDate'], $data['endDate'], $data['daysOfWeek'], $data['startTime'], $data['endTime'], $data['startRecur'], $data['endRecur'], $data['url'], $data['society'], $data['sport'], $data['note'], $data['eventType'], $data['cameras'], $data['author']);
             echo json_encode(array('status' => 'success', 'id' => $id));
         } else {
             echo json_encode(array('status' => 'error', 'message' => 'Missing required fields'));
@@ -677,24 +842,24 @@ if (isset($_GET['action'])) {
             echo getInfoEvent($id);
         } else { // invalid action
         }
-    } elseif ($action == 'edit-event') { // salvataggio di un evento
+    } elseif ($action == 'edit-event') { // modifica evento già esistente
+        $data = array(
+            // Tabella Calendar Event
+            'id' => $_POST['id'] ?? null,
+            'groupId' => $_POST['groupId'] ?? null,
+            'startDate' => $_POST['startDate'] ?? null,
+            'endDate' => $_POST['endDate'] ?? null,
+            'startTime' => $_POST['startTime'] ?? null,
+            'endTime' => $_POST['endTime'] ?? null,
+            // Tabella prenotazioni
+            'url' => $_POST['url'] ?? null,
+            'society' => $_POST['society'] ?? null,
+            'note' => $_POST['note'] ?? null,
+        );
 
-        //tabella calendar_event
-        $id = isset($_POST['id']) ? $_POST['id'] : null;
-        $groupId = isset($_POST['groupId']) ? $_POST['groupId'] : null;
-        $startDate = isset($_POST['startDate']) ? $_POST['startDate'] : null;
-        $endDate = isset($_POST['endDate']) ? $_POST['endDate'] : null;
-        $startTime = isset($_POST['startTime']) ? $_POST['startTime'] : null;
-        $endTime = isset($_POST['endTime']) ? $_POST['endTime'] : null;
-        $url = isset($_POST['url']) ? $_POST['url'] : null;
-
-        //tabella event-info 
-        $society = isset($_POST['society']) ? $_POST['society'] : null;
-        $note = isset($_POST['note']) ? $_POST['note'] : null;
-
-        //Sono obbligatori society e startdate ed effettuiamo il controllo che esistano
-        if ($society && $startDate) {
-            $id = edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $url, $society, $note, $id);
+        // Controllo campi obbligatori (society e startDate)
+        if ($data['society'] && $data['startDate']) {
+            $id = edit_training($data['groupId'], $data['startDate'], $data['endDate'], $data['startTime'], $data['endTime'], $data['url'], $data['society'], $data['note'], $data['id']);
             echo json_encode(array('status' => 'success', 'id' => $id));
         } else {
             echo json_encode(array('status' => 'error', 'message' => 'Missing required fields'));

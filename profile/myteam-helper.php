@@ -75,82 +75,95 @@ function getTeambyCoach($coach_email)
 }
 
 
-function getSocietyByBoss($boss) {
-  try {
-      $con = get_connection();
-      $query = "SELECT sp.*
-                FROM societa_sportive AS sp
-                WHERE sp.responsabile = :email";
-      $statement = $con->prepare($query);
-      $statement->bindParam(':email', $boss);
-      $statement->execute();
-      $society = $statement->fetchAll(PDO::FETCH_ASSOC);
+/**
+ * Ottiene le società sportive in base all'email del responsabile.
+ * 
+ * @param {string} $boss - L'email del responsabile da utilizzare come filtro.
+ * @return {void} - La funzione restituisce una risposta JSON contenente le società sportive o un messaggio di errore.
+ */
+function getSocietyByBoss($boss)
+{
+    try {
+        $con = get_connection();
+        $query = "SELECT sp.*
+                  FROM societa_sportive AS sp
+                  WHERE sp.responsabile = :email";
+        $statement = $con->prepare($query);
+        $statement->bindParam(':email', $boss);
+        $statement->execute();
+        $society = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-      if ($society) {
-          // Success response
-          $response = [
-              'status' => 'success',
-              'society' => $society
-          ];
-      } else {
-          // Error response if no team found
-          $response = [
-              'status' => 'error',
-              'message' => 'No team found for the given coach'
-          ];
-      }
+        if ($society) {
+            // Risposta di successo se sono state trovate società sportive
+            $response = [
+                'status' => 'success',
+                'society' => $society
+            ];
+        } else {
+            // Risposta di errore se nessuna squadra è stata trovata per il responsabile fornito
+            $response = [
+                'status' => 'error',
+                'message' => 'Nessuna società sportiva trovata per il responsabile fornito'
+            ];
+        }
 
-      echo json_encode($response);
-  } catch (Exception $e) {
-      // Error response if an exception occurs
-      $response = [
-          'status' => 'error',
-          'message' => 'An error occurred: ' . $e->getMessage()
-      ];
-      echo json_encode($response);
-  }
+        echo json_encode($response);
+    } catch (Exception $e) {
+        // Risposta di errore in caso di eccezione
+        $response = [
+            'status' => 'error',
+            'message' => 'Si è verificato un errore: ' . $e->getMessage()
+        ];
+        echo json_encode($response);
+    }
 }
 
 
+/**
+ * Ottiene gli allenatori in base all'email del responsabile.
+ * 
+ * @param {string} $responsabile_email - L'email del responsabile da utilizzare come filtro.
+ * @return {string} - Una stringa JSON contenente i dati degli allenatori o un messaggio di errore.
+ */
 function getCoachesbyBoss($responsabile_email)
 {
-  try {
-    $con = get_connection();
-    $query = "SELECT DISTINCT p.* 
-    FROM persone AS p 
-    INNER JOIN allenatori AS coach ON coach.email = p.email 
-    INNER JOIN allenatori_squadre AS a_s ON a_s.email_allenatore = coach.email
-    INNER JOIN squadre ON a_s.id_squadra = squadre.id 
-    INNER JOIN societa_sportive AS sp ON sp.partita_iva = squadre.societa 
-    WHERE sp.responsabile = :email";
-    $statement = $con->prepare($query);
-    $statement->bindParam(':email', $responsabile_email);
-    $statement->execute();
-    $coaches = $statement->fetchAll(PDO::FETCH_ASSOC);
+    try {
+        $con = get_connection();
+        $query = "SELECT DISTINCT p.* 
+                  FROM persone AS p 
+                  INNER JOIN allenatori AS coach ON coach.email = p.email 
+                  INNER JOIN allenatori_squadre AS a_s ON a_s.email_allenatore = coach.email
+                  INNER JOIN squadre ON a_s.id_squadra = squadre.id 
+                  INNER JOIN societa_sportive AS sp ON sp.partita_iva = squadre.societa 
+                  WHERE sp.responsabile = :email";
+        $statement = $con->prepare($query);
+        $statement->bindParam(':email', $responsabile_email);
+        $statement->execute();
+        $coaches = $statement->fetchAll(PDO::FETCH_ASSOC);
 
-    if ($coaches) {
-      // Success response
-      $response = [
-        'status' => 'success',
-        'coaches' => $coaches
-      ];
-    } else {
-      // Error response if no team found
-      $response = [
-        'status' => 'error',
-        'message' => 'No team found for the given coach'
-      ];
+        if ($coaches) {
+            // Risposta di successo se sono stati trovati allenatori
+            $response = [
+                'status' => 'success',
+                'coaches' => $coaches
+            ];
+        } else {
+            // Risposta di errore se nessun allenatore è stato trovato per il responsabile fornito
+            $response = [
+                'status' => 'error',
+                'message' => 'Nessun allenatore trovato per il responsabile fornito'
+            ];
+        }
+
+        return json_encode($response);
+    } catch (Exception $e) {
+        // Risposta di errore in caso di eccezione
+        $response = [
+            'status' => 'error',
+            'message' => 'Si è verificato un errore: ' . $e->getMessage()
+        ];
+        return json_encode($response);
     }
-
-    return json_encode($response);
-  } catch (Exception $e) {
-    // Error response if an exception occurs
-    $response = [
-      'status' => 'error',
-      'message' => 'An error occurred: ' . $e->getMessage()
-    ];
-    return json_encode($response);
-  }
 }
 
 

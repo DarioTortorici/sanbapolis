@@ -5,83 +5,95 @@ require('auth-helper.php');
 require_once('db_connection.php');
 require('../modals/email-handler.php');
 
-/**
- * Gestisce la validazione dei campi dell'utente e l'upload dell'immagine del profilo.
- * In caso di errori di validazione, i messaggi di errore vengono aggiunti all'array $errors.
- * @param string $_POST['firstName'] Il nome fornito dall'utente.
- * @param string $_POST['lastName'] Il cognome fornito dall'utente.
- * @param string $_POST['email'] L'indirizzo email fornito dall'utente.
- * @param string $_POST['password'] La password fornita dall'utente.
- * @param string $_POST['confirm_pwd'] La conferma della password fornita dall'utente.
- * @param string $_POST['userType'] Il ruolo fornito dall'utente.
- * @param string $_POST['dataNascita'] La data di nascita fornita dall'utente.
- * @param string $_POST['citta'] La citta fornita dall'utente.
- * @param string $_POST['telefono'] Il numero di telefono dell'utente
- * @param string $_POST['societyCode'] Il codice associato alla societ�
- * @param string $_POST['teamCode'] Il codice associato alla squadra
- * @param array $_FILES['profileUpload'] I dettagli dell'immagine del profilo da caricare.
- */
+
 // Array per gli errori
 $errors = array();
 
+// Funzione per aggiungere un errore all'array degli errori
+function addError(&$errors, $error)
+{
+    $errors[] = $error;
+}
+
+// Funzione per verificare l'esistenza e validità di un parametro POST
+function validatePostParameter($paramName)
+{
+    return isset($_POST[$paramName]) && !empty(trim($_POST[$paramName]));
+}
+
 $firstName = validate_input_text($_POST['firstName']);
-if (empty($firstName)) {
-    $errors[] = "Hai dimenticato di inserire il tuo nome.";
+if (!$firstName) {
+    addError($errors, "Hai dimenticato di inserire il tuo nome.");
 }
 
 $lastName = validate_input_text($_POST['lastName']);
-if (empty($lastName)) {
-    $errors[] = "Hai dimenticato di inserire il tuo cognome.";
+if (!$lastName) {
+    addError($errors, "Hai dimenticato di inserire il tuo cognome.");
 }
 
 $email = validate_input_email($_POST['email']);
-if (empty($email)) {
-    $errors[] = "Hai dimenticato di inserire il tuo indirizzo email.";
+if (!$email) {
+    addError($errors, "Hai dimenticato di inserire il tuo indirizzo email.");
 }
 
 $password = validate_input_text($_POST['password']);
-if (empty($password)) {
-    $errors[] = "Hai dimenticato di inserire una password.";
+$confirmPwd = validate_input_text($_POST['confirm_pwd']);
+
+if (!$password) {
+    addError($errors, "Hai dimenticato di inserire una password.");
 } elseif (!validate_password($password)) {
-    $errors[] = "La password deve contenere almeno 8 caratteri, di cui uno maiuscolo ed uno speciale.";
+    addError($errors, "La password deve contenere almeno 8 caratteri, di cui uno maiuscolo ed uno speciale.");
 }
 
-$confirmPwd = validate_input_text($_POST['confirm_pwd']);
-if (empty($confirmPwd)) {
-    $errors[] = "Hai dimenticato di inserire la conferma della password.";
+if (!$confirmPwd) {
+    addError($errors, "Hai dimenticato di inserire la conferma della password.");
 }
 
 // Verifica che le password corrispondano
 if ($password !== $confirmPwd) {
-    $errors[] = "Le password non coincidono.";
+    addError($errors, "Le password non coincidono.");
 }
 
 $userType = validate_input_text($_POST['userType']);
-if (empty($userType)) {
-    $errors[] = "Hai dimenticato di inserire il tuo ruolo.";
+if (!$userType) {
+    addError($errors, "Hai dimenticato di inserire il tuo ruolo.");
 }
 
+// Verifica la presenza di altri campi dati specifici in base al tipo di utente
+if ($userType === "allenatore") {
+    $coachType = validate_input_text($_POST['coachType']);
+    if (!$coachType) {
+        addError($errors, "Hai dimenticato di selezionare il tipo di allenatore.");
+    }
+} elseif ($userType === "giocatore") {
+    $teamCode = $_POST['teamCode'];
+    if (empty($teamCode) || !validate_team_code($con, $teamCode)) {
+        addError($errors, "Il codice squadra non esiste.");
+    }
+} elseif ($userType === "società") {
+    $p_iva = validate_input_text($_POST['p_iva']);
+    $societyName = validate_input_text($_POST['societyName']);
+    $address = validate_input_text($_POST['address']);
+    $sportType = validate_input_text($_POST['sportType']);
 
+    if (!$p_iva || !$societyName || !$address || !$sportType) {
+        addError($errors, "Alcuni campi dati per la società mancano o sono invalidi.");
+    }
+}
+
+// Verifica la presenza di altri campi dati comuni a tutti i tipi di utente
 $dataNascita = $_POST['dataNascita'];
 $citta = $_POST['citta'];
 $telefono = $_POST['telefono'];
 $profileImage = upload_profile("../assets/profileimg/", $_FILES['profileUpload']);
 
 $societyCode = $_POST['societyCode'];
-$teamCode = $_POST['teamCode'];
 
-if (!empty($societyCode)) {
-    if (!validate_society_code($con, $societyCode)) {
-        $errors[] = "Il codice societario non esiste";
-    }
-} else if (!empty($teamCode)) {
-    if (!validate_team_code($con, $teamCode)) {
-        $errors[] = "Il codice squadra non esiste";
-    }
+if ($societyCode && !validate_society_code($con, $societyCode)) {
+    addError($errors, "Il codice societario non esiste.");
 }
 
 if (empty($errors)) {
-
     // Registra un nuovo utente
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     $activationCode = generateActivationCode(); // Genera un codice di attivazione univoco
@@ -148,19 +160,7 @@ if (empty($errors)) {
         $con = null; // Chiudi la connessione PDO
     }
 } else {
-    // Aggiungi l'errore specifico della password all'array degli errori
-    $passwordError = "";
-    foreach ($errors as $error) {
-        if (strpos($error, "La password") !== false) {
-            $passwordError = $error;
-            break;
-        }
-    }
-
-    echo $passwordError;
-}
-// Mostra gli errori a schermo
-if (!empty($errors)) {
+    // Mostra gli errori a schermo
     echo "<ul>";
     foreach ($errors as $error) {
         echo "<li>$error</li>";

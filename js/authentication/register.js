@@ -1,6 +1,8 @@
-/** Gestisce la selezione del tipo di utente e mostra/nasconde le righe dei codici assegnazione.
+/**
+ * Gestisce la selezione del tipo di utente in un form.
+ * Mostra o nasconde le righe del form in base al tipo di utente selezionato.
+ * Imposta i campi input come obbligatori o facoltativi a seconda del tipo di utente.
  */
-
 function handleUserType() {
     // Ottieni il riferimento all'elemento select per il tipo di utente
     var userTypeSelect = document.getElementById('userType');

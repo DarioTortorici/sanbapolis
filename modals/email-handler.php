@@ -25,6 +25,14 @@ if (isset($_POST['invited-email'])) {
     }
 }
 
+/**
+ * Inserisce un'email invitata per un determinato tipo di utente nella tabella degli inviti.
+ * 
+ * @param {string} $userType - Il tipo di utente ("allenatori" o "giocatori").
+ * @param {string} $invitedEmail - L'email dell'utente invitato.
+ * @return {boolean} - True se l'inserimento è avvenuto con successo, False altrimenti.
+ * @throws {InvalidArgumentException} - Viene lanciata un'eccezione se il tipo di utente non è valido.
+ */
 function insertInvitedEmail($userType, $invitedEmail)
 {
     // Verifica se il $userType è valido
@@ -34,6 +42,8 @@ function insertInvitedEmail($userType, $invitedEmail)
     }
 
     $con = get_connection();
+
+    // Costruisce il nome della tabella dinamicamente
     $tabella = 'inviti_' . $userType;
 
     // Utilizzo della stessa query per entrambi i tipi di utente
@@ -42,6 +52,7 @@ function insertInvitedEmail($userType, $invitedEmail)
     $stmt->bindParam(':email', $invitedEmail);
 
     try {
+        // Esegue l'inserimento dell'email nella tabella
         $stmt->execute();
         return true; // Ritorno true in caso di successo
     } catch (PDOException $e) {
@@ -51,16 +62,23 @@ function insertInvitedEmail($userType, $invitedEmail)
     }
 }
 
+/**
+ * Invia un'email di autenticazione con il codice di attivazione per attivare l'account.
+ * 
+ * @param {string} $userEmail - L'email dell'utente a cui inviare l'email di autenticazione.
+ * @param {string} $activationCode - Il codice di attivazione da includere nell'email di autenticazione.
+ * @return {void} - La funzione non restituisce alcun valore.
+ */
 function authEmail($userEmail, $activationCode)
 {
     $activationLink = 'https://istar.disi.unitn.it/authentication/activation.php?code=' . urlencode($activationCode); // URL della pagina di attivazione con il codice come parametro
 
-    // Create an instance of PHPMailer
+    // Crea istanza di PHPMailer
     $mail = new PHPMailer(true);
 
     try {
-        // Server settings for Sendinblue
-        $mail->isSMTP();                                            // Send using SMTP
+        // Server settings di Sendinblue
+        $mail->isSMTP();                                            // Mandato via SMTP
         $mail->Host       = 'smtp-relay.sendinblue.com';
         $mail->SMTPAuth   = true;
         $mail->Username   = 'sporttech76@gmail.com';
@@ -79,23 +97,32 @@ function authEmail($userEmail, $activationCode)
         $mail->AltBody = 'Per poter usufruire di tutti i nostri servizi, copia e incolla il seguente link nel tuo browser: ' . $activationLink;
 
         $mail->send();
-        echo 'Message has been sent';
-
+        // L'email è stata inviata con successo, quindi esegui un reindirizzamento alla dashboard dell'utente.
         header('Location: ../profile/user-dashboard.php');
+        exit(); // Termina l'esecuzione dello script dopo il reindirizzamento.
 
     } catch (Exception $e) {
+        // In caso di errore nell'invio dell'email, mostra un messaggio di errore.
         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }
 }
 
+/**
+ * Invia un'email di invito a un allenatore specifico.
+ * 
+ * @param {string} $userEmail - L'email dell'allenatore a cui inviare l'invito.
+ * @param {string} $teamName - Il nome della squadra a cui l'allenatore è invitato.
+ * @param {string} $code - Il codice di invito associato all'allenatore.
+ * @return {void} - La funzione non restituisce alcun valore.
+ */
 function inviteCoachByEmail($userEmail, $teamName, $code)
 {
-    // Create an instance of PHPMailer
+    // Crea instanza di PHPMailer
     $mail = new PHPMailer(true);
 
     try {
         // Server settings for Sendinblue
-        $mail->isSMTP();                                            // Send using SMTP
+        $mail->isSMTP();                                            // Mandato via SMTP
         $mail->Host       = 'smtp-relay.sendinblue.com';
         $mail->SMTPAuth   = true;
         $mail->Username   = 'sporttech76@gmail.com';
@@ -110,28 +137,37 @@ function inviteCoachByEmail($userEmail, $teamName, $code)
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Invito alla Sanbapolis Platform';
-        $mail->Body    = 'Unisciti a ' . $teamName . ', clicca su istar.disi.unitn.it/authentication/register.php?userType=allenatore&teamcode=' . $code;
-        $mail->AltBody = 'Unisciti a ' . $teamName . ', clicca su istar.disi.unitn.it/authentication/register.php?userType=allenatore&teamcode=' . $code;
+        $invitationLink = 'https://istar.disi.unitn.it/authentication/register.php?userType=allenatore&teamcode=' . $code;
+        $mail->Body    = 'Unisciti a ' . $teamName . ', clicca su <a href="' . $invitationLink . '">questo link</a>';
+        $mail->AltBody = 'Unisciti a ' . $teamName . ', copia e incolla il seguente link nel tuo browser: ' . $invitationLink;
 
         $mail->send();
-        echo 'Message has been sent';
-
-        // Redirect back to the calling page
+        // L'email è stata inviata con successo, quindi esegui un reindirizzamento alla pagina precedente.
         header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit();
+        exit(); // Termina l'esecuzione dello script dopo il reindirizzamento.
+
     } catch (Exception $e) {
+        // In caso di errore nell'invio dell'email, mostra un messaggio di errore.
         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }
 }
 
+/**
+ * Invia un'email di invito a un giocatore specifico.
+ * 
+ * @param {string} $userEmail - L'email del giocatore a cui inviare l'invito.
+ * @param {string} $teamName - Il nome della squadra a cui il giocatore è invitato.
+ * @param {string} $code - Il codice di invito associato al giocatore.
+ * @return {void} - La funzione non restituisce alcun valore.
+ */
 function invitePlayerByEmail($userEmail, $teamName, $code)
 {
-    // Create an instance of PHPMailer
+    // Crea instanza di PHPMailer
     $mail = new PHPMailer(true);
 
     try {
-        // Server settings for Sendinblue
-        $mail->isSMTP();                                            // Send using SMTP
+        // Server settings di Sendinblue
+        $mail->isSMTP();                                            // Mandato via SMTP
         $mail->Host       = 'smtp-relay.sendinblue.com';
         $mail->SMTPAuth   = true;
         $mail->Username   = 'sporttech76@gmail.com';
@@ -146,28 +182,41 @@ function invitePlayerByEmail($userEmail, $teamName, $code)
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Invito alla Sanbapolis Platform';
-        $mail->Body    = 'Unisciti a ' . $teamName . ', clicca su istar.disi.unitn.it/authentication/register.php?userType=giocatore&teamcode=' . $code;
-        $mail->AltBody = 'Unisciti a ' . $teamName . ', clicca su istar.disi.unitn.it/authentication/register.php?userType=giocatore&teamcode=' . $code;
+        $invitationLink = 'https://istar.disi.unitn.it/authentication/register.php?userType=giocatore&teamcode=' . $code;
+        $mail->Body    = 'Unisciti a ' . $teamName . ', clicca su <a href="' . $invitationLink . '">questo link</a>';
+        $mail->AltBody = 'Unisciti a ' . $teamName . ', copia e incolla il seguente link nel tuo browser: ' . $invitationLink;
 
         $mail->send();
-        echo 'Message has been sent';
-
-        // Redirect back to the calling page
+        // L'email è stata inviata con successo, quindi esegui un reindirizzamento alla pagina precedente.
         header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit();
+        exit(); // Termina l'esecuzione dello script dopo il reindirizzamento.
+
     } catch (Exception $e) {
+        // In caso di errore nell'invio dell'email, mostra un messaggio di errore.
         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }
 }
 
+/**
+ * Invia una richiesta di evento ai manutentori specificati.
+ * 
+ * @param {array} $manutentore - Un array contenente gli indirizzi email dei manutentori a cui inviare la richiesta.
+ * @param {string} $author - Il nome dell'autore della richiesta evento.
+ * @param {string} $startDate - La data di inizio dell'evento.
+ * @param {string} $endDate - La data di fine dell'evento.
+ * @param {string} $startTime - L'ora di inizio dell'evento.
+ * @param {string} $endTime - L'ora di fine dell'evento.
+ * @param {string} $cameras - Un elenco delle telecamere utilizzate nell'evento.
+ * @return {void} - La funzione non restituisce alcun valore.
+ */
 function authEvent($manutentore, $author, $startDate, $endDate, $startTime, $endTime, $cameras)
 {
-    // Create an instance of PHPMailer
+    // Crea istanza di PHPMailer
     $mail = new PHPMailer(true);
 
     try {
-        // Server settings for Sendinblue
-        $mail->isSMTP();                                            // Send using SMTP
+        // Server settings di Sendinblue
+        $mail->isSMTP();                                            // Mandato via SMTP
         $mail->Host       = 'smtp-relay.sendinblue.com';
         $mail->SMTPAuth   = true;
         $mail->Username   = 'sporttech76@gmail.com';
@@ -178,7 +227,7 @@ function authEvent($manutentore, $author, $startDate, $endDate, $startTime, $end
         // Recipients
         $mail->setFrom('sporttech76@gmail.com', 'SportTech');
 
-        // Mail ad ogni manutentore
+        // Aggiungi gli indirizzi email dei manutentori come destinatari
         foreach ($manutentore as $email) {
             $mail->addAddress($email);
         }
@@ -187,21 +236,21 @@ function authEvent($manutentore, $author, $startDate, $endDate, $startTime, $end
         $mail->isHTML(true);
         $mail->Subject = 'Richiesta Evento';
         $mail->Body    = 'La tua struttura è richiesta da ' . $author .
-            'Dal ' . $startDate . 'al ' . $endDate .
-            "dall'ora" . $startTime . "alle " . $endTime .
-            "Utilizzando le seguenti telecamere: " . $cameras;
+            ' dal ' . $startDate . ' al ' . $endDate .
+            " dalle ore " . $startTime . " alle " . $endTime .
+            " utilizzando le seguenti telecamere: " . $cameras;
         $mail->AltBody = 'La tua struttura è richiesta da ' . $author .
-            'Dal ' . $startDate . 'al ' . $endDate .
-            "dall'ora" . $startTime . "alle " . $endTime .
-            "Utilizzando le seguenti telecamere: " . $cameras;
+            ' dal ' . $startDate . ' al ' . $endDate .
+            " dalle ore " . $startTime . " alle " . $endTime .
+            " utilizzando le seguenti telecamere: " . $cameras;
 
         $mail->send();
-        echo 'Message has been sent';
-
-        // Redirect back to the calling page
+        // L'email è stata inviata con successo, quindi esegui un reindirizzamento alla pagina precedente.
         header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit();
+        exit(); // Termina l'esecuzione dello script dopo il reindirizzamento.
+
     } catch (Exception $e) {
+        // In caso di errore nell'invio dell'email, mostra un messaggio di errore.
         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
     }
 }

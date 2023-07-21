@@ -7,11 +7,6 @@ checkRecordtoStart();
 checkRecordtoEnd();
 
 
-/**
- * Verifica se ci sono record nella tabella 'prenotazioni' che hanno raggiunto il loro orario di inizio
- * e aggiorna il campo 'privilegi_cam' degli allenatori corrispondenti a 1.
- * @return void
- */
 function checkRecordtoStart()
 {
     $con = get_connection();
@@ -45,7 +40,7 @@ function checkRecordtoStart()
 
         //ffmpeg parte video-rec per ogni telecamera
         foreach ($cams as $Camerartsp) {
-            $rtsp =  'rtsp://istar:password@'. $Camerartsp + '/profile2/media.smp';          
+            $rtsp =  'rtsp://istar:password@' . $Camerartsp + '/profile2/media.smp';
             ffmpegRec($rtsp, $squadra, $data);
         }
 
@@ -59,15 +54,21 @@ function checkRecordtoStart()
     }
 }
 
+
 /**
- * Verifica se ci sono record nella tabella 'prenotazioni' che hanno raggiunto il loro orario di fine
- * e aggiorna il campo 'privilegi_cam' degli allenatori corrispondenti a 0.
+ * Controlla e gestisce le prenotazioni scadute per chiudere le registrazioni video.
+ * 
+ * La funzione recupera le prenotazioni con data di fine inferiore a 5 minuti fa e
+ * chiude le registrazioni video relative, aggiorna i permessi dello staff e aggiunge
+ * i dettagli dei video registrati nel database.
+ * 
  * @return void
  */
 function checkRecordtoEnd()
 {
     $con = get_connection();
 
+    // Query per recuperare le prenotazioni scadute e le relative telecamere
     $sql = "SELECT p.*, GROUP_CONCAT(tp.telecamera) as telecamere, COUNT(*) as count 
         FROM prenotazioni as p 
         INNER JOIN telecamere_prenotazioni as tp ON tp.prenotazione = p.id 
@@ -78,6 +79,7 @@ function checkRecordtoEnd()
     $result = $query->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($result as $row) {
+        // Estrai le informazioni dalla riga risultante
         $count = $row['count'];
         $squadra = $row['id_squadra'];
         $cams = $row['telecamere']; // $cams conterrà un elenco di telecamere separate da virgole
@@ -86,22 +88,22 @@ function checkRecordtoEnd()
     }
 
     if ($count > 0) {
-        //Retrieve allenatori
+        // Recupera gli allenatori associati alla squadra
         $sql = "SELECT email_allenatore FROM allenatori_squadre WHERE id_squadra = :squadra";
         $query = $con->prepare($sql);
         $query->bindParam(':squadra', $squadra);
         $query->execute();
         $coaches = $query->fetchAll(PDO::FETCH_COLUMN); // Utilizziamo FETCH_COLUMN per ottenere solo la colonna 'email_allenatore'
 
-        //Retrieve ip selected cameras [TO DO]
-        $cameraRTSP = $cams; // Simulo $cams come array deglii indirizzi RTSP delle telecamere
+        // Recupera gli indirizzi RTSP delle telecamere selezionate [TO DO]
+        $cameraRTSP = $cams; // Simuliamo $cams come array di indirizzi RTSP delle telecamere
 
-        //ffmpeg parte video-rec per ogni telecamera
+        // Interrompi la registrazione video per ogni telecamera usando ffmpeg
         foreach ($cameraRTSP as $rtsp) {
             $directory = ffmpegStopRec($rtsp, $squadra, $data);
         }
 
-        // Aggiorna permessi dello staff per ogni allenatore
+        // Aggiorna i permessi dello staff
         foreach ($coaches as $coach) {
             $sql = "UPDATE allenatori SET privilegi_cam = 0 WHERE email = :allenatore";
             $query = $con->prepare($sql);
@@ -109,13 +111,14 @@ function checkRecordtoEnd()
             $query->execute();
         }
 
-        //Imposta la directory dove sono presenti i file
+        // Aggiorna l'URL nel calendario dell'evento con la directory dei file
         $sql = "UPDATE calendar_events SET url = :dir WHERE id = :idCalendar";
         $query = $con->prepare($sql);
         $query->bindParam(':dir', $directory);
         $query->bindParam(':idCalendar', $idCalendar);
         $query->execute();
 
+        // Registra i file video nella tabella 'video'
         $query = "INSERT INTO video (locazione) VALUES (:dir)";
         $stmt = $con->prepare($query);
         $stmt->bindParam(':dir', $directory);
