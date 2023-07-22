@@ -96,6 +96,30 @@ CREATE TABLE video(
 	PRIMARY KEY(locazione)
 );
 
+CREATE TABLE screenshots (
+	locazione VARCHAR(255) NOT NULL,
+	nome VARCHAR(64)  NOT NULL,
+	video VARCHAR(255) NOT NULL,
+	nota TEXT,
+
+	CONSTRAINT fk_screenshot_video FOREIGN KEY (video) REFERENCES video(locazione) ON UPDATE CASCADE ON DELETE CASCADE,
+
+	PRIMARY KEY (locazione)
+);
+
+CREATE TABLE segnaposti (
+	id INTEGER AUTO_INCREMENT NOT NULL,
+	minutaggio TIME NOT NULL,
+	video VARCHAR(255) NOT NULL,
+	nome VARCHAR(64),
+	note TEXT,
+
+	CONSTRAINT fk_segnaposti_video FOREIGN KEY (video) REFERENCES video(locazione) ON UPDATE CASCADE ON DELETE CASCADE,
+
+	UNIQUE(minutaggio, video),
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE societa_sportive(
 	partita_iva VARCHAR(11) NOT NULL,
 	nome VARCHAR(64) NOT NULL, 
