@@ -115,3 +115,7 @@ INSERT INTO allenatori_squadre (email_allenatore, id_squadra, data_inizio) VALUE
 ('raffaele.palladino@gmail.com', (SELECT id FROM squadre WHERE nome = 'Pallavolo Trento Nord' AND societa = 23456789012), (SELECT CURDATE())),
 ('giorgio.verdi@gmail.com', (SELECT id FROM squadre WHERE nome = 'Basket Club Trento Sud' AND societa = 34567890123), (SELECT CURDATE())),
 ('luisa.bianchi@gmail.com', (SELECT id FROM squadre WHERE nome = 'Pallavolo Trento Sud' AND societa = 45678901234), (SELECT CURDATE()));
+
+INSERT INTO video(locazione, nome, autore, nota) VALUES ('video/video.mp4', 'Test Video', 'vincenzo.italiano@gmail.com', NULL);
+INSERT INTO video(locazione, nome, autore, nota) VALUES ('video/basket_test_1.mp4', 'Test Basket', 'vincenzo.italiano@gmail.com', NULL);
+INSERT INTO video(locazione, nome, autore, nota) VALUES ('video/volley_test_1.mp4', 'Test Volley', 'vincenzo.italiano@gmail.com', NULL);

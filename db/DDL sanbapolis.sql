@@ -109,7 +109,7 @@ CREATE TABLE screenshots (
 
 CREATE TABLE segnaposti (
 	id INTEGER AUTO_INCREMENT NOT NULL,
-	minutaggio TIME NOT NULL,
+	minutaggio TIME(3) NOT NULL,
 	video VARCHAR(255) NOT NULL,
 	nome VARCHAR(64),
 	note TEXT,
