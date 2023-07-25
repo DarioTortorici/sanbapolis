@@ -165,6 +165,66 @@ function getCoachesByBoss(mail) {
 }
 
 /**
+ * Elimina il giocatore in base al bottone cliccato.
+ * Effettua una richiesta AJAX al server per eliminare i dettagli del giocatore associato al bottone.
+ * La risposta dal server viene interpretata come JSON.
+ * 
+ * @function deletePlayer
+ * @param {Element} buttonElement - Il bottone cliccato che genera la richiesta.
+ * @throws {Error} Se la richiesta AJAX fallisce.
+ */
+function deletePlayer(buttonElement) {
+  // risalgo alla email del giocatore dal titolo della card
+  var email = buttonElement.parentNode.querySelector('.card-title').innerText;
+  $.ajax({
+    url: 'http://localhost/profile/myteam-helper.php?action=delete-player',
+    method: 'POST',
+    data: {
+      email: email
+    },
+    dataType: "json",
+    success: function (response) {
+      updateCardVisibility(response.players);
+    },
+    error: function (xhr, status, error) {
+      console.log(error);
+      console.log(xhr.responseText);
+    }
+  });
+}
+
+/**
+ * Elimina l'allenatore in base al bottone cliccato.
+ * Effettua una richiesta AJAX al server per eliminare i dettagli dell'allenatore associato al bottone.
+ * La risposta dal server viene interpretata come JSON.
+ * 
+ * @function deletePlayer
+ * @param {Element} buttonElement - Il bottone cliccato che genera la richiesta.
+ * @param {String} managerMail - La mail del responsabile della società
+ * @throws {Error} Se la richiesta AJAX fallisce.
+ */
+function deleteStaff(buttonElement, managerMail) {
+  // risalgo alla email del giocatore dal titolo della card
+  var email = buttonElement.parentNode.querySelector('.card-title').innerText;
+  $.ajax({
+    url: 'http://localhost/profile/myteam-helper.php?action=delete-staff',
+    method: 'POST',
+    data: {
+      email: email,
+      boss_email: managerMail
+    },
+    dataType: "json",
+    success: function (response) {
+      updateCardVisibility(response.coaches);
+    },
+    error: function (xhr, status, error) {
+      console.log(error);
+      console.log(xhr.responseText);
+    }
+  });
+}
+
+/**
  * Aggiorna la pagina della squadra con i dettagli della squadra ricevuti come parametro.
  * 
  * @function updateMyTeampage
@@ -247,8 +307,6 @@ function updateMyStaffpage(society) {
     }
   }
 }
-
-
 
 /**
  * Aggiorna la visibilità delle card dei giocatori all'interno della pagina web.

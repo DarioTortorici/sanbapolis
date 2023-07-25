@@ -198,17 +198,108 @@ function getPlayersbyTeam($teamid)
         'message' => 'No team found for the given coach'
       ];
     }
-
-    return json_encode($response);
   } catch (Exception $e) {
     // Error response if an exception occurs
     $response = [
       'status' => 'error',
       'message' => 'An error occurred: ' . $e->getMessage()
     ];
-    return json_encode($response);
   }
+  return json_encode($response);
 }
+
+/**
+ * Elimina l'associazione di un giocatore da una squadra dal database tramite la sua email.
+ *
+ * @param string $email Email del giocatore.
+ * @return string JSON contenente il successo o meno dell'operazione e la lista aggiornata dei giocatori della squadra.
+ */
+function deletePlayerbyEmail($email){
+  try {
+    $con = get_connection();
+
+    // Seleziona l'ID della squadra associata al giocatore
+    $query = "SELECT id_squadra FROM giocatori_squadre WHERE email_giocatore = :email";
+    $statement = $con->prepare($query);
+    $statement->execute([':email' => $email]);
+    $teamId = $statement->fetchColumn();
+
+    // Elimina il giocatore dalla tabella giocatori_squadre
+    $query = "DELETE FROM giocatori_squadre WHERE email_giocatore = :email";
+    $statement = $con->prepare($query);
+    $statement->execute([':email' => $email]);
+
+    // Ottieni la lista aggiornata dei giocatori della squadra
+    $infoJson = getPlayersbyTeam($teamId);
+    $info = json_decode($infoJson, true); // Converti l'oggetto JSON in un array associativo
+
+    $response = [
+      'status' => 'success',
+      'players' => $info['players']
+    ];
+    return json_encode($response);
+  } catch (Exception $e) {
+    // Risposta di errore se si verifica un'eccezione
+    $response = [
+      'status' => 'error',
+      'message' => 'Si è verificato un errore: ' . $e->getMessage()
+    ];
+  }
+  return json_encode($response);
+}
+
+/**
+ * Elimina l'associazione di un giocatore da una squadra dal database tramite la sua email.
+ *
+ * @param string $email Email del giocatore.
+ * @return string JSON contenente il successo o meno dell'operazione e la lista aggiornata dello staff della squadra.
+ */
+function deleteStaffbyEmail($email, $boss)
+{
+    try {
+        $con = get_connection();
+        $con->beginTransaction();
+
+        // Elimina l'allenatore dalla squadra
+        $query = "DELETE a_s FROM allenatori_squadre AS a_s
+                  INNER JOIN squadre AS s ON a_s.id_squadra = s.id
+                  INNER JOIN societa_sportive AS sp ON s.societa = sp.partita_iva
+                  WHERE a_s.email_allenatore = :email AND sp.responsabile = :boss";
+        $statement = $con->prepare($query);
+        $statement->execute([':email' => $email, ':boss' => $boss]);
+
+        // Ottieni la lista aggiornata dello staff della squadra
+        $infoJson = getCoachesbyBoss($boss);
+        $info = json_decode($infoJson, true); // Converti l'oggetto JSON in un array associativo
+
+        // Controlla se la chiave 'coaches' è presente nell'array
+        if (isset($info['coaches'])) {
+            $coaches = $info['coaches'];
+        } else {
+            $coaches = []; // Se la chiave 'coaches' non è presente, assegna un array vuoto
+        }
+
+        $con->commit();
+
+        $response = [
+            'status' => 'success',
+            'coaches' => $coaches
+        ];
+    } catch (Exception $e) {
+        // Rollback in caso di eccezione
+        $con->rollBack();
+
+        // Risposta di errore con messaggio dettagliato
+        $response = [
+            'status' => 'error',
+            'message' => 'Si è verificato un errore durante l\'eliminazione dello staff: ' . $e->getMessage()
+        ];
+    }
+
+    return json_encode($response);
+}
+
+
 
 ///////////////////////////
 // GET e POST Management //
@@ -245,5 +336,16 @@ if (isset($_GET['action'])) {
     header('Content-Type: application/json');
     $email = isset($_GET['boss']) ? $_GET['boss'] : null;
     echo getSocietyByBoss($email);
+  }
+  elseif ($action == 'delete-player') { // Richiesta per eliminare una associazione giocatore squadra
+    header('Content-Type: application/json');
+    $email = isset($_POST['email']) ? $_POST['email'] : null;
+    echo deletePlayerbyEmail($email);
+  }
+  elseif ($action == 'delete-staff') { // Richiesta per eliminare una associazione allenatore squadra
+    header('Content-Type: application/json');
+    $email = isset($_POST['email']) ? $_POST['email'] : null;
+    $boss = isset($_POST['boss_email']) ? $_POST['boss_email'] : null;
+    echo deleteStaffbyEmail($email,$boss);
   }
 }

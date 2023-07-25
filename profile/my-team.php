@@ -62,37 +62,36 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 1</h5>
-          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
         </div>
       </div>
     </div>
-
     <div class="col-md-4">
       <div class="card">
-        <img src="../assets/profileimg/Penguin writer.png" class="card-img-top" alt="Card Image">
+        <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 2</h5>
-          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
         </div>
       </div>
     </div>
 
     <div class="col-md-4">
       <div class="card">
-        <img src="https://via.placeholder.com/150" class="card-img-top" alt="Card Image">
+        <img src="../assets/profileimg/beard.png" class=" card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 3</h5>
-          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
         </div>
       </div>
     </div>
 
     <div class="col-md-4">
       <div class="card">
-        <img src="https://via.placeholder.com/150" class="card-img-top" alt="Card Image">
+        <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 4</h5>
-          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
         </div>
       </div>
     </div>
@@ -102,7 +101,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 5</h5>
-          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
         </div>
       </div>
     </div>
@@ -112,7 +111,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 6</h5>
-          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
         </div>
       </div>
     </div>
@@ -122,7 +121,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 7</h5>
-          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
         </div>
       </div>
     </div>
@@ -132,7 +131,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 8</h5>
-          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
         </div>
       </div>
     </div>
@@ -142,7 +141,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 9</h5>
-          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
         </div>
       </div>
     </div>
@@ -152,7 +151,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 10</h5>
-          <p class="card-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
         </div>
       </div>
     </div>
