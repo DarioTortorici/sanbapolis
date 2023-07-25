@@ -168,7 +168,7 @@ if ($userType == "allenatore") {
         <form id="edit-form">
             <input type="text" id="id-edit" style="display: none;"></p>
             <select name="society-edit" required>
-                <option value="" id="selected-option" selected>Scegli una societ�</option>
+                <option value="" id="selected-option" selected>Scegli una società</option>
                 <?php echo getSocieties(); ?>
             </select>
             <label for="start-date-edit">Data inizio:</label>
