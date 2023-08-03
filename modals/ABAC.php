@@ -100,7 +100,7 @@ function checkRecordtoEnd()
 
         // Interrompi la registrazione video per ogni telecamera usando ffmpeg
         foreach ($cameraRTSP as $rtsp) {
-            $directory = ffmpegStopRec($rtsp, $squadra, $data);
+            $path = ffmpegStopRec($rtsp, $squadra, $data);
         }
 
         // Aggiorna i permessi dello staff
@@ -111,17 +111,18 @@ function checkRecordtoEnd()
             $query->execute();
         }
 
-        // Aggiorna l'URL nel calendario dell'evento con la directory dei file
+        // Aggiorna l'URL nel calendario dell'evento con la pagina per visualizzare i file
+        $watchCams = "cameras/ponte.php?video_location=".$path;
         $sql = "UPDATE calendar_events SET url = :dir WHERE id = :idCalendar";
         $query = $con->prepare($sql);
-        $query->bindParam(':dir', $directory);
+        $query->bindParam(':dir', $watchCams);
         $query->bindParam(':idCalendar', $idCalendar);
         $query->execute();
 
         // Registra i file video nella tabella 'video'
         $query = "INSERT INTO video (locazione) VALUES (:dir)";
         $stmt = $con->prepare($query);
-        $stmt->bindParam(':dir', $directory);
+        $stmt->bindParam(':dir', $path);
         $stmt->execute();
     }
 }

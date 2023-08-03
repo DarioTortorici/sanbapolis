@@ -2,7 +2,7 @@
 session_start();
 
 include 'functions.php';
-include 'db_connection.php';
+include '../../authentication/db_connection.php';
 include 'classes/Mark.php';
 
 $pdo = get_connection();

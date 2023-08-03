@@ -3,7 +3,7 @@ session_start();
 
 include '../vendor/autoload.php';
 include 'functions.php';
-include 'db_connection.php';
+include '../../authentication/db_connection.php';
 include 'classes/Screen.php';
 
 $path_video = "../" . $_SESSION["path_video"];

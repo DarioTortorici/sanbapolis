@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-include 'db_connection.php';
+include '../../authentication/db_connection.php';
 include 'functions.php';
 include 'classes/Video.php';
 
