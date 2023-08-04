@@ -1,5 +1,8 @@
 <?php
 
+//Global variable per aiutare nel refactoring
+$cartellaStorage = "../video_editing/storage_video/";
+
 /**
  * Avvia lo streaming live utilizzando FFmpeg.
  *
@@ -22,7 +25,8 @@ function ffmpegLive($cameraRTSP)
  */
 function ffmpegRec($cameraRTSP, $squadra, $data)
 {
-    $outputFolder = '../cameras/videos/'.$squadra.'/'.$data.'/';
+    global $cartellaStorage;
+    $outputFolder = $cartellaStorage.$squadra.'/'.$data.'/';
 
     // Verifica se la cartella di output esiste
     if (!is_dir($outputFolder)) {
@@ -48,7 +52,8 @@ function ffmpegRec($cameraRTSP, $squadra, $data)
  */
 function ffmpegStopRec($cameraRTSP, $squadra, $data)
 {
-    $outputFolder = '../cameras/videos/' . $squadra . '/' . $data . '/';
+    global $cartellaStorage;
+    $outputFolder = $cartellaStorage . $squadra . '/' . $data . '/';
     $outputPath = $outputFolder . $cameraRTSP . '.mp4';
     $comando = 'pkill -f "ffmpeg -y -r 25 -rtsp_transport tcp -i ' . $cameraRTSP . ' -vcodec copy -b:v 10000k ' . $outputPath . '"';
     shell_exec($comando);

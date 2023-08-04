@@ -112,7 +112,7 @@ function checkRecordtoEnd()
         }
 
         // Aggiorna l'URL nel calendario dell'evento con la pagina per visualizzare i file
-        $watchCams = "cameras/ponte.php?video_location=".$path;
+        $watchCams = "/editing_video/video_list.php?video_location=./storage_video/".$path;
         $sql = "UPDATE calendar_events SET url = :dir WHERE id = :idCalendar";
         $query = $con->prepare($sql);
         $query->bindParam(':dir', $watchCams);

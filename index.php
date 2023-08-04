@@ -9,7 +9,7 @@ include("modals/navbar.php");
 
     <!-- Carosello-->
 
-    <div id="sportCarousel" class="carousel slide">
+    <div id="sportCarousel" class="container carousel slide">
         <div class="carousel-indicators">
             <button type="button" data-bs-target="#sportCarousel" data-bs-slide-to="0" class="active"
                 aria-current="true" aria-label="Slide 1"></button>
