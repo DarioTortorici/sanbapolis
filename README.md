@@ -15,6 +15,18 @@ Si può clonare l'intera repository direttamente nella propria cartella apache, 
 ``` bash
 git clone https://github.com/SportTech-UniTN/Sanbapolis.git
 ```
+## Testarlo
+Essendo un progetto in evoluzione, potrebbero esserci degli errori presenti nel codice, vi consigliamo di testare voi stessi se nella versione scaricata il codice è consistente
+### Unit Tests
+Nella cartella del progetto eseguite
+``` bash
+vendor/bin/phpunit tests/*
+```
+### Integration Tests
+Nella cartella del progetto eseguite
+``` bash
+vendor/bin/codeception Acceptance
+```
 
 ## Impostazioni esterne alla repository
 
@@ -164,10 +176,10 @@ Le calendar API sono raggiungibili tramite la pagina `calendar-helper`e sono le 
 
 #### save-cams
 
-| Action      | Descrizione                                                               | Parametro | Tipo Parametro |
-|-------------|---------------------------------------------------------------------------|-----------|----------------|
-| save-cams   | Salva le telecamere da attivare per un evento specifico.                   | id        | string         |
-                                                                      | cameras   | array          |
+| Action      | Descrizione                                                            | Parametro | Tipo Parametro |
+|-------------|------------------------------------------------------------------------|-----------|----------------|
+| save-cams   | Salva le telecamere da attivare per un evento specifico.                | id        | string         |
+|             |                                                                        | cameras   | array          |
 
 ## Gestione squadre e società API
 
@@ -219,3 +231,14 @@ La Gestione squadre e società può essere fatta tramite la pagina `myteam-helpe
 |------------|-------------------------------------------------------------|-----------|----------------|
 | delete-staff   | Elimina l'associazione giocatore-squadra data la sua mail e quella del responsabile che ne fa richiesta            | email        | string         |
 |             |                                                                           | email   | string          |
+
+## Video 
+Le API per la gestione dei video si trovano nel file `videoList-helper` e sono le seguenti
+### Get
+#### get-playlist
+
+| Action     | Descrizione                                                 | Parametro | Tipo Parametro |
+|------------|-------------------------------------------------------------|-----------|----------------|
+| get-playlist   | Ritorna la locazione di tutti i video in una sessione tramite uno di essi          | video        | string         |
+
+#
