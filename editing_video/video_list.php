@@ -22,12 +22,11 @@ echo '<script>const videoLocation = "' . $video_location . '";</script>';
 <link rel="stylesheet" href="../css/video/videoList.css">
 
 <section class="main-site">
-    <h1>Lista Video</h1>
+    <h1 id=video-name>Video Name</h1>
     <h2 id="data-sessione">GG-MM-YYYY</h2>
-    <h3 id="squadra-name">Squadra</h3>
     <div class="video-gallery">
         <div class="video-player container embed-responsive embed-responsive-16by9">
-            <video id="player" class="embed-responsive-item" controls autoplay>
+            <video class="player embed-responsive-item" controls autoplay>
                 <!-- Your video source here -->
                 <source src="<?php echo $video_location; ?>" type="video/mp4">
             </video>
@@ -40,7 +39,8 @@ echo '<script>const videoLocation = "' . $video_location . '";</script>';
     </div>
 
     <div class="container">
-        <a href="editing_video.php" class="button btn btn-info">Editing Video</a>
+        <!-- Link dinamicamente in JS -->
+        <a href="editing_video.php?video=" id="editing-button" class=" button btn btn-info">Editing Video</a>
         <a href="./clips/clips_list.php" class="button btn btn-light">Gestione clip</a>
         <a href="./marks/marks_list.php" class="button btn btn-warning">Gestione segnaposti</a>
         <a href="./screenshots/screenshots_list.php" class="button btn btn-dark">Gestione screenshots</a>

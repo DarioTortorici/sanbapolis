@@ -32,17 +32,17 @@ function fromSeconds(seconds, showHours) {
  * @returns {string|null} - Il valore del parametro specificato, oppure `null` se il parametro non è presente o non ha un valore.
  */
 function findGetParameter(parameterName) {
-        var result = null,
-            tmp = [];
-        location.search
-            //.substr(1) modificato perché deprecato
-            .slice(1)
-            .split("&")
-            .forEach(function(item) {
-                tmp = item.split("=");
-                if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
-            });
-        return result;
+    var result = null,
+        tmp = [];
+    location.search
+        //.substr(1) modificato perché deprecato
+        .slice(1)
+        .split("&")
+        .forEach(function (item) {
+            tmp = item.split("=");
+            if (tmp[0] === parameterName) result = decodeURIComponent(tmp[1]);
+        });
+    return result;
 }
 
 /**
@@ -56,7 +56,7 @@ function showSnackbar() {
     var x = document.getElementById("snackbar");
     //console.log(x);
     x.className = "show";
-    setTimeout(function(){ x.className = x.className.replace("show", ""); }, 3000);
+    setTimeout(function () { x.className = x.className.replace("show", ""); }, 3000);
 }
 
 /**
@@ -65,12 +65,12 @@ function showSnackbar() {
  * @param {string} timing_screen - Una stringa nel formato "HH:mm:ss" rappresentante un tempo.
  * @returns {number} - Il tempo totale in secondi, rappresentato come un numero con la parte dei millisecondi inclusa.
  */
-function getNumberTimingScreen(timing_screen){
+function getNumberTimingScreen(timing_screen) {
     let ris = 0.0;
     let vet_timing = Array();
     substr = timing_screen.split(":");
     substr.forEach(element => {
-        vet_timing.push(parseInt(element)); 
+        vet_timing.push(parseInt(element));
     });
     ris = vet_timing[0] * 60 + vet_timing[1] + vet_timing[2] / 1000;
 
@@ -87,7 +87,7 @@ function getNumberTimingScreen(timing_screen){
  * visualizzato nel campo "timing_video".
  * Infine, la funzione richiama `checkTrimTime(start_trim, end_trim)` per verificare il tempo di trimming.
  */
-function getStartTimingTrim(){
+function getStartTimingTrim() {
     timing = document.getElementById("timing_video");
     start_trim = document.getElementById("start_timing_trim");
     start_trim.value = timing.value;
@@ -106,7 +106,7 @@ function getStartTimingTrim(){
  * nel campo "timing_video".
  * Infine, la funzione richiama `checkTrimTime(start_trim, end_trim)` per verificare il tempo di trimming.
  */
-function getEndTimingTrim(){
+function getEndTimingTrim() {
     timing = document.getElementById("timing_video");
     start_trim = document.getElementById("start_timing_trim");
     end_trim = document.getElementById("end_timing_trim");
@@ -120,19 +120,19 @@ function getEndTimingTrim(){
  * @param {HTMLInputElement} start_trim - L'elemento HTML rappresentante il campo di inizio trim.
  * @param {HTMLInputElement} end_trim - L'elemento HTML rappresentante il campo di fine trim.
  */
-function checkTrimTime(start_trim, end_trim){
-    if (start_trim != '' && end_trim != ''){
+function checkTrimTime(start_trim, end_trim) {
+    if (start_trim != '' && end_trim != '') {
         let st = getNumberTimingScreen(start_trim.value);
         let et = getNumberTimingScreen(end_trim.value);
-        if (st > et){
+        if (st > et) {
             showSnackbar();
             disableTrim(true);
         }
-        else{
+        else {
             disableTrim(false);
         }
     }
-    else{
+    else {
         disableTrim(true);
     }
 }
@@ -142,7 +142,7 @@ function checkTrimTime(start_trim, end_trim){
  *
  * @param {boolean} disabled - Un valore booleano che determina se l'elemento deve essere disabilitato (true) o abilitato (false).
  */
-function disableTrim(disabled){
+function disableTrim(disabled) {
     document.getElementById("trim_video").disabled = disabled;
 }
 
@@ -177,15 +177,46 @@ function showScreenArea() {
  * Altrimenti, se l'elemento "marks" è già visibile, la funzione lo nasconde impostando l'attributo hidden a true
  * e cambia il testo del pulsante "show_marks" in "Mostra i segnaposti".
  */
-function showMarks(){
+function showMarks() {
     let screen_area = document.getElementById('marks');
     let btn = document.getElementById('show_marks');
-    if (screen_area.hidden == true){
+    if (screen_area.hidden == true) {
         screen_area.hidden = false;
         btn.innerHTML = "Nascondi i segnaposti";
     }
-    else{
+    else {
         screen_area.hidden = true;
         btn.innerHTML = "Mostra i segnaposti";
     }
+}
+
+function segnaposto() {
+    const xhttp = new XMLHttpRequest();
+    var location = "./storage_video/" + $('#video-name').text();
+    var url = "marks/mark_manager.php?video="+location+"&timing=" + $('#timing_video').val();
+    xhttp.open("GET", url, true);
+    xhttp.onreadystatechange = function () {
+        if (this.readyState = 4 && this.status === 200) {
+            let timing = xhttp.responseText;
+            if (timing != "") {
+                $('#timing_mark')[0].value = timing;
+                $('#mark_details')[0].hidden = false;
+                $('#<?php echo $filename ?>')[0].pause();
+            }
+        }
+    }
+    xhttp.send();
+}
+
+window.onload = function () {
+    let timing = findGetParameter("timing_screen");
+    if (timing != null) {
+        timing = parseFloat(timing);
+        document.getElementById("<?php echo $filename ?>").currentTime = timing;
+    }
+}
+
+function goToTiming(video, timing) {
+    video.currentTime = timing;
+    video.pause();
 }

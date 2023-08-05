@@ -1,7 +1,7 @@
 <?php
 session_start();
 
-include 'video-helper.php';
+include '../video-helper.php';
 include '../../authentication/db_connection.php';
 include '../../classes/Mark.php';
 
@@ -9,6 +9,10 @@ $pdo = get_connection();
 
 if(isset($_GET["timing"])){
     echo $_GET["timing"];
+}
+
+if(isset($_GET["video"])){
+    $videoPath = $_GET["video"];
 }
 
 if(isset($_GET["operation"])){
@@ -20,7 +24,7 @@ if(isset($_GET["operation"])){
 				$timing = timing_format_db($timing);//fromato corretto per db
 				$name = ($_POST["mark_name"] == "") ? null : $_POST["mark_name"];
 				$note = ($_POST["mark_note"] == "") ? null : $_POST["mark_note"];
-				$video = $_SESSION["path_video"];
+				$video = $videoPath;
 				$mark = new Mark($timing, $name, $note, $video);
 				echo insertNewMark($pdo, $mark);
 			}
@@ -31,7 +35,7 @@ if(isset($_GET["operation"])){
 				$timing = timing_format_db($timing);//fromato corretto per db
 				$name = ($_POST["mark_name"] == "") ? null : $_POST["mark_name"];
 				$note = ($_POST["mark_note"] == "") ? null : $_POST["mark_note"];
-				$video = $_SESSION["path_video"];
+				$video = $videoPath;
 				$id = $_GET["id"];
 				$mark = new Mark($timing, $name, $note, $video, $id);
 				echo updateMarkFromId($pdo, $mark);
@@ -59,7 +63,7 @@ if(isset($_GET["operation"])){
 	$tmp = "";
 	if(isset($_POST["timing_mark"])){
 		$timing = getIntTimingScreen($_POST["timing_mark"]);
-		$tmp = "?timing_screen=$timing";
+		$tmp = "?video=".$videoPath."&timing_screen=$timing";
 		header("Location: ../editing_video.php$tmp");
 	}
 	

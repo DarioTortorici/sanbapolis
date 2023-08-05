@@ -7,7 +7,10 @@ include '../../vendor/autoload.php';
 include '../video-helper.php';
 include '../../classes/Screen.php';
 
-$path_video = "../" . $_SESSION["path_video"];
+if(isset($_GET["video"])){
+    $videoPath = $_GET["video"];
+}
+
 $filename = $_SESSION["name_file_video"];
 /*var_dump($_SESSION["video"]);
 $video = unserialize($_SESSION["video"]);
@@ -22,9 +25,9 @@ if(isset($_GET["operation"])){
             try{                
                 $timing_screen_string = $_POST["timing_video"];
                 $timing_screen = getIntTimingScreen($timing_screen_string);
-                getScreen($path_video, $filename, $timing_screen, $timing_screen_string, $pdo);
+                getScreen($videoPath, $filename, $timing_screen, $timing_screen_string, $pdo);
             } catch (Exception $e) {echo 'Eccezione: ',  $e->getMessage(), "\n";}
-            header("Location: ../editing_video.php?timing_screen=$timing_screen");
+            header("Location: ../editing_video.php?video=" . $videoPath . "&timing_screen=" . urlencode($timing_screen));
             break;
         case "update_screen":
             try{  
@@ -51,10 +54,26 @@ if(isset($_GET["operation"])){
     }
 }
 
-//funzioni locali, solo per questo file
-function getScreen($path_video, $filename, $timing_screen, $timing_screen_string, $pdo){
+/**
+ * Crea uno screenshot da un video e salva le informazioni nel database.
+ *
+ * Questa funzione riceve come parametri il percorso del video, il nome del file, il timing
+ * dello screenshot in secondi, la rappresentazione in formato stringa del timing, e un
+ * oggetto PDO per la connessione al database. Utilizza la libreria FFMpeg per aprire il
+ * video e creare uno screenshot al tempo specificato. Quindi, genera un nome per lo
+ * screenshot utilizzando la funzione "generateScreenName" e salva l'immagine nel server.
+ * Successivamente, salva le informazioni dello screenshot nel database, inclusa la
+ * locazione del file e il nome dell'immagine.
+ *
+ * @param string $videoPath - Il percorso del video da cui estrarre lo screenshot.
+ * @param string $filename - Il nome del file video.
+ * @param float $timing_screen - Il timing dello screenshot in secondi.
+ * @param string $timing_screen_string - Il timing dello screenshot come stringa.
+ * @param PDO $pdo - L'oggetto PDO utilizzato per la connessione al database.
+ */
+function getScreen($videoPath, $filename, $timing_screen, $timing_screen_string, $pdo){
     $ffmpeg = FFMpeg\FFMpeg::create();
-    $video = $ffmpeg->open($path_video);
+    $video = $ffmpeg->open($videoPath);
     $screen_name = generateScreenName($filename, $timing_screen_string);
     $video
         ->frame(FFMpeg\Coordinate\TimeCode::fromSeconds($timing_screen))
@@ -67,10 +86,22 @@ function getScreen($path_video, $filename, $timing_screen, $timing_screen_string
     $statement->execute([
         ':locazione' => $screen_name,
         ':nome' => $img_name,
-        ':video' => $_SESSION["path_video"],
+        ':video' => $videoPath
     ]);
 }
 
+/**
+ * Aggiorna un record di screenshot nel database con i nuovi dati forniti.
+ *
+ * Questa funzione riceve come parametro un oggetto PDO per la connessione al database.
+ * Recupera l'ID dello screenshot da aggiornare dalla query string ($_GET) e i nuovi
+ * dati dello screenshot dai dati inviati tramite il metodo POST. Viene quindi creato un
+ * nuovo oggetto "Screen" con i dati forniti e l'ID recuperato. Infine, la funzione
+ * "updateScreenFromId" viene richiamata per eseguire l'aggiornamento nel database.
+ *
+ * @param PDO $pdo - L'oggetto PDO utilizzato per la connessione al database.
+ * @return bool - True se l'aggiornamento è avvenuto con successo, altrimenti false.
+ */
 function updateScreen($pdo){
     $id = $_GET["id"];
     $name = ($_POST["screen_name"] == "") ? null : $_POST["screen_name"];
@@ -79,7 +110,21 @@ function updateScreen($pdo){
     return updateScreenFromId($pdo, $screen);
 }
 
-function deleteScreen($pdo, $id){
+/**
+ * Elimina uno screenshot dal database e il file corrispondente dal server.
+ *
+ * Questa funzione riceve come parametro un oggetto PDO per la connessione al database
+ * e l'ID dello screenshot da eliminare. Recupera la posizione del file dello screenshot
+ * dal database e quindi richiama la funzione "deleteScreenFromId" per eliminare l'elemento
+ * dal database. Infine, elimina anche il file dello screenshot dal server utilizzando la
+ * posizione del file recuperata dal database.
+ *
+ * @param PDO $pdo - L'oggetto PDO utilizzato per la connessione al database.
+ * @param int $id - L'ID dello screenshot da eliminare.
+ * 
+ * @see deleteScreenFromId
+ */
+function deleteScreen($pdo, $id) {
     $path_screen = "";
     $query = "SELECT locazione FROM screenshots WHERE id=$id";
     $statement = $pdo->query($query);
@@ -93,8 +138,19 @@ function deleteScreen($pdo, $id){
     unlink("../$path_screen");
 }
 
-function multipleDelete($pdo){
-    foreach($_POST["id"] as $el){
+
+/**
+ * Elimina più elementi dal database utilizzando l'ID fornito.
+ *
+ * Questa funzione accetta un array di ID di elementi da eliminare. Per ciascun ID nell'array,
+ * viene richiamata la funzione "deleteScreen" per eliminare l'elemento corrispondente dal database.
+ *
+ * @param PDO $pdo - L'oggetto PDO utilizzato per la connessione al database.
+ * @param array $idArray - Un array contenente gli ID degli elementi da eliminare.
+ *
+ */
+function multipleDelete($pdo, $idArray) {
+    foreach ($idArray as $el) {
         deleteScreen($pdo, $el);
     }
 }
