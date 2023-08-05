@@ -10,22 +10,24 @@ setPreviusPage();
 ?>
 
 
-        <div>
-            <form action="mark_manager.php?operation=multiple_mark_delete" method="post">
-                <table class="paleBlueRows">
-                    <tr>
-                        <th>Selezione</th>
-                        <th>Minutaggio</th>
-                        <th>Nome</th>
-                        <th>Descrizione</th>
-                    </tr>
-<?php
-$pdo = get_connection();
+<div>
+    <form action="mark_manager.php?operation=multiple_mark_delete" method="post">
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Selezione</th>
+                    <th>Minutaggio</th>
+                    <th>Nome</th>
+                    <th>Descrizione</th>
+                </tr>
+            </thead>
+                <?php
+                $pdo = get_connection();
 
-try{               
-    $marks = getMarksFromVideo($pdo, $_SESSION["path_video"]);
-    foreach($marks as $el){
-        echo <<<END
+                try {
+                    $marks = getMarksFromVideo($pdo, $_SESSION["path_video"]);
+                    foreach ($marks as $el) {
+                        echo <<<END
                     <tr class='clickable-row'>
                         <td><input type="checkbox" id="{$el->getId()}" name="id[]" value="{$el->getId()}"></td>
                         <td data-href='mark_details.php?id={$el->getId()}'>{$el->getTiming()}</td>
@@ -33,20 +35,23 @@ try{
                         <td data-href='mark_details.php?id={$el->getId()}'>{$el->getNote()}</td>
                     </tr>\n
         END;
-    }
-} catch (Exception $e) {echo 'Eccezione: ',  $e->getMessage(), "\n";}
-?>
-                </table>
-                <input type="submit" class="btn btn-danger" value="Elimina">
-            </form>
-        </div>
-    </body>
+                    }
+                } catch (Exception $e) {
+                    echo 'Eccezione: ',  $e->getMessage(), "\n";
+                }
+                ?>
+        </table>
+        <input type="submit" class="btn btn-danger" value="Elimina">
+    </form>
+</div>
+</body>
+
 </html>
 
 <script>
     jQuery(document).ready(function($) {
-    $(".clickable-row td:not(:first-child)").click(function() {
-        window.location = $(this).data("href");
+        $(".clickable-row td:not(:first-child)").click(function() {
+            window.location = $(this).data("href");
+        });
     });
-});
 </script>

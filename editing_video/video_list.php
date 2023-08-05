@@ -17,13 +17,18 @@ if (isset($_GET['video_location']) && !empty($_GET['video_location'])) {
     // For this example, I'll set a default location
     $video_location = "../videos/default_folder/";
 }
+
+if (isset($_GET['recording_date']) && !empty($_GET['recording_date'])) {
+    // Sanitize the input to prevent any potential security issues
+    $data = $_GET['recording_date'];
+} 
 echo '<script>const videoLocation = "' . $video_location . '";</script>';
 ?>
 <link rel="stylesheet" href="../css/video/videoList.css">
 
 <section class="main-site">
     <h1 id=video-name>Video Name</h1>
-    <h2 id="data-sessione">GG-MM-YYYY</h2>
+    <h2 id="data-sessione"><?php echo $data; ?></h2>
     <div class="video-gallery">
         <div class="video-player container embed-responsive embed-responsive-16by9">
             <video class="player embed-responsive-item" controls autoplay>
@@ -32,7 +37,7 @@ echo '<script>const videoLocation = "' . $video_location . '";</script>';
             </video>
         </div>
         <div id="playlist" class="playlist">
-            <ul id="video-list">
+            <ul id="video-list" class="list-group">
                 <!-- Video thumbnails and titles will be added here dynamically -->
             </ul>
         </div>

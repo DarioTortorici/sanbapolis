@@ -37,7 +37,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Crea la playlist di video della sessione
     const createPlaylist = (videoData) => {
         // Crea un nuovo elemento di lista non ordinata per contenere la playlist video.
-        const videoList = document.createElement('ul');
+        const videoList = document.createElement("ul");
+        videoList.classList.add("list-group");
 
         // Itera su ciascun oggetto video presente nell'array 'videoData'.
         videoData.forEach((videoObj) => {
@@ -52,14 +53,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Imposta il contenuto testuale del nuovo elemento di lista con il titolo del video.
             listItem.textContent = videoTitle;
 
+            // Aggiunge classe bootstrap per css
+            listItem.classList.add("list-group-item");
+
             // Aggiungi un listener di evento per il clic su ciascun elemento di lista, il quale riprodurrà il video corrispondente.
             listItem.addEventListener('click', () => {
                 // Parte il video
                 playVideo(videoUrl);
 
-                
-                    //Aggiorna titolo del video visualizzato
-                    VideoNameElement.innerText = videoUrl.split('/').pop();
+                // Rimuovi la classe "active" dagli altri elementi della lista
+                const allListItems = videoList.querySelectorAll("li");
+                allListItems.forEach((item) => {
+                    item.classList.remove("active");
+                });
+
+                // Aggiungi la classe "active" solo all'elemento corrente
+                listItem.classList.add("active");
+
+                //Aggiorna titolo del video visualizzato
+                VideoNameElement.innerText = videoTitle;
 
                 if (window.location.href.includes('http://localhost/editing_video/video_list.php')) {
                     //Aggiorno link bottoni
@@ -79,9 +91,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Ottieni l'elemento della playlist tramite l'ID 'playlist'.
         const playlistElement = document.getElementById('playlist');
 
+        // Rimuovi eventuali elementi precedenti dalla playlist prima di aggiungerne uno nuovo
+        playlistElement.innerHTML = "";
+
         // Aggiungi la playlist video (elemento ul) all'elemento della playlist.
         playlistElement.appendChild(videoList);
     };
+
 
     try {
         // Utilizza l'API per recuperare tutti i video di una sessione avendone uno

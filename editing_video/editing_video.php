@@ -23,17 +23,15 @@ echo '<script>const videoLocation = "' . $video_location . '";</script>';
 <!-- CSS che gestisce la lista video -->
 <link rel="stylesheet" href="../css/video/videoList.css">
 <h1 id=video-name>Video Name</h1>
-<h2 id="data-sessione">GG-MM-YYYY</h2>
 <h3 id="squadra-name">Estrai Clip</h3>
 <div class="video-gallery">
     <div class="video-player container embed-responsive embed-responsive-16by9">
         <video id="<?php echo $filename ?>" class="player embed-responsive-item" controls autoplay>
-            <!-- Your video source here -->
             <source src="<?php echo "../{$playedVideo}" ?>" type="video/mp4">
         </video>
     </div>
     <div id="playlist" class="playlist">
-        <ul id="video-list">
+        <ul id="video-list" class="list-group">
             <!-- Video thumbnails and titles will be added here dynamically -->
         </ul>
     </div>

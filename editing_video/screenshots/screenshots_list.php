@@ -10,22 +10,24 @@ setPreviusPage();
 
 ?>
 
-        <div>
-            <form action="screen_manager.php?operation=multiple_screen_delete" method="post">
-                <table class="paleBlueRows">
-                    <tr>
-                        <th>Selezione</th>
-                        <th>Immagine</th>
-                        <th>Nome</th>
-                        <th>Descrizione</th>
-                    </tr>
-<?php
-$pdo = get_connection();
+<div>
+    <form action="screen_manager.php?operation=multiple_screen_delete" method="post">
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Selezione</th>
+                    <th>Immagine</th>
+                    <th>Nome</th>
+                    <th>Descrizione</th>
+                </tr>
+            </thead>
+            <?php
+            $pdo = get_connection();
 
-try{               
-    $screenahots = getScreenshotsFromVideo($pdo, $_SESSION["path_video"]);
-    foreach($screenahots as $el){
-        echo <<<END
+            try {
+                $screenahots = getScreenshotsFromVideo($pdo, $_SESSION["path_video"]);
+                foreach ($screenahots as $el) {
+                    echo <<<END
                     <tr class='clickable-row'>
                         <td><input type="checkbox" id="{$el->getId()}" name="id[]" value="{$el->getId()}"></td>
                         <td data-href='screen_details.php?id={$el->getId()}'><img id="{$el->getId()}" src="../{$el->getPath()}" alt="img" width="128" height="96"></td>
@@ -33,20 +35,23 @@ try{
                         <td data-href='screen_details.php?id={$el->getId()}'>{$el->getNote()}</td>
                     </tr>\n
         END;
-    }
-} catch (Exception $e) {echo 'Eccezione: ',  $e->getMessage(), "\n";}
-?>
-                </table>
-                <input type="submit" class="btn btn-danger" value="Elimina">
-            </form>
-        </div>
-    </body>
+                }
+            } catch (Exception $e) {
+                echo 'Eccezione: ',  $e->getMessage(), "\n";
+            }
+            ?>
+        </table>
+        <input type="submit" class="btn btn-danger" value="Elimina">
+    </form>
+</div>
+</body>
+
 </html>
 
 <script>
     jQuery(document).ready(function($) {
-    $(".clickable-row td:not(:first-child)").click(function() {
-        window.location = $(this).data("href");
+        $(".clickable-row td:not(:first-child)").click(function() {
+            window.location = $(this).data("href");
+        });
     });
-});
 </script>
