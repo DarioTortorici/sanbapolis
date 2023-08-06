@@ -5,6 +5,7 @@ CREATE DATABASE sanbapolis;
 USE sanbapolis;
 
 CREATE TABLE persone(
+	id INTEGER AUTO_INCREMENT NOT NULL,
 	email VARCHAR(320) NOT NULL,
 	nome VARCHAR(64) NOT NULL,
 	cognome VARCHAR(64) NOT NULL,
@@ -17,7 +18,8 @@ CREATE TABLE persone(
 	verificato BOOLEAN NOT NULL,
 	data_ora_registrazione DATETIME NOT NULL,
 	
-	PRIMARY KEY(email)
+	UNIQUE(email),
+	PRIMARY KEY(id)
 );
 
 /*
@@ -85,14 +87,28 @@ CREATE TABLE tag_rfid(
 	id INTEGER PRIMARY KEY
 );
 
+CREATE TABLE sessioni_registrazione (
+	id INTEGER AUTO_INCREMENT NOT NULL,
+	autore VARCHAR(320) NOT NULL,
+	data_ora_inizio DATETIME NOT NULL,
+	data_ora_fine DATETIME NOT NULL,
+
+	CONSTRAINT fk_autore_sessione FOREIGN KEY (autore) REFERENCES persone(email) ON UPDATE CASCADE ON DELETE CASCADE,
+
+	UNIQUE (autore, data_ora_inizio),
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE video(
 	id INTEGER AUTO_INCREMENT NOT NULL,
 	locazione VARCHAR(255) NOT NULL, /*255 in teoria lunghezza massima per una path in linux*/
 	nome VARCHAR(64) NOT NULL,
 	autore VARCHAR(64) NOT NULL,
 	nota TEXT,
+	sessione INTEGER NOT NULL,
 	
 	CONSTRAINT fk_email_autore FOREIGN KEY (autore) REFERENCES persone(email) ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT fk_video_sessione FOREIGN KEY (sessione) REFERENCES sessioni_registrazione(id) ON UPDATE CASCADE ON DELETE CASCADE,
 	
 	UNIQUE(locazione),
 	PRIMARY KEY(id)
@@ -291,21 +307,6 @@ CREATE TABLE formazioni (
 	UNIQUE (id_squadra, id_partita),
 	PRIMARY KEY (id)
 );
-
-CREATE TABLE sessioni_registrazione (
-	id INTEGER AUTO_INCREMENT NOT NULL,
-	autore VARCHAR(320) NOT NULL,
-	data_ora_inizio DATETIME NOT NULL,
-	data_ora_fine DATETIME NOT NULL,
-	video VARCHAR(255) NOT NULL,
-
-	CONSTRAINT fk_autore_sessione FOREIGN KEY (autore) REFERENCES persone(email) ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT fk_video_sessione FOREIGN KEY (video) REFERENCES video(locazione) ON UPDATE CASCADE ON DELETE CASCADE,
-
-	UNIQUE (autore, data_ora_inizio),
-	PRIMARY KEY (id)
-);
-
 
 /*tabella che associa una prenotazione al relativo allenamento -NON USATA PER ORA- PER ORA CHIAVE ESTERNA DA ALLENAMENTI A PRENOTAZIONI
 CREATE TABLE prenotazioni_allenamenti (
