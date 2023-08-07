@@ -1,6 +1,3 @@
-<!-- Javascripts per gestire la pagina squadra -->
-<script src="../js/teams/myteam-scripts.js"></script>
-
 <!-- PHP session init -->
 <?php
 
@@ -15,7 +12,8 @@ if (!isset($_COOKIE['email'])) {
 
 ?>
 
-
+<!-- Javascripts per gestire la pagina squadra -->
+<script src="../js/teams/myteam-scripts.js"></script>
 <script>
   // Otteniamo l'ID della squadra del coach e recuperiamo i giocatori della squadra
   // Creiamo una promessa chiamando la funzione getTeambyCoach con l'email del coach
@@ -62,7 +60,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 1</h5>
-          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
+          <button class="btn btn-danger text-right" onclick="confirmDelete(this)">Elimina</button>
         </div>
       </div>
     </div>
@@ -71,7 +69,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 2</h5>
-          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
+          <button class="btn btn-danger text-right" onclick="confirmDelete(this)">Elimina</button>
         </div>
       </div>
     </div>
@@ -81,7 +79,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class=" card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 3</h5>
-          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
+          <button class="btn btn-danger text-right" onclick="confirmDelete(this)">Elimina</button>
         </div>
       </div>
     </div>
@@ -91,7 +89,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 4</h5>
-          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
+          <button class="btn btn-danger text-right" onclick="confirmDelete(this)">Elimina</button>
         </div>
       </div>
     </div>
@@ -101,7 +99,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 5</h5>
-          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
+          <button class="btn btn-danger text-right" onclick="confirmDelete(this)">Elimina</button>
         </div>
       </div>
     </div>
@@ -111,7 +109,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 6</h5>
-          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
+          <button class="btn btn-danger text-right" onclick="confirmDelete(this)">Elimina</button>
         </div>
       </div>
     </div>
@@ -121,7 +119,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 7</h5>
-          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
+          <button class="btn btn-danger text-right" onclick="confirmDelete(this)">Elimina</button>
         </div>
       </div>
     </div>
@@ -131,7 +129,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 8</h5>
-          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
+          <button class="btn btn-danger text-right" onclick="confirmDelete(this)">Elimina</button>
         </div>
       </div>
     </div>
@@ -141,7 +139,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 9</h5>
-          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
+          <button class="btn btn-danger text-right" onclick="confirmDelete(this)">Elimina</button>
         </div>
       </div>
     </div>
@@ -151,7 +149,7 @@ if (!isset($_COOKIE['email'])) {
         <img src="../assets/profileimg/beard.png" class="card-img-top" alt="Card Image">
         <div class="card-body">
           <h5 class="card-title">Card Title 10</h5>
-          <button class="btn btn-danger text-right" onclick="deletePlayer(this)">Elimina</button>
+          <button class="btn btn-danger text-right" onclick="confirmDelete(this)">Elimina</button>
         </div>
       </div>
     </div>
