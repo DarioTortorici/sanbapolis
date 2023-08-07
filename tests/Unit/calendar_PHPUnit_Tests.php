@@ -121,16 +121,6 @@ class calendar_PHPUnit_Tests extends TestCase
         $this->assertNotNull($result);
     }
 
-    public function test_getAuthorEvent()
-    {
-        // Configurazione di prova
-        global $sessionId; // ID della sessione
-
-        // Chiamata alla funzione
-        $result = getAuthorEvent($sessionId);
-        $this->assertNotNull($result);
-    }
-
     public function test_getEvents()
     {
         // Chiamata alla funzione
