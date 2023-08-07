@@ -4,12 +4,13 @@
 $user = array();
 require(__DIR__ . '/../authentication/db_connection.php');
 include(__DIR__ . '/../authentication/auth-helper.php');
+session_start(); // Avvia la sessione per poter utilizzare $_SESSION
 
 if (isset($_COOKIE['email'])) {
     $user_email = $_COOKIE['email'];
     $user = get_user_info($con, $_COOKIE['email']);
 
-    if (!$user['verificato']){
+    if (!$_SESSION['attivato']){
         header("Location: /modals/suggest.php");
     }
 }

@@ -5,7 +5,7 @@ require('auth-helper.php');
 require_once('db_connection.php');
 require('../modals/email-handler.php');
 
-
+session_start(); // Avvia la sessione per poter utilizzare $_SESSION
 // Array per gli errori
 $errors = array();
 
@@ -99,10 +99,11 @@ if (empty($errors)) {
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
     $activationCode = generateActivationCode(); // Genera un codice di attivazione univoco
 
+    $_SESSION['token'] = $activationCode;
     try {
         // Crea una query
-        $query = "INSERT INTO persone (nome, cognome, email, data_nascita, citta, indirizzo, telefono, digest_password, locazione_immagine_profilo, data_ora_registrazione,codice_attivazione,verificato)";
-        $query .= " VALUES (:firstName, :lastName, :email, :dataNascita, :citta, :indirizzo, :telefono, :password, :profileImage, NOW(), :code,0)";
+        $query = "INSERT INTO persone (nome, cognome, email, data_nascita, citta, indirizzo, telefono, digest_password, locazione_immagine_profilo, data_ora_registrazione)";
+        $query .= " VALUES (:firstName, :lastName, :email, :dataNascita, :citta, :indirizzo, :telefono, :password, :profileImage, NOW())";
 
         // Prepara la dichiarazione
         $stmt = $con->prepare($query);
@@ -117,7 +118,6 @@ if (empty($errors)) {
         $stmt->bindParam(':telefono', $telefono);
         $stmt->bindParam(':password', $hashedPassword);
         $stmt->bindParam(':profileImage', $profileImage, PDO::PARAM_LOB);
-        $stmt->bindParam(':code', $activationCode, PDO::PARAM_LOB);
 
         // Esegui la query
         $stmt->execute();
