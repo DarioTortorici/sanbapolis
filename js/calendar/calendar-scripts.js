@@ -112,14 +112,32 @@ function saveEvent(email) {
             data: formData,
             dataType: 'json'
         })
-        .done(function (response) {
-            if (response.status === 'success') {
-                getUserType(email);
-            }
-        })
-        .fail(function (xhr, status, error) {
-            console.log(xhr.responseText);
-        });
+            .done(function (response) {
+                if (response.status === 'success') {
+                    $.ajax({ //getUserType che non funziona altrimenti
+                        url: 'http://localhost/calendar/calendar-helper.php?action=get-user-type',
+                        type: 'POST',
+                        data: { email: email },
+                        dataType: 'text',
+                        success: function (userType) {
+                            if (userType === '"manutentore"') { //Essendo la risposa in datatype text è "manutentore" da cercare
+                                fetchEvents();
+                            } else {
+                                fetchCoachEvents(email);
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.log("Errore AJAX: " + error);
+                        }
+                    });
+
+                    $.magnificPopup.close();
+                    showSuccessAlert();
+                }
+            })
+            .fail(function (xhr, status, error) {
+                console.log(xhr.responseText);
+            });
     } else {
         $('#error-message').show();
     }
@@ -140,18 +158,18 @@ function getUserType(email) {
         data: { email: email },
         dataType: 'text',
         success: function (userType) {
-            if (userType === "manutentore") {
+            if (userType === '"manutentore"') { //Essendo la risposa in datatype text è "manutentore" da cercare
                 fetchEvents();
             } else {
                 fetchCoachEvents(email);
             }
-            $.magnificPopup.close();
         },
         error: function (xhr, status, error) {
-            console.log(xhr.responseText);
+            console.log("Errore AJAX: " + error);
         }
     });
 }
+
 
 
 /** Funzione per visualizzare i dettagli di un obiettivo.
@@ -202,6 +220,7 @@ function deleteEvent() {
         success: function (response) {
             if (response.status == 'success') {
                 $.magnificPopup.close()
+                showSuccessAlert();
             }
         },
         error: function (xhr, status, error) {
@@ -295,12 +314,14 @@ function editEvent() {
             if (response.status == 'success') {
                 fetchEvents();
                 $.magnificPopup.close();
+                showSuccessAlert();
             }
         },
         error: function (xhr, status, error) {
             console.log(xhr.responseText);
         }
     });
+    
 }
 
 /** Salva le telecamere selezionate tramite una chiamata AJAX.
@@ -314,7 +335,6 @@ function saveCameras() {
         return $(this).val();
     }).get();
 
-    console.log(eventId);
     // Effettua la chiamata AJAX per salvare le telecamere
     jQuery.ajax({
         url: 'http://localhost/calendar/calendar-helper.php?action=save-cams',
@@ -325,10 +345,9 @@ function saveCameras() {
         },
         dataType: 'json',
         success: function (response) {
-            // Se la chiamata ha avuto successo, aggiorna gli eventi e chiudi il modal
             if (response.status == 'success') {
-                //fetchEvents();
                 $.magnificPopup.close();
+                showSuccessAlert();
             }
         },
         error: function (xhr, status, error) {
@@ -574,6 +593,36 @@ function toggleCameraOptions(checkbox) {
     }
 }
 
+function confirmSaveEvent(email) {
+    // Mostra il popup di conferma
+    if (confirm("Sei sicuro di voler salvare l'evento per l'utente con email " + email + "?")) {
+        // Se l'utente ha cliccato su "OK", esegui la funzione saveEvent()
+        saveEvent(email);
+    }
+}
+
+function confirmdeleteEvent() {
+    // Mostra il popup di conferma
+    if (confirm("Sei sicuro di voler eliminare l'evento?")) {
+        deleteEvent();
+    }
+}
+
+function showSuccessAlert() {
+    // Crea l'elemento alert di Bootstrap per il messaggio di successo
+    var alertElement = $('<div class="alert alert-success alert-dismissible fade show" role="alert">' +
+        '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+        'Evento modificato con successo !' +
+        '<span aria-hidden="true">&times;</span></button></div>');
+  
+    // Inserisci l'alert all'interno del div con classe "container" e id "alert"
+    $('.container #alert').prepend(alertElement);
+  
+    // Nascondi l'alert dopo qualche secondo (es. 5 secondi)
+    setTimeout(function () {
+      alertElement.alert('close');
+    }, 5000);
+  }  
 
 /** Funzione per formattare una data nel formato "DD mese YYYY".
  * 

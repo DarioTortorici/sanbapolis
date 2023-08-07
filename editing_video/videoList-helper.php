@@ -7,9 +7,9 @@ function getPlaylist($videoUrl)
     $videoUrl = "./storage_video/basket_test_1.mp4";
     $con = get_connection();
 
-    $sql = "SELECT video
-            FROM sessioni_registrazione
-            WHERE id = (SELECT id FROM sessioni_registrazione WHERE video = ?)";
+    $sql = "SELECT locazione
+            FROM video
+            WHERE sessione = (SELECT id FROM sessioni_registrazione WHERE video = ?)";
     $query = $con->prepare($sql);
     $query->execute([$videoUrl]);
     $result = $query->fetchAll();

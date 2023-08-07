@@ -20,6 +20,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Includi il file login-process.php per elaborare il login
     require('login-process.php');
 }
+
+//Controlla che la pagina sia caricata dall'activation e mostra all'utente che è stato verificato
+if (isset($_GET['verified']) && $_GET['verified'] === 'true') {
+    echo '<div class="alert alert-success" role="alert">Account verificato con successo! Procedi nuovamente con il login</div>';
+}
 ?>
 
 <!-- Area di registrazione -->

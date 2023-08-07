@@ -61,7 +61,7 @@ if (isset($_GET['code'])) {
     if (activateAccountUsingCode($activationCode)) {
         // Codice di attivazione valido, esegui le azioni necessarie per attivare l'account
         echo "Account attivato con successo!";
-        header("Location: ../authentication/login.php");
+        header("Location: ../authentication/login.php?verified=true");
         exit; // Termina l'esecuzione del codice dopo la reindirizzamento
     } else {
         // Codice di attivazione non valido

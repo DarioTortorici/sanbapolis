@@ -49,6 +49,7 @@ if ($userType == "allenatore") {
 
 <!-- Calendario "FullCalendar" caricato da JavaScript -->
 <div class="container">
+    <div id="alert"></div>
     <div id="calendar"></div>
 </div>
 
@@ -124,7 +125,7 @@ if ($userType == "allenatore") {
                 Tutto il giorno: <input type="checkbox" name="allDay" placeholder="allday"><br>
             </div>
 
-            <button type="button" id="save-event" onclick="saveEvent('<?php echo $_COOKIE['email']; ?>')">Salva</button>
+            <button type="button" id="save-event" onclick="confirmSaveEvent('<?php echo $_COOKIE['email']; ?>')">Salva</button>
         </form>
     </div>
     <div id="error-message" style="color: red; display: none;">Si prega di compilare tutti i campi obbligatori.</div>
@@ -149,7 +150,7 @@ if ($userType == "allenatore") {
 
 
     if ($delete) {
-        echo ('<button id="delete-button" class="btn btn-danger" onclick="deleteEvent()">Elimina</button>');
+        echo ('<button id="delete-button" class="btn btn-danger" onclick="confirmdeleteEvent()">Elimina</button>');
     }
     if ($modify) {
         echo ('<button id="edit-button" class="btn btn-primary" onclick="ShowForEditEvent()">Modifica</button>');

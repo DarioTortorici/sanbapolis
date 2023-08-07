@@ -265,8 +265,8 @@ function save_cameras($cameras, $id)
             // Converti le telecamere in un array di interi
             $cams_array = is_array($cameras) ? array_map('intval', $cameras) : json_decode($cameras, true);
 
-            // Inserisci le nuove telecamere associate alla prenotazione
-            $sql = "INSERT INTO telecamere_prenotazioni (telecamera, prenotazione) VALUES (?,?)";
+            // Inserisci le nuove telecamere associate alla prenotazione o modifica se già presenti
+            $sql = "INSERT INTO telecamere_prenotazioni (telecamera, prenotazione) VALUES (?, ?) ON DUPLICATE KEY UPDATE telecamera = VALUES(telecamera)";
             $query = $con->prepare($sql);
             foreach ($cams_array as $camera) {
                 $query->execute([$camera, $prenotazioni_id]);
@@ -604,7 +604,8 @@ function getCoachEvents($coach)
  *                    Restituisce NULL in caso di errori o nessun risultato.
  * @throws PDOException Se si verifica un errore durante l'esecuzione della query.
  */
-function getSocietyEvents($manager) {
+function getSocietyEvents($manager)
+{
     $con = get_connection();
 
     try {
@@ -836,7 +837,7 @@ if (isset($_GET['action'])) {
             $response = array('status' => 'error', 'message' => 'Missing required fields');
         }
         header('Content-Type: application/json');
-        echo json_encode($response);        
+        echo json_encode($response);
     } elseif ($action == 'get-events') { // recupero tutti gli eventi da calendar_event
         header('Content-Type: application/json');
         echo getEvents();
@@ -862,7 +863,7 @@ if (isset($_GET['action'])) {
             header('Content-Type: application/json');
             echo getCoachEvents($coach);
         }
-    }elseif ($action == 'get-society-event') { //recupero tutti gli eventi da calendar_event dove allena coach
+    } elseif ($action == 'get-society-event') { //recupero tutti gli eventi da calendar_event dove allena coach
         $manager = isset($_GET['responsabile']) ? $_GET['responsabile'] : null;
         if ($manager) {
             header('Content-Type: application/json');
@@ -936,10 +937,10 @@ if (isset($_GET['action'])) {
         }
     } elseif ($action == 'get-user-type') { // recupero utente
         header('Content-Type: application/json');
-    
+
         // Decodifica il payload JSON della richiesta POST
         $email = isset($_POST['email']) ? $_POST['email'] : null;
-    
+
         // Verifica se è stata fornita l'email come parametro nella richiesta POST
         if ($email) {
             // Se è presente l'email nel payload JSON, passa l'email alla funzione getUserType()
@@ -948,9 +949,9 @@ if (isset($_GET['action'])) {
             // Se l'email non è presente, utilizza l'email memorizzata nel cookie come prima
             $response = getUserType();
         }
-    
+
         echo json_encode($response);
     } else {
         // Parametro 'action' mancante
-    }    
+    }
 }

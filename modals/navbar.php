@@ -34,13 +34,13 @@ if (isset($_COOKIE['email'])) {
                         </li>
                         <?php if (isset($user) && $user['privilegi_cam'] == 1) : ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="../cameras/video_storage.php">Filmati</a>
-                            </li>
-                            <li class="nav-item">
                                 <a class="nav-link" href="../cameras/overview.php">Livecams</a>
                             </li>
                         <?php endif; ?>
                         <?php if (isset($user) && $user['userType'] == "allenatore") : ?>
+                            <li class="nav-item">
+                                <a class="nav-link" href="../cameras/video_storage.php">Filmati</a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="../profile/my-team.php">My team</a>
                             </li>
