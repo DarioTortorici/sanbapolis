@@ -161,10 +161,11 @@ if (empty($errors)) {
         $con = null; // Chiudi la connessione PDO
     }
 } else {
-    // Mostra gli errori a schermo
-    echo "<ul>";
-    foreach ($errors as $error) {
-        echo "<li>$error</li>";
-    }
-    echo "</ul>";
+    // Prepara gli errori come query string per passarli a register.php
+    $errorString = implode("|", $errors); // Converte l'array di errori in una stringa separata da "|"
+    $redirectURL = "register.php?errors=" . urlencode($errorString);
+    
+    // Esegue il reindirizzamento alla pagina login.php con gli errori come parte della query string
+    header("Location: $redirectURL");
+    exit(); // Assicura che lo script si interrompa dopo aver eseguito il reindirizzamento
 }

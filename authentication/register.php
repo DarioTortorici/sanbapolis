@@ -9,10 +9,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $userType = $_POST['userType'] ?? '';
 $teamcode = $_POST['teamCode'] ?? '';
 $societycode = $_POST['societyCode'] ?? '';
+
+if (isset($_GET['errors'])) {
+    $errorString = $_GET['errors'];
+    $errors = explode("|", $errorString); // Converti la stringa degli errori in un array
+}
 ?>
 
 <!-- registration scripts -->
 <script src="../js/authentication/register.js"></script>
+
+<!-- Blocco per mostrare gli alert di Bootstrap -->
+<div class="container mt-4">
+        <?php
+        if (!empty($errors)) {
+            foreach ($errors as $error) {
+                echo '<div class="alert alert-danger">' . $error . '</div>';
+            }
+        }
+        ?>
 
 <!-- registration area -->
 <section id="register">
