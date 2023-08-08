@@ -47,7 +47,7 @@ function is_ajax_request()
  *
  * @return int L'ID dell'evento creato nel calendario.
  */
-function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $sport, $note, $eventType, $cameras, $author)
+function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $note, $eventType, $cameras, $author)
 {
     // missing premium parameter `resourceEditable`=?, `resourceId`=?, `resourceIds`=?
 
@@ -91,7 +91,7 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
 
     //$color settato a null perch modifichiamo bordi e background in base al tipo di evento
     $color = null;
-    $backgroundColor = getEventColor($sport);
+    $backgroundColor = getEventColor($society);
     $textcolor = "white";
 
     //Camere preselezionate da attivare
@@ -653,16 +653,29 @@ function getNote($id)
  * @param string $sport Lo sport per il quale si desidera ottenere il colore.
  * @return string Una stringa che rappresenta il colore corrispondente allo sport specificato. Se lo sport non corrisponde a nessuna delle opzioni predefinite, viene restituito il colore di default.
  */
-function getEventColor($sport)
+function getEventColor($society)
 {
-    if ($sport == 'calcio') {
+    $con = get_connection();
+
+    try {
+        $query = "SELECT sport FROM squadre INNER JOIN societa_sportive sp ON sp.partita_iva = squadre.societa WHERE sp.Nome = :societa";
+        $statement = $con->prepare($query);
+        $statement->bindParam(':societa', $society);
+        $statement->execute();
+        $sport = $statement->fetchColumn();
+        
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il recupero della data e dell'ora dell'evento: " . $e->getMessage());
+    }
+
+    if ($sport == 'Calcio') {
         return "purple";
-    } else if ($sport == 'pallavolo') {
+    } else if ($sport == 'Pallavolo') {
         return "darkorange";
-    } else if ($sport == 'basket') {
+    } else if ($sport == 'Basket') {
         return "darkgreen";
     }
-    return '#378006';
+    return 'lightblue';
 }
 
 /**
@@ -822,7 +835,6 @@ if (isset($_GET['action'])) {
             'url' => $_POST['url'] ?? null,
             // Tabella prenotazioni
             'society' => $_POST['society'] ?? null,
-            'sport' => $_POST['sport'] ?? null,
             'note' => $_POST['description'] ?? null,
             'eventType' => $_POST['event_type'] ?? null,
             // Tabella telecamere
@@ -831,7 +843,7 @@ if (isset($_GET['action'])) {
         );
         // Controllo che esistano campi obbligatori (society e startDate)
         if ($data['society'] && $data['startDate']) {
-            $id = save_event($data['groupId'], $data['allDay'], $data['startDate'], $data['endDate'], $data['daysOfWeek'], $data['startTime'], $data['endTime'], $data['startRecur'], $data['endRecur'], $data['url'], $data['society'], $data['sport'], $data['note'], $data['eventType'], $data['cameras'], $data['author']);
+            $id = save_event($data['groupId'], $data['allDay'], $data['startDate'], $data['endDate'], $data['daysOfWeek'], $data['startTime'], $data['endTime'], $data['startRecur'], $data['endRecur'], $data['url'], $data['society'], $data['note'], $data['eventType'], $data['cameras'], $data['author']);
             $response = array('status' => 'success', 'id' => $id);
         } else {
             $response = array('status' => 'error', 'message' => 'Missing required fields');
