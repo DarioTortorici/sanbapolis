@@ -4,6 +4,10 @@ DROP DATABASE IF EXISTS sanbapolis;
 CREATE DATABASE sanbapolis;
 USE sanbapolis;
 
+GRANT ALL PRIVILEGES ON *.* TO `phpuser`@`localhost` IDENTIFIED BY PASSWORD '*039A9EE1E4E0D639C23C33AE55DFF34AB0F0FFE6' WITH GRANT OPTION;
+
+GRANT ALL PRIVILEGES ON `testdb`.* TO `phpuser`@`localhost`;
+
 CREATE TABLE persone(
 	id INTEGER AUTO_INCREMENT NOT NULL,
 	email VARCHAR(320) NOT NULL,
@@ -156,6 +160,7 @@ CREATE TABLE societa_sportive(
 	nome VARCHAR(64) NOT NULL, 
 	indirizzo VARCHAR(64),
 	responsabile VARCHAR(320) NOT NULL,
+	codice VARCHAR(6) NOT NULL,
 	
 	CONSTRAINT fk_email_responsabile FOREIGN KEY (responsabile) REFERENCES persone(email) ON UPDATE CASCADE ON DELETE CASCADE,
 	
@@ -171,7 +176,7 @@ CREATE TABLE squadre(
 	nome VARCHAR(64) NOT NULL,
 	societa VARCHAR(11) NOT NULL,
 	sport VARCHAR(64) NOT NULL,
-	/*codice_accesso VARCHAR(6) NOT NULL,*/
+	codice VARCHAR(6) NOT NULL,
 	
 	CONSTRAINT fk_sport_squadra FOREIGN KEY (sport) REFERENCES sport(nome_sport) ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT fk_squadra_societa FOREIGN KEY (societa) REFERENCES societa_sportive(partita_iva) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -265,14 +270,13 @@ CREATE TABLE prenotazioni (
 CREATE TABLE partite (
 	id INTEGER AUTO_INCREMENT NOT NULL,
 	id_squadra_casa INTEGER NOT NULL,
-	id_squadra_trasferta INTEGER NOT NULL,
+	id_squadra_trasferta INTEGER,
 	data_ora_inizio DATETIME NOT NULL,
 	data_ora_fine DATETIME,
 	sport VARCHAR(64) NOT NULL,
 	prenotazione INTEGER NOT NULL,
 
 	CONSTRAINT fk_squadra_casa FOREIGN KEY (id_squadra_casa) REFERENCES squadre(id) ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT fk_squadra_trasferta FOREIGN KEY (id_squadra_trasferta) REFERENCES squadre(id) ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT fk_sport_partita FOREIGN KEY (sport) REFERENCES sport(nome_sport) ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT fk_prenotazione_partita FOREIGN KEY (prenotazione) REFERENCES prenotazioni(id) ON UPDATE CASCADE ON DELETE CASCADE,
 

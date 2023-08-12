@@ -97,7 +97,7 @@ INSERT INTO giocatori (email) VALUES
 ('luca.rossi@gmail.com');
 
 
-INSERT INTO sport (nome_sport) VALUES ('Basket'), ('Pallavolo');
+INSERT INTO sport (nome_sport) VALUES ('Basket'), ('Pallavolo'),('Calcio');
 
 INSERT INTO societa_sportive (partita_iva, nome, indirizzo, responsabile) VALUES
 ('12345678901', 'Basket Club Trento Nord', 'Via Roma 1', 'paola.verdi@gmail.com'),
