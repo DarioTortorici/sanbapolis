@@ -91,70 +91,6 @@ CREATE TABLE tag_rfid(
 	id INTEGER PRIMARY KEY
 );
 
-CREATE TABLE sessioni_registrazione (
-	id INTEGER AUTO_INCREMENT NOT NULL,
-	autore VARCHAR(320) NOT NULL,
-	data_ora_inizio DATETIME NOT NULL,
-	data_ora_fine DATETIME NOT NULL,
-
-	CONSTRAINT fk_autore_sessione FOREIGN KEY (autore) REFERENCES persone(email) ON UPDATE CASCADE ON DELETE CASCADE,
-
-	UNIQUE (autore, data_ora_inizio),
-	PRIMARY KEY (id)
-);
-
-CREATE TABLE video(
-	id INTEGER AUTO_INCREMENT NOT NULL,
-	locazione VARCHAR(255) NOT NULL, /*255 in teoria lunghezza massima per una path in linux*/
-	nome VARCHAR(64) NOT NULL,
-	autore VARCHAR(64) NOT NULL,
-	nota TEXT,
-	sessione INTEGER NOT NULL,
-	
-	CONSTRAINT fk_email_autore FOREIGN KEY (autore) REFERENCES persone(email) ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT fk_video_sessione FOREIGN KEY (sessione) REFERENCES sessioni_registrazione(id) ON UPDATE CASCADE ON DELETE CASCADE,
-	
-	UNIQUE(locazione),
-	PRIMARY KEY(id)
-);
-
-CREATE TABLE clips_video (
-	locazione_video_originale VARCHAR(255) NOT NULL,
-	locazione_clip VARCHAR(255) NOT NULL,
-
-	CONSTRAINT fk_video_originale FOREIGN KEY (locazione_video_originale) REFERENCES video(locazione) ON UPDATE CASCADE ON DELETE CASCADE,
-	CONSTRAINT fk_clip_video FOREIGN KEY (locazione_clip) REFERENCES video(locazione) ON UPDATE CASCADE ON DELETE CASCADE,
-
-	PRIMARY KEY(locazione_video_originale, locazione_clip)
-);
-
-
-CREATE TABLE screenshots (
-	id INTEGER AUTO_INCREMENT NOT NULL,
-	locazione VARCHAR(255) NOT NULL,
-	nome VARCHAR(64)  NOT NULL,
-	video VARCHAR(255) NOT NULL,
-	nota TEXT,
-
-	CONSTRAINT fk_screenshot_video FOREIGN KEY (video) REFERENCES video(locazione) ON UPDATE CASCADE ON DELETE CASCADE,
-
-	UNIQUE (locazione),
-	PRIMARY KEY (id)
-);
-
-CREATE TABLE segnaposti (
-	id INTEGER AUTO_INCREMENT NOT NULL,
-	minutaggio TIME(3) NOT NULL,
-	video VARCHAR(255) NOT NULL,
-	nome VARCHAR(64),
-	nota TEXT,
-
-	CONSTRAINT fk_segnaposti_video FOREIGN KEY (video) REFERENCES video(locazione) ON UPDATE CASCADE ON DELETE CASCADE,
-
-	UNIQUE(minutaggio, video),
-	PRIMARY KEY (id)
-);
-
 CREATE TABLE societa_sportive(
 	partita_iva VARCHAR(11) NOT NULL,
 	nome VARCHAR(64) NOT NULL, 
@@ -264,6 +200,72 @@ CREATE TABLE prenotazioni (
 	CONSTRAINT fk_prenotazione_evento_calendario FOREIGN KEY (id_calendar_events) REFERENCES calendar_events(id) ON UPDATE CASCADE ON DELETE CASCADE,
 	
 	UNIQUE (autore_prenotazione, data_ora_inizio, data_ora_fine),
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE sessioni_registrazione (
+	id INTEGER AUTO_INCREMENT NOT NULL,
+	autore VARCHAR(320) NOT NULL,
+	data_ora_inizio DATETIME NOT NULL,
+	data_ora_fine DATETIME NOT NULL,
+	prenotazione INTEGER NOT NULL,
+
+	CONSTRAINT fk_autore_sessione FOREIGN KEY (autore) REFERENCES persone(email) ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT fk_prenotazione_sessione FOREIGN KEY (prenotazione) REFERENCES prenotazioni(id) ON UPDATE CASCADE ON DELETE CASCADE,
+
+	UNIQUE (autore, data_ora_inizio),
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE video(
+	id INTEGER AUTO_INCREMENT NOT NULL,
+	locazione VARCHAR(255) NOT NULL, /*255 in teoria lunghezza massima per una path in linux*/
+	nome VARCHAR(64) NOT NULL,
+	autore VARCHAR(64) NOT NULL,
+	nota TEXT,
+	sessione INTEGER NOT NULL,
+	
+	CONSTRAINT fk_email_autore FOREIGN KEY (autore) REFERENCES persone(email) ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT fk_video_sessione FOREIGN KEY (sessione) REFERENCES sessioni_registrazione(id) ON UPDATE CASCADE ON DELETE CASCADE,
+	
+	UNIQUE(locazione),
+	PRIMARY KEY(id)
+);
+
+CREATE TABLE clips_video (
+	locazione_video_originale VARCHAR(255) NOT NULL,
+	locazione_clip VARCHAR(255) NOT NULL,
+
+	CONSTRAINT fk_video_originale FOREIGN KEY (locazione_video_originale) REFERENCES video(locazione) ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT fk_clip_video FOREIGN KEY (locazione_clip) REFERENCES video(locazione) ON UPDATE CASCADE ON DELETE CASCADE,
+
+	PRIMARY KEY(locazione_video_originale, locazione_clip)
+);
+
+
+CREATE TABLE screenshots (
+	id INTEGER AUTO_INCREMENT NOT NULL,
+	locazione VARCHAR(255) NOT NULL,
+	nome VARCHAR(64)  NOT NULL,
+	video VARCHAR(255) NOT NULL,
+	nota TEXT,
+
+	CONSTRAINT fk_screenshot_video FOREIGN KEY (video) REFERENCES video(locazione) ON UPDATE CASCADE ON DELETE CASCADE,
+
+	UNIQUE (locazione),
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE segnaposti (
+	id INTEGER AUTO_INCREMENT NOT NULL,
+	minutaggio TIME(3) NOT NULL,
+	video VARCHAR(255) NOT NULL,
+	nome VARCHAR(64),
+	nota TEXT,
+
+	CONSTRAINT fk_segnaposti_video FOREIGN KEY (video) REFERENCES video(locazione) ON UPDATE CASCADE ON DELETE CASCADE,
+
+	UNIQUE(minutaggio, video),
 	PRIMARY KEY (id)
 );
 
@@ -394,5 +396,16 @@ CREATE TABLE telecamere_prenotazioni (
 	PRIMARY KEY (telecamera, prenotazione)
 );
 
+
+CREATE TABLE telecamere_video (
+	telecamera INTEGER NOT NULL,
+	video INTEGER NOT NULL,
+
+	CONSTRAINT fk_telecamera_video FOREIGN KEY (telecamera) REFERENCES telecamere(id) ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT fk_video_telecamera FOREIGN KEY (video) REFERENCES video(id) ON UPDATE CASCADE ON DELETE CASCADE,
+	
+
+	PRIMARY KEY(telecamera, video)
+);
 
 COMMIT;

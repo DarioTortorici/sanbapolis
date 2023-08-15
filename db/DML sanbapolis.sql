@@ -118,9 +118,30 @@ INSERT INTO allenatori_squadre (email_allenatore, id_squadra, data_inizio) VALUE
 ('giorgio.verdi@gmail.com', (SELECT id FROM squadre WHERE nome = 'Basket Club Trento Sud' AND societa = 34567890123), (SELECT CURDATE())),
 ('luisa.bianchi@gmail.com', (SELECT id FROM squadre WHERE nome = 'Pallavolo Trento Sud' AND societa = 45678901234), (SELECT CURDATE()));
 
-INSERT INTO sessioni_registrazione(autore, data_ora_inizio, data_ora_fine) VALUES ('vincenzo.italiano@gmail.com', NOW(), NOW());
 
-INSERT INTO video(locazione, nome, autore, nota, sessione) VALUES ('video/basket_test_1.mp4', 'Test Basket', 'vincenzo.italiano@gmail.com', NULL, (SELECT id FROM sessioni_registrazione WHERE autore = 'vincenzo.italiano@gmail.com' AND data_ora_inizio = NOW()));
-INSERT INTO video(locazione, nome, autore, nota, sessione) VALUES ('video/volley_test_1.mp4', 'Test Volley', 'vincenzo.italiano@gmail.com', NULL, (SELECT id FROM sessioni_registrazione WHERE autore = 'vincenzo.italiano@gmail.com' AND data_ora_inizio = NOW()));
+INSERT INTO calendar_events(id, title, start) VALUES (1, "Allenamento 10 Basket", '2023-08-14 10:00:00');
+INSERT INTO calendar_events(id, title, start) VALUES (2 ,"Allenamento 14 Basket", '2023-08-14 14:00:00');
+
+INSERT INTO prenotazioni(autore_prenotazione, data_ora_inizio, data_ora_fine, id_squadra, id_calendar_events, nota) 
+VALUES 
+('vincenzo.italiano@gmail.com', '2023-08-14 10:00:00', '2023-08-14 12:00:00', (SELECT id FROM squadre WHERE nome = 'Basket Club Trento Nord' AND societa = '12345678901'),
+1, NULL),
+
+('vincenzo.italiano@gmail.com', '2023-08-14 14:00:00', '2023-08-14 16:00:00', (SELECT id FROM squadre WHERE nome = 'Basket Club Trento Nord' AND societa = '12345678901'),
+2, NULL);
+
+INSERT INTO sessioni_registrazione(autore, data_ora_inizio, data_ora_fine, prenotazione)
+VALUES
+('vincenzo.italiano@gmail.com', '2023-08-14 10:00:00', '2023-08-14 12:00:00',
+(SELECT id FROM prenotazioni WHERE autore_prenotazione = 'vincenzo.italiano@gmail.com' AND data_ora_inizio = '2023-08-14 10:00:00' AND data_ora_fine = '2023-08-14 12:00:00')),
+('vincenzo.italiano@gmail.com', '2023-08-14 14:00:00', '2023-08-14 16:00:00',
+(SELECT id FROM prenotazioni WHERE autore_prenotazione = 'vincenzo.italiano@gmail.com' AND data_ora_inizio = '2023-08-14 10:00:00' AND data_ora_fine = '2023-08-14 12:00:00'));
+
+
+INSERT INTO video(locazione, nome, autore, nota, sessione) VALUES ('video/basket_test_1.mp4', 'Test Basket', 'vincenzo.italiano@gmail.com', NULL, 
+(SELECT id FROM sessioni_registrazione WHERE autore = 'vincenzo.italiano@gmail.com' AND data_ora_inizio = '2023-08-14 10:00:00'));
+
+INSERT INTO video(locazione, nome, autore, nota, sessione) VALUES ('video/volley_test_1.mp4', 'Test Volley', 'vincenzo.italiano@gmail.com', NULL, 
+(SELECT id FROM sessioni_registrazione WHERE autore = 'vincenzo.italiano@gmail.com' AND data_ora_inizio = '2023-08-14 14:00:00'));
 
 COMMIT;
