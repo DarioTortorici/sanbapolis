@@ -1,9 +1,13 @@
 <?php
 session_start();
 
-include '../video-helper.php';
+include '../editing/video-editing-helper.php';
 include '../../authentication/db_connection.php';
 include '../../classes/Mark.php';
+include '../../classes/Video.php';
+include '../../classes/Person.php';
+
+include '../editing/error-checker.php';
 
 $pdo = get_connection();
 
@@ -11,31 +15,23 @@ if(isset($_GET["timing"])){
     echo $_GET["timing"];
 }
 
-if(isset($_GET["video"])){
-    $videoPath = $_GET["video"];
-}
-
 if(isset($_GET["operation"])){
 	switch ($_GET["operation"]){
 		case "new_mark":
-			echo "new mark<br>";
 			if(isset($_POST["timing_mark"])){
-				$timing = $_POST["timing_mark"];
-				$timing = timing_format_db($timing);//fromato corretto per db
-				$name = ($_POST["mark_name"] == "") ? null : $_POST["mark_name"];
-				$note = ($_POST["mark_note"] == "") ? null : $_POST["mark_note"];
-				$video = $videoPath;
-				$mark = new Mark($timing, $name, $note, $video);
-				echo insertNewMark($pdo, $mark);
+				if (!newMark($pdo, $video, $person)){
+					header("Location: ".EDITING_VIDEO."?message=mark_exists");
+					exit();
+				}
 			}
-			break;	
+			break;
 		case "update_mark":
 			if(isset($_POST["timing_mark"])){
 				$timing = $_POST["timing_mark"];
 				$timing = timing_format_db($timing);//fromato corretto per db
 				$name = ($_POST["mark_name"] == "") ? null : $_POST["mark_name"];
 				$note = ($_POST["mark_note"] == "") ? null : $_POST["mark_note"];
-				$video = $videoPath;
+				$video = $_SESSION["path_video"];
 				$id = $_GET["id"];
 				$mark = new Mark($timing, $name, $note, $video, $id);
 				echo updateMarkFromId($pdo, $mark);
@@ -63,10 +59,19 @@ if(isset($_GET["operation"])){
 	$tmp = "";
 	if(isset($_POST["timing_mark"])){
 		$timing = getIntTimingScreen($_POST["timing_mark"]);
-		$tmp = "?video=".$videoPath."&timing_screen=$timing";
-		header("Location: ../editing_video.php$tmp");
+		$tmp = "?timing_screen=$timing";
+		header("Location: ../editing/".EDITING_VIDEO.$tmp);
 	}
 	
+}
+
+function newMark($pdo, $video, $person){
+	$timing = $_POST["timing_mark"];
+	$timing = timing_format_db($timing);//fromato corretto per db
+	$name = ($_POST["mark_name"] == "") ? null : $_POST["mark_name"];
+	$note = ($_POST["mark_note"] == "") ? null : $_POST["mark_note"];
+	$mark = new Mark($timing, $name, $note, $video->getPath());
+	return insertNewMark($pdo, $mark);
 }
 
 function multipleDelete($pdo){

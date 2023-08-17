@@ -32,11 +32,10 @@ function fromSeconds(seconds, showHours) {
  * @returns {string|null} - Il valore del parametro specificato, oppure `null` se il parametro non è presente o non ha un valore.
  */
 function findGetParameter(parameterName) {
-    var result = null,
+    let result = null,
         tmp = [];
     location.search
-        //.substr(1) modificato perché deprecato
-        .slice(1)
+        .substr(1)
         .split("&")
         .forEach(function (item) {
             tmp = item.split("=");
@@ -193,7 +192,7 @@ function showMarks() {
 function segnaposto() {
     const xhttp = new XMLHttpRequest();
     var location = "./storage_video/" + $('#video-name').text();
-    var url = "marks/mark_manager.php?video="+location+"&timing=" + $('#timing_video').val();
+    var url = "../marks/mark_manager.php?video="+location+"&timing=" + $('#timing_video').val();
     xhttp.open("GET", url, true);
     xhttp.onreadystatechange = function () {
         if (this.readyState = 4 && this.status === 200) {
@@ -201,7 +200,7 @@ function segnaposto() {
             if (timing != "") {
                 $('#timing_mark')[0].value = timing;
                 $('#mark_details')[0].hidden = false;
-                $('#<?php echo $filename ?>')[0].pause();
+                $('.embed-responsive video')[0].pause();
             }
         }
     }
@@ -209,10 +208,10 @@ function segnaposto() {
 }
 
 window.onload = function () {
-    let timing = findGetParameter("timing_screen");
-    if (timing != null) {
-        timing = parseFloat(timing);
-        document.getElementById("<?php echo $filename ?>").currentTime = timing;
+    let timingParam = findGetParameter("timing_screen");
+    if (timingParam != null) {
+        let timing = parseFloat(timingParam);
+        document.querySelector(".embed-responsive-item").currentTime = timing;
     }
 }
 

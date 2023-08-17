@@ -1,4 +1,43 @@
 <?php
+
+define("INDEX", "index.php");
+
+define("EDITING_VIDEO", "editing_video.php");
+
+define("VIDEO_MANAGER", "video_manager.php");
+define("VIDEOS_LIST", "videos_list.php");
+define("VIDEO_DETAILS", "video_details.php");
+
+define("CLIP", "clip.php");
+define("CLIP_MANAGER", "clip_manager.php");
+define("CLIPS_LIST", "clips_list.php");
+
+define("MARK_DETAILS", "mark_details.php");
+define("MARK_MANAGER", "mark_manager.php");
+define("MARKS_LIST", "marks_list.php");
+
+define("SCREEN_DETAILS", "screen_details.php");
+define("SCREEN_MANAGER", "screen_manager.php");
+define("SCREENSHOTS_LIST", "screenshots_list.php");
+
+define("SESSIONS_LIST", "sessions_list.php");
+define("SESSION", "session.php");
+
+/**
+ * mi serve per fare dei test sui valori delle variabili
+ * aggiunge una eventuale descrizione da stampare e va a capo dopo la stampa 
+ */
+function myVarDump($value, $descr = ""){
+    echo "$descr:    "; var_dump($value); echo "<br><br>\n";
+}
+
+/**
+ * controlla se una pagina è stata ricaricata
+ */
+function isPageRefreshed(){
+    return (isset($_SERVER['HTTP_CACHE_CONTROL']) && $_SERVER['HTTP_CACHE_CONTROL'] == 'max-age=0');
+}
+
 /**
  * converte il timing del video indicato dall'appostio box nel browser in un intero
  * @param string $timing_screen La stringa è nel formato 00:00:000 (minuti:secondi:millesimi di secondi)
@@ -6,7 +45,7 @@
  */
 function getIntTimingScreen($timing_screen){
 
-    $vet_timing = array();  
+    $vet_timing = array();
     $tok = strtok($timing_screen, ":");
     while ($tok !== false) {
         array_push($vet_timing, intval($tok));
@@ -175,7 +214,7 @@ function insertNewMark($pdo, $mark){
             ':nome' => $mark->getName(),
             ':note' => $mark->getNote(),
         ]);
-    } catch (Exception $e){echo "Eccezione:" . $e->getMessage();}
+    } catch (Exception $e){myVarDump($e); echo "Eccezione:" . $e->getMessage();}
     return $ris;
 }
 
@@ -205,6 +244,28 @@ function updateMarkFromId($pdo, $mark){
 function deleteMarkFromId($pdo, $id){
     $query = "DELETE FROM segnaposti WHERE id = \"$id\"";
     $pdo->query($query);
+}
+
+/**
+ * Inserisce nel db un nuovo screenshots
+ * @param PDO La connessione al db
+ * @param Screen $screen Istanza della classe Screen, che contiene i valori da inserie
+ * @return bool true se l'inserimento ha successo, altrimenti false
+ */
+function insertNewScreen($pdo, $screen){
+    $ris = null;
+    try{
+        $query = 'INSERT INTO screenshots(locazione, nome, nota, video) VALUES (:locazione, :nome, :nota, :video)';
+        $statement = $pdo->prepare($query);
+        $statement->execute([
+            ':locazione' => $screen->getPath(),
+            ':nome' => $screen->getName(),
+            ':nota' => $screen->getNote(),
+            ':video' => $screen->getPathVideo(),
+        ]);
+    } catch (Exception $e){echo "Eccezione:" . $e->getMessage();}
+
+    return $ris;
 }
 
 /**
@@ -303,18 +364,20 @@ function deleteScreenFromId($pdo, $id){
 function insertNewVideo($pdo, $video){
     $ris = null;
     try{
-        $query = 'INSERT INTO video(locazione, nome, autore, nota) VALUES (:locazione, :nome, :autore, :nota)';
+        $query = 'INSERT INTO video(locazione, nome, autore, nota, sessione) VALUES (:locazione, :nome, :autore, :nota, :sessione)';
         $statement = $pdo->prepare($query);
         $ris = $statement->execute([
             ':locazione' => $video->getPath(),
             ':nome' => $video->getName(),
             ':autore' => $video->getAuthor(),
             ':nota' => $video->getNote(),
+            ':sessione' => $video->getSession(),
         ]);
     } catch (Exception $e){echo "Eccezione:" . $e->getMessage();}
 
     return $ris;
 }
+
 
 /**
  * @param PDO La connessione al db
@@ -345,7 +408,7 @@ function insertNewClip($pdo, $clip, $path_original_video){
  */
 function getClipsFromVideo($pdo, $path_video){
     $videos = array();
-    $query = "SELECT V.id, V.locazione, V.nome, V.autore, V.nota FROM video V INNER JOIN clips_video CV ON V.locazione = CV.locazione_clip WHERE CV.locazione_video_originale = '$path_video'";
+    $query = "SELECT V.id, V.locazione, V.nome, V.autore, V.nota, V.sessione FROM video V INNER JOIN clips_video CV ON V.locazione = CV.locazione_clip WHERE CV.locazione_video_originale = '$path_video'";
     $statement = $pdo->query($query);
     $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
     if ($publishers) {
@@ -356,7 +419,8 @@ function getClipsFromVideo($pdo, $path_video){
                 $name = $publisher['nome'];
                 $author = $publisher['autore'];
                 $note = $publisher['nota'];
-                $video = new Video($id, $path, $name, $note, $author);
+                $session = $publisher['sessione'];
+                $video = new Video($id, $path, $name, $note, $author, $session);
                 array_push($videos, $video);
             } catch (Exception $e) {
                 echo 'Eccezione: ',  $e->getMessage(), "\n";
@@ -397,7 +461,8 @@ function getVideoFromId($pdo, $id){
                 $name = $publisher['nome'];
                 $author = $publisher['autore'];
                 $note = $publisher['nota'];
-                $video = new Video($id, $path, $name, $note, $author);
+                $session = $publisher['sessione'];
+                $video = new Video($id, $path, $name, $note, $author, $session);
             } catch (Exception $e) {
                 echo 'Eccezione: ',  $e->getMessage(), "\n";
             }
@@ -425,7 +490,8 @@ function getVideoFromPath($pdo, $path){
                 $name = $publisher['nome'];
                 $author = $publisher['autore'];
                 $note = $publisher['nota'];
-                $video = new Video($id, $path, $name, $note, $author);
+                $session = $publisher['sessione'];
+                $video = new Video($id, $path, $name, $note, $author, $session);
             } catch (Exception $e) {
                 echo 'Eccezione: ',  $e->getMessage(), "\n";
             }
@@ -435,36 +501,36 @@ function getVideoFromPath($pdo, $path){
     return $video;
 }
 
-
-/** Restitiusce la persona con l'email specificata
+/**
+ * Restituisce tutti i video relativi ad una sessione
  * @param PDO La connessione al db
- * @param string $email 
- * @return Person $person la persona cercata
- */
-function getPersonaFromEmail($pdo, $email){
-    $person = null;
-    $query = "SELECT * FROM persone WHERE email = '$email'";
+ * @param string $email indica l'email dell'autore del video
+ * @param integer $session indica la sessione di cui si vogliono ottenere i video
+ * @return array() Video
+*/
+function getVideosFromSession($pdo, $email, $session){
+    $videos = array();
+    $query = "SELECT * FROM video WHERE autore = '$email' AND sessione = '$session'";
     $statement = $pdo->query($query);
     $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
     if ($publishers) {
         foreach ($publishers as $publisher) {
             try{                
-                //$id = $publisher['id'];
-                $email = $publisher['email'];
+                $id = $publisher['id'];
+                $path = $publisher['locazione'];
                 $name = $publisher['nome'];
-                $surname = $publisher['cognome'];
-                $birthday = $publisher['data_nascita'];
-                $city = $publisher['citta'];
-                $address = $publisher['indirizzo'];
-                $telephone_number = $publisher['telefono'];
-                $person = new Person(null, $email, $name, $surname, $birthday, $city, $address, $telephone_number);
+                $author = $publisher['autore'];
+                $note = $publisher['nota'];
+                $session = $publisher['sessione'];
+                $video = new Video($id, $path, $name, $note, $author, $session);
+                array_push($videos, $video);
             } catch (Exception $e) {
                 echo 'Eccezione: ',  $e->getMessage(), "\n";
             }
         }
     }
 
-    return $person;
+    return $videos;
 }
 
 /**
@@ -486,7 +552,8 @@ function getVideosFromUser($pdo, $email){
                 $name = $publisher['nome'];
                 $author = $publisher['autore'];
                 $note = $publisher['nota'];
-                $video = new Video($id, $path, $name, $note, $author);
+                $session = $publisher['sessione'];
+                $video = new Video($id, $path, $name, $note, $author, $session);
                 array_push($videos, $video);
             } catch (Exception $e) {
                 echo 'Eccezione: ',  $e->getMessage(), "\n";
@@ -516,7 +583,6 @@ function updateVideo($pdo, $video){
 }
 
 
-
 /**
  * @return string restituisce il link alla pagina corrente
  */
@@ -539,3 +605,87 @@ function getPreviusPage(){
     return $_SESSION["previus_page"];
 }
 
+/**
+ * @param string Elimina il file specificato, se esiste
+ * @return bool true se il file è stato eliminato, false se il file non esiste o l'eliminazione non è andata a buon fine
+ */
+function deleteFile($path_file){
+    if(file_exists($path_file)){   
+        return unlink($path_file);
+    }
+    return false;
+}
+
+
+/** Restitiusce le sessioni relative all'email specificata
+ * @param PDO La connessione al db
+ * @param string $email 
+ * @return Session la sessione
+ */
+function getSessionsFromEmail($pdo, $email){
+    $sessions = array();
+    $query = "SELECT * FROM sessioni_registrazione WHERE autore = '$email'";
+    $statement = $pdo->query($query);
+    $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
+    if ($publishers) {
+        foreach ($publishers as $publisher) {
+            try{                
+                $id = $publisher['id'];
+                $autore = $publisher['autore'];
+                $data_ora_inizio = $publisher['data_ora_inizio'];
+                $data_ora_fine = $publisher['data_ora_fine'];
+                $prenotazione = $publisher['prenotazione'];
+                $session = new Session($id, $autore, $data_ora_inizio, $data_ora_fine, $prenotazione);
+                array_push($sessions, $session);
+            } catch (Exception $e) {
+                echo 'Eccezione: ',  $e->getMessage(), "\n";
+            }
+        }
+    }
+    return $sessions;
+}
+
+/**
+ * Ottiene la playlist associata a un URL video.
+ *
+ * Questa funzione prende in input l'URL di un video e restituisce un array di oggetti Video corrispondenti
+ * alla sessione di registrazione associata a quel video. La funzione si basa su un database di registrazione
+ * dei video e delle sessioni.
+ *
+ * @param string $videoUrl L'URL del video di cui si desidera ottenere la playlist.
+ * @return array|false Un array contenente gli oggetti Video della playlist o false se si verificano errori.
+ */
+function getPlaylist($videoUrl)
+{
+    $con = get_connection();
+    $videos = array();
+
+    $sql = "SELECT *
+            FROM video
+            WHERE sessione = (SELECT id FROM sessioni_registrazione WHERE video = ?)";
+    $query = $con->prepare($sql);
+    $query->execute([$videoUrl]);
+    $publishers = $query->fetchAll(PDO::FETCH_ASSOC);
+
+    if ($publishers) {
+        foreach ($publishers as $publisher) {
+            try {
+                $id = $publisher['id'];
+                $path = $publisher['locazione'];
+                $name = $publisher['nome'];
+                $author = $publisher['autore'];
+                $note = $publisher['nota'];
+                $session = $publisher['sessione'];
+                
+                // Creazione di un oggetto Video e aggiunta all'array dei video.
+                $video = new Video($id, $path, $name, $note, $author, $session);
+                array_push($videos, $video);
+            } catch (Exception $e) {
+                // In caso di eccezione, stampa il messaggio dell'eccezione.
+                echo 'Eccezione: ',  $e->getMessage(), "\n";
+            }
+        }
+    }
+
+    return $videos;
+}

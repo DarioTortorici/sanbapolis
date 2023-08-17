@@ -1,5 +1,6 @@
 <?php
 require_once('db_connection.php');
+include_once '/xampp/htdocs/classes/Person.php';
 
 /**
  * Convalida un valore di testo di input.
@@ -511,4 +512,35 @@ function getSports()
     }, $result);
 
     return implode('', $options);
+}
+
+/** Restitiusce la persona con l'email specificata
+ * @param PDO La connessione al db
+ * @param string $email 
+ * @return Person $person la persona cercata
+ */
+function getPersonaFromEmail($pdo, $email){
+    $person = null;
+    $query = "SELECT * FROM persone WHERE email = '$email'";
+    $statement = $pdo->query($query);
+    $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
+    if ($publishers) {
+        foreach ($publishers as $publisher) {
+            try{                
+                //$id = $publisher['id'];
+                $email = $publisher['email'];
+                $name = $publisher['nome'];
+                $surname = $publisher['cognome'];
+                $birthday = $publisher['data_nascita'];
+                $city = $publisher['citta'];
+                $address = $publisher['indirizzo'];
+                $telephone_number = $publisher['telefono'];
+                $person = new Person(null, $email, $name, $surname, $birthday, $city, $address, $telephone_number);
+            } catch (Exception $e) {
+                echo 'Eccezione: ',  $e->getMessage(), "\n";
+            }
+        }
+    }
+
+    return $person;
 }

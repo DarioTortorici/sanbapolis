@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ video: player.src.replace(/^http:\/\/localhost/, "..") }),
+            body: JSON.stringify({ video: player.src.replace(/^http:\/\/localhost/, "..").replace(/&recording_date=[^&]*/, "") }),
         });
 
         if (!response.ok) {

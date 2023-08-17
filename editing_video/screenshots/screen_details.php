@@ -2,8 +2,12 @@
 session_start();
 
 include '../../authentication/db_connection.php';
-include 'video-helper.php';
-include 'classes/Screen.php';
+include '../editing/video-editing-helper.php';
+include '../../classes/Screen.php';
+include '../../classes/Video.php';
+include '../../classes/Person.php';
+
+include '../editing/error-checker.php';
 
 ?>
 
@@ -11,9 +15,9 @@ include 'classes/Screen.php';
 <html>
     <head>
         <meta charset="utf-8">
-        <link rel="stylesheet" href="../css/editing-video.css">
+        <link rel="stylesheet" href="../css/style.css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-        <script src="../js/video-scripts.js"></script>
+        <script src="../js/functions.js"></script>
         <title>Dettagli Screen</title>
         <h1>Dettagli Screen</h1>
     </head>
