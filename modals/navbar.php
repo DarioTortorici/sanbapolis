@@ -12,7 +12,7 @@ if (isset($_COOKIE['email'])) {
     $person = getPersonaFromEmail($con, $_COOKIE['email']);
     $_SESSION["person"] = serialize($person);
     if (!$_SESSION['attivato']){
-        //header("Location: /modals/suggest.php");
+        header("Location: /modals/suggest.php");
     }
 }
 ?>

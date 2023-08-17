@@ -27,14 +27,18 @@ define("SESSION", "session.php");
  * mi serve per fare dei test sui valori delle variabili
  * aggiunge una eventuale descrizione da stampare e va a capo dopo la stampa 
  */
-function myVarDump($value, $descr = ""){
-    echo "$descr:    "; var_dump($value); echo "<br><br>\n";
+function myVarDump($value, $descr = "")
+{
+    echo "$descr:    ";
+    var_dump($value);
+    echo "<br><br>\n";
 }
 
 /**
  * controlla se una pagina è stata ricaricata
  */
-function isPageRefreshed(){
+function isPageRefreshed()
+{
     return (isset($_SERVER['HTTP_CACHE_CONTROL']) && $_SERVER['HTTP_CACHE_CONTROL'] == 'max-age=0');
 }
 
@@ -43,7 +47,8 @@ function isPageRefreshed(){
  * @param string $timing_screen La stringa è nel formato 00:00:000 (minuti:secondi:millesimi di secondi)
  * @return int il numero di secondi relativo al timing idicato 
  */
-function getIntTimingScreen($timing_screen){
+function getIntTimingScreen($timing_screen)
+{
 
     $vet_timing = array();
     $tok = strtok($timing_screen, ":");
@@ -65,8 +70,9 @@ function getIntTimingScreen($timing_screen){
  * @param string $image_format Formato dell'immagine in cui salvare l'immagine, di default jpg
  * @return string la path completa, formattata, di dove salvare l'immagine
  */
-function generateScreenName($filename, $timing_screen_string, $screen_folder = "screen/", $image_format = "jpg"){
-    $name_video = strtok($filename,'.');
+function generateScreenName($filename, $timing_screen_string, $screen_folder = "screen/", $image_format = "jpg")
+{
+    $name_video = strtok($filename, '.');
     $timing = "";
     $tok = strtok($timing_screen_string, ":");
     while ($tok !== false) {
@@ -74,42 +80,44 @@ function generateScreenName($filename, $timing_screen_string, $screen_folder = "
         $tok = strtok(":");
     }
     $screen_name = $screen_folder . "frame_{$name_video}_{$timing}." . $image_format;
-    
+
     return $screen_name;
 }
 
 /**
  * @param string $timing Il timing è formattato minuti:secondi:millesimi di secondo
  * @return string Il fromato richiesto dal db: hh:mm:ss.ssss
-*/
-function timing_format_db($timing){
-    $hh = 0; $mm = 0;
+ */
+function timing_format_db($timing)
+{
+    $hh = 0;
+    $mm = 0;
     $db_format = "";
 
     $tok = strtok($timing, ":");
 
     //estraggo i minuti
     $mm = intval($tok);
-    
+
     //calcolo il numero di ore
-    if($mm >= 60){
+    if ($mm >= 60) {
         $hh = intdiv($mm, 60);
-        $mm -= $hh * 60;//calcolo i min rimanenti (es. 63 min sono 1h e 3 min)
+        $mm -= $hh * 60; //calcolo i min rimanenti (es. 63 min sono 1h e 3 min)
     }
 
     //concateno le ore
     $db_format .= "$hh:";
     //concateno i minuti
     $db_format .= ($mm < 10) ? "0$mm:" : "$mm:"; // se i minuti sono < 10, aggiungo lo 0 (es. 3 minuti devo aggiungere 03, non solo 3)
-    
+
     //concateno i secondi
     $tok = strtok(":");
-    $db_format .= "$tok";   
-    
+    $db_format .= "$tok";
+
     //concateno i millesimi di secondo
     $tok = strtok(":");
     $db_format .= ".$tok";
-    
+
     return $db_format;
 }
 
@@ -118,7 +126,8 @@ function timing_format_db($timing){
  * @param string $timing La stringa che specifica il timing formattato secondo il db (hh:mm:ss.sss)
  * @return integer timing espresso in secondi.millisecondi
  */
-function timing_format_from_db_to_int($timing){
+function timing_format_from_db_to_int($timing)
+{
     $ss = 0.0;
 
     //estraggo le ore e le converto in secondi
@@ -128,7 +137,7 @@ function timing_format_from_db_to_int($timing){
     //estraggo i minuti e li converto in secondi
     $tok = strtok(":");
     $ss += intval($tok) * 60;
-    
+
     //estraggo e sommo i secondi
     $tok = strtok(".");
     $ss += (intval($tok));
@@ -145,14 +154,15 @@ function timing_format_from_db_to_int($timing){
  * @param PDO La connessione al db
  * @return array Un array di istanze della classe Mark, che rappresentano i mark salvati nel db
  */
-function getMarksFromVideo($pdo, $video){
+function getMarksFromVideo($pdo, $video)
+{
     $marks = array();
     $query = "SELECT * FROM segnaposti WHERE video=\"$video\"";
     $statement = $pdo->query($query);
     $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
     if ($publishers) {
         foreach ($publishers as $publisher) {
-            try{                
+            try {
                 $id = $publisher['id'];
                 $timing = $publisher['minutaggio'];
                 $name = $publisher['nome'];
@@ -175,14 +185,15 @@ function getMarksFromVideo($pdo, $video){
  * @param integer $id l'id che identifica il mark
  * @return Mark il mark cercato, come istanza della classe Mark
  */
-function getMarkFromId($pdo, $id){
+function getMarkFromId($pdo, $id)
+{
     $mark = null;
     $query = "SELECT * FROM segnaposti WHERE id=$id";
     $statement = $pdo->query($query);
     $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
     if ($publishers) {
         foreach ($publishers as $publisher) {
-            try{                
+            try {
                 $id = $publisher['id'];
                 $timing = $publisher['minutaggio'];
                 $name = $publisher['nome'];
@@ -203,9 +214,10 @@ function getMarkFromId($pdo, $id){
  * @param Mark $mark Istanza della classe Mark, che contiene i valori da inserie
  * @return bool true se l'inserimento ha successo, altrimenti false
  */
-function insertNewMark($pdo, $mark){
+function insertNewMark($pdo, $mark)
+{
     $ris = null;
-    try{
+    try {
         $query = 'INSERT INTO segnaposti(minutaggio, video, nome, nota) VALUES (:minutaggio, :video, :nome, :note)';
         $statement = $pdo->prepare($query);
         $ris = $statement->execute([
@@ -214,7 +226,10 @@ function insertNewMark($pdo, $mark){
             ':nome' => $mark->getName(),
             ':note' => $mark->getNote(),
         ]);
-    } catch (Exception $e){myVarDump($e); echo "Eccezione:" . $e->getMessage();}
+    } catch (Exception $e) {
+        myVarDump($e);
+        echo "Eccezione:" . $e->getMessage();
+    }
     return $ris;
 }
 
@@ -224,16 +239,17 @@ function insertNewMark($pdo, $mark){
  * @param Mark $mark Istanza della classe Mark, che contiene i valori da aggiornare
  * @return bool true se l'aggiornamento ha successo, altrimenti false
  */
-function updateMarkFromId($pdo, $mark){
-   $query = "UPDATE segnaposti SET nome=:nome, nota=:nota WHERE id=:id";
-   $statement = $pdo->prepare($query);
-   $ris = $statement->execute([
-       ':nome' => $mark->getName(),
-       ':nota' => $mark->getNote(),
-       ':id' => $mark->getId(),
+function updateMarkFromId($pdo, $mark)
+{
+    $query = "UPDATE segnaposti SET nome=:nome, nota=:nota WHERE id=:id";
+    $statement = $pdo->prepare($query);
+    $ris = $statement->execute([
+        ':nome' => $mark->getName(),
+        ':nota' => $mark->getNote(),
+        ':id' => $mark->getId(),
     ]);
-    
-   return $ris;
+
+    return $ris;
 }
 
 /**
@@ -241,7 +257,8 @@ function updateMarkFromId($pdo, $mark){
  * @param PDO La connessione al db
  * @param integer $id indica l'id del segnaposto
  */
-function deleteMarkFromId($pdo, $id){
+function deleteMarkFromId($pdo, $id)
+{
     $query = "DELETE FROM segnaposti WHERE id = \"$id\"";
     $pdo->query($query);
 }
@@ -252,9 +269,10 @@ function deleteMarkFromId($pdo, $id){
  * @param Screen $screen Istanza della classe Screen, che contiene i valori da inserie
  * @return bool true se l'inserimento ha successo, altrimenti false
  */
-function insertNewScreen($pdo, $screen){
+function insertNewScreen($pdo, $screen)
+{
     $ris = null;
-    try{
+    try {
         $query = 'INSERT INTO screenshots(locazione, nome, nota, video) VALUES (:locazione, :nome, :nota, :video)';
         $statement = $pdo->prepare($query);
         $statement->execute([
@@ -263,7 +281,9 @@ function insertNewScreen($pdo, $screen){
             ':nota' => $screen->getNote(),
             ':video' => $screen->getPathVideo(),
         ]);
-    } catch (Exception $e){echo "Eccezione:" . $e->getMessage();}
+    } catch (Exception $e) {
+        echo "Eccezione:" . $e->getMessage();
+    }
 
     return $ris;
 }
@@ -274,14 +294,15 @@ function insertNewScreen($pdo, $screen){
  * @param string Il percorso del video
  * @return array Un array di istanze della classe Screen, che rappresentano gli screenshots salvati nel db
  */
-function getScreenshotsFromVideo($pdo, $path_video){
+function getScreenshotsFromVideo($pdo, $path_video)
+{
     $screenshots = array();
     $query = "SELECT * FROM screenshots WHERE video=\"$path_video\"";
     $statement = $pdo->query($query);
     $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
     if ($publishers) {
         foreach ($publishers as $publisher) {
-            try{                
+            try {
                 $id = $publisher['id'];
                 $path = $publisher['locazione'];
                 $name = $publisher['nome'];
@@ -304,14 +325,15 @@ function getScreenshotsFromVideo($pdo, $path_video){
  * @param integer $id l'id che identifica lo screen
  * @return Screem lo screen cercato, come istanza della classe Screen
  */
-function getScreenfromId($pdo, $id){
+function getScreenfromId($pdo, $id)
+{
     $screen = null;
     $query = "SELECT * FROM screenshots WHERE id=$id";
     $statement = $pdo->query($query);
     $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
     if ($publishers) {
         foreach ($publishers as $publisher) {
-            try{                
+            try {
                 $id = $publisher['id'];
                 $path = $publisher['locazione'];
                 $name = $publisher['nome'];
@@ -333,16 +355,17 @@ function getScreenfromId($pdo, $id){
  * @param Screen $screen Istanza della classe Screen, che contiene i valori da aggiornare
  * @return bool true se l'aggiornamento ha successo, altrimenti false
  */
-function updateScreenFromId($pdo, $screen){
+function updateScreenFromId($pdo, $screen)
+{
     $query = "UPDATE screenshots SET nome=:nome, nota=:nota WHERE id=:id";
     $statement = $pdo->prepare($query);
     $ris = $statement->execute([
         ':nome' => $screen->getName(),
         ':nota' => $screen->getNote(),
         ':id' => $screen->getId(),
-     ]);
+    ]);
 
-     return $ris;
+    return $ris;
 }
 
 /**
@@ -350,7 +373,8 @@ function updateScreenFromId($pdo, $screen){
  * @param PDO La connessione al db
  * @param integer $id indica l'id dello screen
  */
-function deleteScreenFromId($pdo, $id){
+function deleteScreenFromId($pdo, $id)
+{
     $query = "DELETE FROM screenshots WHERE id = \"$id\"";
     $pdo->query($query);
 }
@@ -361,9 +385,10 @@ function deleteScreenFromId($pdo, $id){
  * @param Video $video Istanza della classe Video, che contiene i valori da inserie
  * @return bool true se l'inserimento ha successo, altrimenti false
  */
-function insertNewVideo($pdo, $video){
+function insertNewVideo($pdo, $video)
+{
     $ris = null;
-    try{
+    try {
         $query = 'INSERT INTO video(locazione, nome, autore, nota, sessione) VALUES (:locazione, :nome, :autore, :nota, :sessione)';
         $statement = $pdo->prepare($query);
         $ris = $statement->execute([
@@ -373,7 +398,9 @@ function insertNewVideo($pdo, $video){
             ':nota' => $video->getNote(),
             ':sessione' => $video->getSession(),
         ]);
-    } catch (Exception $e){echo "Eccezione:" . $e->getMessage();}
+    } catch (Exception $e) {
+        echo "Eccezione:" . $e->getMessage();
+    }
 
     return $ris;
 }
@@ -385,17 +412,20 @@ function insertNewVideo($pdo, $video){
  * @param string $path_original_video locazione del video da cui è stata estratta la clip
  * @return bool true se l'inserimento ha successo, altrimenti false
  */
-function insertNewClip($pdo, $clip, $path_original_video){
+function insertNewClip($pdo, $clip, $path_original_video)
+{
     $ris = null;
-    if(insertNewVideo($pdo, $clip)){
-        try{
+    if (insertNewVideo($pdo, $clip)) {
+        try {
             $query = 'INSERT INTO clips_video(locazione_video_originale, locazione_clip) VALUES (:originale, :clip)';
             $statement = $pdo->prepare($query);
             $ris = $statement->execute([
                 ':originale' => $path_original_video,
                 ':clip' => $clip->getPath(),
             ]);
-        } catch (Exception $e){echo "Eccezione:" . $e->getMessage();}
+        } catch (Exception $e) {
+            echo "Eccezione:" . $e->getMessage();
+        }
     }
 
     return $ris;
@@ -406,14 +436,15 @@ function insertNewClip($pdo, $clip, $path_original_video){
  * @param string $path_video locazione del video originale da cui estrarre le clip
  * @return array array con le istanse dei video, della classe Video
  */
-function getClipsFromVideo($pdo, $path_video){
+function getClipsFromVideo($pdo, $path_video)
+{
     $videos = array();
     $query = "SELECT V.id, V.locazione, V.nome, V.autore, V.nota, V.sessione FROM video V INNER JOIN clips_video CV ON V.locazione = CV.locazione_clip WHERE CV.locazione_video_originale = '$path_video'";
     $statement = $pdo->query($query);
     $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
     if ($publishers) {
         foreach ($publishers as $publisher) {
-            try{                
+            try {
                 $id = $publisher['id'];
                 $path = $publisher['locazione'];
                 $name = $publisher['nome'];
@@ -438,7 +469,8 @@ function getClipsFromVideo($pdo, $path_video){
  * @param PDO La connessione al db
  * @param integer $id indica l'id del video
  */
-function deleteVideoFromId($pdo, $id){
+function deleteVideoFromId($pdo, $id)
+{
     $query = "DELETE FROM video WHERE id = $id";
     $pdo->query($query);
 }
@@ -448,14 +480,15 @@ function deleteVideoFromId($pdo, $id){
  * @param integer $id indica l'id del video
  * @return Video il video cercato, null se non trovato
  */
-function getVideoFromId($pdo, $id){
+function getVideoFromId($pdo, $id)
+{
     $video = null;
     $query = "SELECT * FROM video WHERE id = $id";
     $statement = $pdo->query($query);
     $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
     if ($publishers) {
         foreach ($publishers as $publisher) {
-            try{                
+            try {
                 $id = $publisher['id'];
                 $path = $publisher['locazione'];
                 $name = $publisher['nome'];
@@ -477,14 +510,15 @@ function getVideoFromId($pdo, $id){
  * @param string $path indica la locazione del video
  * @return Video il video cercato, null se non trovato
  */
-function getVideoFromPath($pdo, $path){
+function getVideoFromPath($pdo, $path)
+{
     $video = null;
     $query = "SELECT * FROM video WHERE locazione = '$path'";
     $statement = $pdo->query($query);
     $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
     if ($publishers) {
         foreach ($publishers as $publisher) {
-            try{                
+            try {
                 $id = $publisher['id'];
                 $path = $publisher['locazione'];
                 $name = $publisher['nome'];
@@ -507,15 +541,16 @@ function getVideoFromPath($pdo, $path){
  * @param string $email indica l'email dell'autore del video
  * @param integer $session indica la sessione di cui si vogliono ottenere i video
  * @return array() Video
-*/
-function getVideosFromSession($pdo, $email, $session){
+ */
+function getVideosFromSession($pdo, $email, $session)
+{
     $videos = array();
     $query = "SELECT * FROM video WHERE autore = '$email' AND sessione = '$session'";
     $statement = $pdo->query($query);
     $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
     if ($publishers) {
         foreach ($publishers as $publisher) {
-            try{                
+            try {
                 $id = $publisher['id'];
                 $path = $publisher['locazione'];
                 $name = $publisher['nome'];
@@ -539,14 +574,15 @@ function getVideosFromSession($pdo, $email, $session){
  * @param string $email della persona
  * @return Array $videos i video cercati
  */
-function getVideosFromUser($pdo, $email){
+function getVideosFromUser($pdo, $email)
+{
     $videos = array();
     $query = "SELECT * FROM video WHERE autore = '$email'";
     $statement = $pdo->query($query);
     $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
     if ($publishers) {
         foreach ($publishers as $publisher) {
-            try{                
+            try {
                 $id = $publisher['id'];
                 $path = $publisher['locazione'];
                 $name = $publisher['nome'];
@@ -570,23 +606,25 @@ function getVideosFromUser($pdo, $email){
  * @param Video $mark Istanza della classe Video, che contiene i valori da aggiornare
  * @return bool true se l'aggiornamento ha successo, altrimenti false
  */
-function updateVideo($pdo, $video){
+function updateVideo($pdo, $video)
+{
     $query = "UPDATE video SET nome=:nome, nota=:nota WHERE id=:id";
     $statement = $pdo->prepare($query);
     $ris = $statement->execute([
         ':nome' => $video->getName(),
         ':nota' => $video->getNote(),
         ':id' => $video->getId(),
-     ]);
+    ]);
 
-     return $ris;
+    return $ris;
 }
 
 
 /**
  * @return string restituisce il link alla pagina corrente
  */
-function getCurentUrl(){
+function getCurentUrl()
+{
     $actual_link = (empty($_SERVER['HTTPS']) ? 'http' : 'https') . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
     return $actual_link;
 }
@@ -594,14 +632,16 @@ function getCurentUrl(){
 /**
  * salva in memoria (in $_SESSION) la pagina attuale, che verrà usata come pagina precedente
  */
-function setPreviusPage(){
+function setPreviusPage()
+{
     $_SESSION["previus_page"] = getCurentUrl();
 }
 
 /**
  * @return string restituisce il link alla pagina precedente
  */
-function getPreviusPage(){
+function getPreviusPage()
+{
     return $_SESSION["previus_page"];
 }
 
@@ -609,8 +649,9 @@ function getPreviusPage(){
  * @param string Elimina il file specificato, se esiste
  * @return bool true se il file è stato eliminato, false se il file non esiste o l'eliminazione non è andata a buon fine
  */
-function deleteFile($path_file){
-    if(file_exists($path_file)){   
+function deleteFile($path_file)
+{
+    if (file_exists($path_file)) {
         return unlink($path_file);
     }
     return false;
@@ -622,14 +663,15 @@ function deleteFile($path_file){
  * @param string $email 
  * @return Session la sessione
  */
-function getSessionsFromEmail($pdo, $email){
+function getSessionsFromEmail($pdo, $email)
+{
     $sessions = array();
     $query = "SELECT * FROM sessioni_registrazione WHERE autore = '$email'";
     $statement = $pdo->query($query);
     $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
     if ($publishers) {
         foreach ($publishers as $publisher) {
-            try{                
+            try {
                 $id = $publisher['id'];
                 $autore = $publisher['autore'];
                 $data_ora_inizio = $publisher['data_ora_inizio'];
@@ -676,7 +718,7 @@ function getPlaylist($videoUrl)
                 $author = $publisher['autore'];
                 $note = $publisher['nota'];
                 $session = $publisher['sessione'];
-                
+
                 // Creazione di un oggetto Video e aggiunta all'array dei video.
                 $video = new Video($id, $path, $name, $note, $author, $session);
                 array_push($videos, $video);
@@ -688,4 +730,28 @@ function getPlaylist($videoUrl)
     }
 
     return $videos;
+}
+
+/**
+ * Ottiene la data e l'ora di inizio registrazione di un video.
+ *
+ * Questa funzione accetta l'URL di un video e restituisce la data e l'ora di inizio della registrazione
+ * associata a quel video. La funzione si basa su un database di sessioni di registrazione e video.
+ *
+ * @param string $videoUrl L'URL del video di cui si desidera ottenere la data e l'ora di inizio registrazione.
+ * @return string|false La data e l'ora di inizio registrazione o false se si verificano errori.
+ */
+function getRecordingDate($videoUrl)
+{
+    $con = get_connection();
+
+    $sql = "SELECT sr.data_ora_inizio
+            FROM sessioni_registrazione sr
+            INNER JOIN video v ON sr.video = v.locazione
+            WHERE sr.video = ?";
+    $query = $con->prepare($sql);
+    $query->execute([$videoUrl]);
+    $data_ora_inizio = $query->fetchColumn();
+
+    return $data_ora_inizio;
 }

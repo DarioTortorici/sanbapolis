@@ -6,8 +6,6 @@ include 'video-editing-helper.php';
 include '../../classes/Mark.php';
 include '../../classes/Screen.php';
 include '../../classes/Video.php';
-
-
 include 'error-checker.php';
 
 $pdo = get_connection();
@@ -21,6 +19,7 @@ if (isset($_GET['video']) && $_GET['video'] != '') {
 } else {
     $video = unserialize($_SESSION["video"]);
     $filename = basename($video->getPath(), ".mp4");
+    $recording_date = getRecordingDate($video->getPath());
 }
 setPreviusPage();
 ?>
@@ -46,7 +45,7 @@ setPreviusPage();
                             </tr>
                           </thead>';
                     foreach ($videos as $el) {
-                        $link = VIDEO_MANAGER . "?operation=select_video&id={$el->getId()}";
+                        $link = "../".$el->getPath();
                         echo <<<END
                     <tr class='clickable-row'>
                         <td>
@@ -236,3 +235,22 @@ setPreviusPage();
     }
 </script>
 <script src="../../js/video/video-scripts.js"></script>
+<script>
+    // Function to change the video source based on the clicked td
+    function changeVideoSource(videoPath) {
+        const videoElement = document.getElementById("<?php echo $filename ?>");
+        videoElement.pause(); // Pause the current video
+        videoElement.src = videoPath; // Change the video source
+        videoElement.load(); // Load the new video source
+        videoElement.play(); // Start playing the new video
+    }
+
+    // Attach click event listeners to all clickable-row <td> elements
+    const clickableRows = document.querySelectorAll('.clickable-row td[data-href]');
+    clickableRows.forEach(td => {
+        td.addEventListener('click', () => {
+            const videoPath = td.getAttribute('data-href');
+            changeVideoSource(videoPath);
+        });
+    });
+</script>
