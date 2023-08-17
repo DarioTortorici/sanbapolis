@@ -99,17 +99,17 @@ INSERT INTO giocatori (email) VALUES
 
 INSERT INTO sport (nome_sport) VALUES ('Basket'), ('Pallavolo'),('Calcio');
 
-INSERT INTO societa_sportive (partita_iva, nome, indirizzo, responsabile) VALUES
-('12345678901', 'Basket Club Trento Nord', 'Via Roma 1', 'paola.verdi@gmail.com'),
-('23456789012', 'Pallavolo Trento Nord', 'Via Garibaldi 2', 'carlo.rossini@gmail.com'),
-('34567890123', 'Basket Club Trento Sud', 'Via Vesuvio 3', 'elisa.ferrari@gmail.com'),
-('45678901234', 'Pallavolo Trento Sud', 'Via Po 4', 'luigi.bianchi@gmail.com');
+INSERT INTO societa_sportive (partita_iva, nome, indirizzo, responsabile, codice) VALUES
+('12345678901', 'Basket Club Trento Nord', 'Via Roma 1', 'paola.verdi@gmail.com','AGYEF'),
+('23456789012', 'Pallavolo Trento Nord', 'Via Garibaldi 2', 'carlo.rossini@gmail.com','TFDFF'),
+('34567890123', 'Basket Club Trento Sud', 'Via Vesuvio 3', 'elisa.ferrari@gmail.com','AHHUF'),
+('45678901234', 'Pallavolo Trento Sud', 'Via Po 4', 'luigi.bianchi@gmail.com','PPFDW');
 
-INSERT INTO squadre (nome, societa, sport) VALUES
-('Basket Club Trento Nord', '12345678901', 'Basket'),
-('Pallavolo Trento Nord', '23456789012', 'Pallavolo'),
-('Basket Club Trento Sud', '34567890123', 'Basket'),
-('Pallavolo Trento Sud', '45678901234', 'Pallavolo');
+INSERT INTO squadre (nome, societa, sport, codice) VALUES
+('Basket Club Trento Nord', '12345678901', 'Basket','FKTVJ'),
+('Pallavolo Trento Nord', '23456789012', 'Pallavolo','PFEJN'),
+('Basket Club Trento Sud', '34567890123', 'Basket','RHNCU'),
+('Pallavolo Trento Sud', '45678901234', 'Pallavolo','JEXKI');
 
 
 INSERT INTO allenatori_squadre (email_allenatore, id_squadra, data_inizio) VALUES
