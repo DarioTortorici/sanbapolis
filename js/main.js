@@ -18,9 +18,27 @@ $(document).ready(function (e) {
         }
     });
 
+     // Get the current page's filename
+     var pageName = window.location.pathname.split('/').pop();
+
+     // Remove file extension if present
+     pageName = pageName.replace(/\.[^/.]+$/, "");
+
+     // Remove dashes and underscores
+     pageName = pageName.replace(/[-_]/g, " ");
+
+     // Capitalize the first letter of each word
+     pageName = pageName.replace(/\b\w/g, function(txt) {
+         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+     });
+
+     // Set the title dynamically
+     document.getElementById("page-title").textContent = "Sanbapolis | " + pageName;
 
 
 });
+
+
 
 function readURL(input) {
     if(input.files && input.files[0]){
