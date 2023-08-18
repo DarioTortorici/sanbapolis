@@ -1,40 +1,35 @@
-<!-- Include necessary files -->
 <?php
-include '../../modals/header.php';
-include_once '../../modals/navbar.php';
-include 'video-editing-helper.php';
-include '../../classes/Mark.php';
-include '../../classes/Screen.php';
-include '../../classes/Video.php';
-include 'error-checker.php';
+require_once '../../modals/header.php';
+require_once '../../modals/navbar.php';
+require_once 'video-editing-helper.php';
+require_once '../../classes/Mark.php';
+require_once '../../classes/Screen.php';
+require_once '../../classes/Video.php';
+require_once 'error-checker.php';
 
 $pdo = get_connection();
 
-// Check if a specific video is selected or use the session stored video
-if (isset($_GET['video']) && $_GET['video'] != '') {
-    $video_location = $_GET['video'];
-    $video = getVideoFromPath($pdo, $video_location);
-    $_SESSION['video'] = serialize($video);
-    $filename = basename($video->getPath(), '.mp4');
-    if (isset($_GET['recording_date']) && $_GET['recording_date'] != '') {
-        $recording_date = $_GET['recording_date'];
-    } else {
-        $recording_date = getRecordingDate($video->getPath());
-    }
-} else {
-    $video = unserialize($_SESSION['video']);
-    $filename = basename($video->getPath(), '.mp4');
-    $recording_date = getRecordingDate($video->getPath());
+$video_location = $_GET['video'] ?? '';  // Ottiene il percorso del video dalla query string o imposta una stringa vuota se manca.
+
+if (!empty($video_location)) {  // Controlla se il percorso del video non è vuoto.
+    $video = getVideoFromPath($pdo, $video_location);  // Ottiene l'oggetto Video utilizzando il percorso fornito.
+    $_SESSION['video'] = serialize($video);  // Serializza e memorizza l'oggetto Video nella sessione.
+    $filename = basename($video->getPath(), '.mp4');  // Estrae il nome del file video senza l'estensione.
+    $recording_date = $_GET['recording_date'] ?? getRecordingDate($video->getPath());  // Ottiene la data di registrazione dal parametro o dal file video.
+} else {  // Se il percorso del video è vuoto, recupera l'oggetto Video dalla sessione.
+    $video = unserialize($_SESSION['video']);  // Deserializza l'oggetto Video dalla sessione.
+    $filename = basename($video->getPath(), '.mp4');  // Estrae il nome del file video senza l'estensione.
+    $recording_date = $_GET['recording_date'] ?? getRecordingDate($video->getPath());  // Ottiene la data di registrazione dal parametro o dal file video.
 }
+
 setPreviusPage();
 
-// Alert modifica info video
 if (isset($_GET['update']) && $_GET['update'] == 1) {
-
-    echo '  <div class="container alert alert-success d-flex align-items-center" role="alert">
-                 Modifiche avvenute con successo
-                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>';
+    // Se il parametro 'update' è presente nella query string e ha valore 1, mostra un messaggio di successo.
+    echo '<div class="container alert alert-success d-flex align-items-center" role="alert">
+              Modifiche avvenute con successo
+              <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>';
 }
 ?>
 
@@ -94,6 +89,8 @@ if (isset($_GET['update']) && $_GET['update'] == 1) {
         </ul>
     </div>
 </div>
+
+<!-- Pulsantiera -->
 <div class="container mt-4">
     <form action="../screenshots/screen_manager.php?operation=get_screen" method="post" class="mb-4">
         <div class="input-group">
@@ -115,33 +112,7 @@ if (isset($_GET['update']) && $_GET['update'] == 1) {
 
 </div>
 
-<div class="container mt-4">
-    <div id="mark_details" hidden>
-        <form action="../marks/mark_manager.php?operation=new_mark" method="post">
-            <fieldset>
-                <legend>Segnaposto</legend>
-
-                <div class="form-group">
-                    <label for="timing_mark">Timing:</label>
-                    <input type="text" class="form-control" name="timing_mark" id="timing_mark" readonly>
-                </div>
-
-                <div class="form-group">
-                    <label for="mark_name">Nome:</label>
-                    <input type="text" class="form-control" name="mark_name" id="mark_name">
-                </div>
-
-                <div class="form-group">
-                    <label for="mark_note">Descrizione:</label>
-                    <textarea class="form-control" id="mark_note" name="mark_note" rows="2" cols="30"></textarea>
-                </div>
-
-                <button type="submit" class="btn btn-primary">Salva</button>
-            </fieldset>
-        </form>
-    </div>
-</div>
-
+<!-- Marks List -->
 <div class="container mt-4" id="marks">
     <table id="list_marks" class="table table-striped">
         <thead class="thead-light">
@@ -206,6 +177,38 @@ if (isset($_GET['update']) && $_GET['update'] == 1) {
 <!--
    Sezione Modal.
 -->
+
+<!-- Modal per aggiungere un segnaposto -->
+<div class="modal fade" id="addMarkModal" tabindex="-1" aria-labelledby="addMarkModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="../marks/mark_manager.php?operation=new_mark" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="markModalLabel">Segnaposto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="timing_mark">Timing:</label>
+                        <input type="text" class="form-control" name="timing_mark" id="timing_mark" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="mark_name">Nome:</label>
+                        <input type="text" class="form-control" name="mark_name" id="mark_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="mark_note">Descrizione:</label>
+                        <textarea class="form-control" id="mark_note" name="mark_note" rows="2" cols="30"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                    <button type="submit" class="btn btn-primary">Salva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 <!-- Modal Dettagli Video -->
 <div class="modal modal-dialog modal-lg" tabindex="-1" role="dialog" id="videoModal">
@@ -420,91 +423,11 @@ if (isset($_GET['update']) && $_GET['update'] == 1) {
     </div>
 </div>
 
-</body>
+<?php
 
-</html>
+include('../../modals/footer.php');
+
+?>
 <!-- Include JavaScript files -->
-<script>
-    //timing video a tempo reale
-    var video = $('#<?php echo $filename ?>');
-    video.bind("timeupdate", function() {
-
-        var stime = video[0].currentTime;
-        stime = stime.toString();
-        stime = stime.split(".").pop();
-        stime = stime.substr(0, 3);
-
-        $('#timing_video').val(fromSeconds(video[0].currentTime) + ':' + stime);
-    });
-
-    function segnaposto() {
-        const xhttp = new XMLHttpRequest();
-        var url = "../marks/mark_manager.php? timing=" + $('#timing_video').val();
-        xhttp.open("GET", url, true);
-        xhttp.onreadystatechange = function() {
-            if (this.readyState = 4 && this.status === 200) {
-                let timing = xhttp.responseText;
-                if (timing != "") {
-                    $('#timing_mark')[0].value = timing;
-                    $('#mark_details')[0].hidden = false;
-                    $('#<?php echo $filename ?>')[0].pause();
-                }
-            }
-        }
-        xhttp.send();
-    }
-
-    window.onload = function() {
-        let timing = findGetParameter("timing_screen");
-        if (timing != null) {
-            timing = parseFloat(timing);
-            document.getElementById("<?php echo $filename ?>").currentTime = timing;
-        }
-
-        let message = findGetParameter("message");
-        if (message == "mark_exists") {
-            showSnackbar();
-        }
-    }
-
-    function goToTiming(video, timing) {
-        video.currentTime = timing;
-        video.pause();
-    }
-</script>
 <script src="../../js/video/video-scripts.js"></script>
-<script>
-    // Function to change the video source based on the clicked td
-    function changeVideoSource(videoPath) {
-        const videoElement = document.getElementById("<?php echo $filename ?>");
-        videoElement.pause(); // Pause the current video
-        videoElement.src = videoPath; // Change the video source
-        videoElement.load(); // Load the new video source
-        videoElement.play(); // Start playing the new video
-    }
-
-    // Attach click event listeners to all clickable-row <td> elements
-    const clickableRows = document.querySelectorAll('.clickable-row td[data-href]');
-    clickableRows.forEach(td => {
-        td.addEventListener('click', () => {
-            const videoPath = td.getAttribute('data-href');
-            changeVideoSource(videoPath);
-        });
-    });
-</script>
-
-<!-- OPEN THE MODAL -->
-<script>
-    document.getElementById("openVideoModal").addEventListener("click", function() {
-        $('#videoModal').modal('show');
-    });
-    document.getElementById("openClipModal").addEventListener("click", function() {
-        $('#clipModal').modal('show');
-    });
-    document.getElementById("openMarksModal").addEventListener("click", function() {
-        $('#marksModal').modal('show');
-    });
-    document.getElementById("openScreensModal").addEventListener("click", function() {
-        $('#screensModal').modal('show');
-    });
-</script>
+<script src="../../js/video/editing_video-scripts.js"></script>

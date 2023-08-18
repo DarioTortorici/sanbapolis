@@ -65,17 +65,44 @@ if(isset($_GET["operation"])){
 	
 }
 
-function newMark($pdo, $video, $person){
-	$timing = $_POST["timing_mark"];
-	$timing = timing_format_db($timing);//fromato corretto per db
-	$name = ($_POST["mark_name"] == "") ? null : $_POST["mark_name"];
-	$note = ($_POST["mark_note"] == "") ? null : $_POST["mark_note"];
-	$mark = new Mark($timing, $name, $note, $video->getPath());
-	return insertNewMark($pdo, $mark);
+/**
+ * Creazione e inserimento di un nuovo segnaposto nel database.
+ *
+ * Questa funzione gestisce la creazione e l'inserimento di un nuovo segnaposto nel database.
+ * Vengono prese le informazioni fornite tramite POST, come il tempo del segnaposto,
+ * il nome e le note. Queste informazioni vengono quindi utilizzate per creare un oggetto Mark,
+ * che viene successivamente inserito nel database.
+ *
+ * @param PDO $pdo L'oggetto PDO per la connessione al database.
+ * @param Video $video L'oggetto Video associato al segnaposto.
+ * @param Person $person L'oggetto Person che rappresenta l'autore del segnaposto.
+ * @return bool True se l'inserimento ha avuto successo, altrimenti False.
+ */
+function newMark($pdo, $video, $person) {
+    $timing = $_POST["timing_mark"];  // Ottiene il tempo del segnaposto dalla richiesta POST.
+    $timing = timing_format_db($timing);  // Converte il formato del tempo per il database.
+
+    $name = ($_POST["mark_name"] == "") ? null : $_POST["mark_name"];  // Ottiene il nome del segnaposto dalla richiesta POST.
+    $note = ($_POST["mark_note"] == "") ? null : $_POST["mark_note"];  // Ottiene le note del segnaposto dalla richiesta POST.
+
+    // Crea un oggetto Mark con le informazioni fornite.
+    $mark = new Mark($timing, $name, $note, $video->getPath());
+
+    return insertNewMark($pdo, $mark);  // Inserisce il segnaposto nel database e restituisce l'esito.
 }
 
-function multipleDelete($pdo){
-	foreach($_POST["id"] as $el){
-		deleteMarkFromId($pdo, $el);
-	}
+
+/**
+ * Eliminazione multipla di marcatori dal database.
+ *
+ * Questa funzione gestisce l'eliminazione multipla di marcatori dal database.
+ * Utilizza un array di ID di marcatori forniti tramite POST per eliminare i marcatori corrispondenti.
+ *
+ * @param PDO $pdo L'oggetto PDO per la connessione al database.
+ * @return void
+ */
+function multipleDelete($pdo) {
+    foreach ($_POST["id"] as $el) {
+        deleteMarkFromId($pdo, $el);  // Elimina il segnaposto dal database.
+    }
 }
