@@ -1,11 +1,10 @@
 <?php
-session_start();
 
 include '../../vendor/autoload.php';
-include 'video-editing-helper.php';
-include '../../authentication/db_connection.php';
+include '../../modals/header.php';
+include_once '../../modals/navbar.php';
+include 'video-editing-helper.php';;
 include '../../classes/Video.php';
-include '../../classes/Person.php';
 
 include 'error-checker.php';
 
@@ -36,8 +35,7 @@ if(isset($_GET["operation"])){
             break;  
         case "update_video":
             update($pdo, $video, $person);
-            //header("Location: " . getPreviusPage());
-            header("Location: " . VIDEO_MANAGER . "?operation=select_video&id=" . $video->getId());
+            header("Location: editing_video.php?update=1" );
             break;
         case "delete_video":
             delete($pdo, $video);

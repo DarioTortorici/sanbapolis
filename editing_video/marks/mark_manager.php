@@ -47,7 +47,7 @@ if(isset($_GET["operation"])){
 		case "multiple_mark_delete":
 			if(isset($_POST["id"])){
 				multipleDelete($pdo);
-				header("Location: " . getPreviusPage());
+				header("Location: ../editing/editing_video.php?update=1");
 			}
 			break;
 		default:

@@ -47,7 +47,7 @@ if(isset($_GET["operation"])){
             if(isset($_POST["id"])){
                 multipleDelete($pdo);
             }
-            header("Location: ./screenshots_list.php");
+            header("Location: ../editing/editing_video.php?update=1");
             break;
 
     }

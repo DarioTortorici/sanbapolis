@@ -30,7 +30,7 @@ if (isset($_GET["operation"])) {
             if (isset($_POST["id"])) {
                 multipleDelete($pdo);
             }
-            header("Location: " . CLIPS_LIST);
+            header("Location: ../editing/editing_video.php?update=1");
             break;
         default:
             echo "<p>Opzione non riconosciuta</p>";
