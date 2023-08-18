@@ -272,7 +272,7 @@ CREATE TABLE segnaposti (
 CREATE TABLE partite (
 	id INTEGER AUTO_INCREMENT NOT NULL,
 	id_squadra_casa INTEGER NOT NULL,
-	id_squadra_trasferta INTEGER,
+	/*id_squadra_trasferta INTEGER, -- solo se mappate tutte le squadre ospiti*/
 	data_ora_inizio DATETIME NOT NULL,
 	data_ora_fine DATETIME,
 	sport VARCHAR(64) NOT NULL,
@@ -283,7 +283,7 @@ CREATE TABLE partite (
 	CONSTRAINT fk_prenotazione_partita FOREIGN KEY (prenotazione) REFERENCES prenotazioni(id) ON UPDATE CASCADE ON DELETE CASCADE,
 
 
-	UNIQUE(id_squadra_casa, id_squadra_trasferta, data_ora_inizio),
+	UNIQUE(id_squadra_casa, /*id_squadra_trasferta,*/ data_ora_inizio),
 	PRIMARY KEY (id)
 
 );
