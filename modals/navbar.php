@@ -32,16 +32,16 @@ if (isset($_COOKIE['email'])) {
                     </li>
                     <?php if (isset($user_email)) : ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="../calendar/calendar.php">Calendario</a>
+                            <a class="nav-link" href="/calendar/calendar.php">Calendario</a>
                         </li>
                         <?php if (isset($user) && $user['privilegi_cam'] == 1) : ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="../cameras/overview.php">Livecams</a>
+                                <a class="nav-link" href="/cameras/overview.php">Livecams</a>
                             </li>
                         <?php endif; ?>
                         <?php if (isset($user) && $user['userType'] == "allenatore") : ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="../cameras/video_storage.php">Filmati</a>
+                                <a class="nav-link" href="/cameras/video_storage.php">Filmati</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="../profile/my-team.php">My team</a>
@@ -49,11 +49,11 @@ if (isset($_COOKIE['email'])) {
                         <?php endif; ?>
                         <?php if (isset($user) && $user['userType'] == "società") : ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="../profile/my-staff.php">My staff</a>
+                                <a class="nav-link" href="/profile/my-staff.php">My staff</a>
                             </li>
                         <?php endif; ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="../chi-siamo.php">Chi siamo</a>
+                            <a class="nav-link" href="/chi-siamo.php">Chi siamo</a>
                         </li>
                     <?php endif; ?>
                 </ul>

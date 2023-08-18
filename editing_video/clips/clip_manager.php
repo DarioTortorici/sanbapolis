@@ -1,13 +1,11 @@
 <?php
-session_start();
 
-include '../../vendor/autoload.php';
-include '../editing/video-editing-helper.php';
-include '../../authentication/db_connection.php';
+include '../../modals/header.php';
+include_once '../../modals/navbar.php';
+include_once '../../vendor/autoload.php';
+include_once '../editing/video-editing-helper.php';
 include '../../classes/Video.php';
-include '../../classes/Person.php';
 include '../editing/error-checker.php';
-
 
 $pdo = get_connection();
 
@@ -18,13 +16,8 @@ if (isset($_GET["operation"])) {
         case "new_clip":
             if (isset($_POST["start_timing_trim"]) && isset($_POST["end_timing_trim"])) {
                 $clip = newClip($pdo, $video, $person);
-                if (isset($clip)) {
-                    $clip = getVideoFromPath($pdo, $clip->getPath());
-                    header("Location: " . CLIP . "?clip={$clip->getId()}");
-                } else {
-                    header("Location: " . CLIP);
+                header("Location ../editing/editing_video.php?update=1");
                 }
-            }
             break;
         case "multiple_clip_delete":
             if (isset($_POST["id"])) {
@@ -72,12 +65,10 @@ function newClip($pdo, $video, $person) {
         null,
         "storage_video/$clip_name",
         basename($clip_name, ".mp4"),
-        "Clip del video {$_SESSION["path_video"]}",
+        "Clip del video {$video->getPath()}",
         $person->getEmail(),
         $video->getSession()
     );
-
-    myVarDump($clip);  // Stampa il dump dell'oggetto
 
     insertNewClip($pdo, $clip, $video->getPath());  // Inserisce la nuova clip nel database.
 
