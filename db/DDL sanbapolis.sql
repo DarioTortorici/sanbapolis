@@ -217,6 +217,15 @@ CREATE TABLE sessioni_registrazione (
 	PRIMARY KEY (id)
 );
 
+CREATE TABLE telecamere (
+	id INTEGER NOT NULL,
+	indirizzo_ipv4 VARCHAR(15),
+	indirizzo_ipv6 VARCHAR(39),
+	
+	UNIQUE(indirizzo_ipv4, indirizzo_ipv6),	
+	PRIMARY KEY (id)
+);
+
 CREATE TABLE video(
 	id INTEGER AUTO_INCREMENT NOT NULL,
 	locazione VARCHAR(255) NOT NULL, /*255 in teoria lunghezza massima per una path in linux*/
@@ -224,9 +233,11 @@ CREATE TABLE video(
 	autore VARCHAR(64) NOT NULL,
 	nota TEXT,
 	sessione INTEGER NOT NULL,
+	telecamera INTEGER NOT NULL,
 	
 	CONSTRAINT fk_email_autore FOREIGN KEY (autore) REFERENCES persone(email) ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT fk_video_sessione FOREIGN KEY (sessione) REFERENCES sessioni_registrazione(id) ON UPDATE CASCADE ON DELETE CASCADE,
+	CONSTRAINT fk_telecamera_video FOREIGN KEY (telecamera) REFERENCES telecamere(id) ON UPDATE CASCADE ON DELETE CASCADE,
 	
 	UNIQUE(locazione),
 	PRIMARY KEY(id)
@@ -377,15 +388,6 @@ CREATE TABLE inviti_giocatori (
 	email VARCHAR(320) PRIMARY KEY
 );
 
-CREATE TABLE telecamere (
-	id INTEGER NOT NULL,
-	indirizzo_ipv4 VARCHAR(15),
-	indirizzo_ipv6 VARCHAR(39),
-	
-	UNIQUE(indirizzo_ipv4, indirizzo_ipv6),	
-	PRIMARY KEY (id)
-);
-
 CREATE TABLE telecamere_prenotazioni (
 	telecamera INTEGER NOT NULL,
 	prenotazione INTEGER NOT NULL,
@@ -397,6 +399,7 @@ CREATE TABLE telecamere_prenotazioni (
 );
 
 
+/*messo chiave esterna in video
 CREATE TABLE telecamere_video (
 	telecamera INTEGER NOT NULL,
 	video INTEGER NOT NULL,
@@ -406,6 +409,6 @@ CREATE TABLE telecamere_video (
 	
 
 	PRIMARY KEY(telecamera, video)
-);
+);*/
 
 COMMIT;

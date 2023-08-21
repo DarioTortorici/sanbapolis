@@ -118,6 +118,10 @@ INSERT INTO allenatori_squadre (email_allenatore, id_squadra, data_inizio) VALUE
 ('giorgio.verdi@gmail.com', (SELECT id FROM squadre WHERE nome = 'Basket Club Trento Sud' AND societa = 34567890123), (SELECT CURDATE())),
 ('luisa.bianchi@gmail.com', (SELECT id FROM squadre WHERE nome = 'Pallavolo Trento Sud' AND societa = 45678901234), (SELECT CURDATE()));
 
+INSERT INTO telecamere(id, indirizzo_ipv4, indirizzo_ipv6) VALUES (1, '127.0.0.1', NULL);
+INSERT INTO telecamere(id, indirizzo_ipv4, indirizzo_ipv6) VALUES (2, '127.0.0.2', NULL);
+INSERT INTO telecamere(id, indirizzo_ipv4, indirizzo_ipv6) VALUES (3, '127.0.0.3', NULL);
+
 INSERT INTO calendar_events(id, title, start) VALUES (1, "Allenamento 10 Basket", '2023-08-14 10:00:00');
 INSERT INTO calendar_events(id, title, start) VALUES (2 ,"Allenamento 14 Basket", '2023-08-14 14:00:00');
 
@@ -129,9 +133,9 @@ INSERT INTO sessioni_registrazione(id, autore, data_ora_inizio, data_ora_fine, p
 (1, 'vincenzo.italiano@gmail.com', '2023-08-14 10:00:00', '2023-08-14 12:00:00', 1),
 (2, 'vincenzo.italiano@gmail.com', '2023-08-14 14:00:00', '2023-08-14 16:00:00', 2);
 
-INSERT INTO video(locazione, nome, autore, nota, sessione) VALUES 
-('video/basket_test_1.mp4', 'Test Basket', 'vincenzo.italiano@gmail.com', NULL, 1),
-('video/volley_test_1.mp4', 'Test Volley', 'vincenzo.italiano@gmail.com', NULL, 2);
+INSERT INTO video(locazione, nome, autore, nota, sessione, telecamera) VALUES 
+('video/basket_test_1.mp4', 'Test Basket', 'vincenzo.italiano@gmail.com', NULL, 1, 1),
+('video/volley_test_1.mp4', 'Test Volley', 'vincenzo.italiano@gmail.com', NULL, 2, 2);
 
 INSERT INTO partite (id_squadra_casa, /*id_squadra_trasferta,*/ data_ora_inizio, data_ora_fine, sport, prenotazione) VALUES
 (1, /*3,--vedi ddl*/ '2023-08-14 10:00:00', '2023-08-14 12:00:00', 'Basket', 1);
