@@ -135,7 +135,9 @@ INSERT INTO sessioni_registrazione(id, autore, data_ora_inizio, data_ora_fine, p
 
 INSERT INTO video(locazione, nome, autore, nota, sessione, telecamera) VALUES 
 ('video/basket_test_1.mp4', 'Test Basket', 'vincenzo.italiano@gmail.com', NULL, 1, 1),
-('video/volley_test_1.mp4', 'Test Volley', 'vincenzo.italiano@gmail.com', NULL, 2, 2);
+('video/volley_test_1.mp4', 'Test Volley', 'vincenzo.italiano@gmail.com', NULL, 2, 1),
+('video/test_inquadratura_1.mp4', 'Test Inquadratura 1', 'vincenzo.italiano@gmail.com', NULL, 1, 1),
+('video/test_inquadratura_2.mp4', 'Test Inquadratura 2', 'vincenzo.italiano@gmail.com', NULL, 1, 2);
 
 INSERT INTO partite (id_squadra_casa, /*id_squadra_trasferta,*/ data_ora_inizio, data_ora_fine, sport, prenotazione) VALUES
 (1, /*3,--vedi ddl*/ '2023-08-14 10:00:00', '2023-08-14 12:00:00', 'Basket', 1);
