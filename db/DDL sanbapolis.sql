@@ -353,8 +353,8 @@ CREATE TABLE formazioni_giocatori (
 	id_formazione INTEGER NOT NULL,
 	giocatore VARCHAR(320) NOT NULL,
 	titolare BOOLEAN,
-	minuto_ingresso DATETIME, /*null se non subentra*/
-	minuto_uscita DATETIME, /*null se non esce prima della partita*/
+	minuto_ingresso TIME, /*null se non subentra*/
+	minuto_uscita TIME, /*null se non esce prima della partita*/
 	tag_giocatore INTEGER NOT NULL,
 
 	CONSTRAINT fk_giocatore_formazione_giocatore FOREIGN KEY (giocatore) REFERENCES giocatori(email) ON UPDATE CASCADE ON DELETE CASCADE,

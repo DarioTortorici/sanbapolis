@@ -11,7 +11,6 @@ INSERT INTO persone (email, nome, cognome, data_nascita, citta, indirizzo, telef
 ('elisa.ricci@gmail.com', 'Elisa', 'Ricci', '1996-07-04', 'Venezia', 'Calle Larga XXII Marzo 15', '041 9876 5432', '$2y$10$z9TLOrILIVOb9GADYdvsCOI0CzJb8IKxXFlXDCaOfFN3MfgeRc3si', NULL, TRUE, NOW()),
 
 
-
 /*allenatori*/
 ('vincenzo.italiano@gmail.com', 'Vincenzo', 'Italiano', '1982:01:01', 'Firenze', 'via Firenze 1', '0423 666 1234', '$2y$10$FO62apRI7o13EO5pIkcHw.gVrO7AMbs271K2F1jT02Hfce75VW5JG', NULL, TRUE, NOW()),
 ('raffaele.palladino@gmail.com', 'Raffaele', 'Palladino', '1980:01:01', 'Monza', 'via Monza 1', '0423 666 1234','$2y$10$st/crDm4qBjRZ64SF4k/4OIXdK6dnS.WPINKPHn8ncB5PzUEFdUD2', NULL, TRUE, NOW()),
@@ -67,25 +66,29 @@ INSERT INTO tifosi (email) VALUES
 ('fabio.mancini@gmail.com'),
 ('elisa.ricci@gmail.com');
 
-INSERT INTO giocatori (email) VALUES 
+INSERT INTO giocatori (email) VALUES
+/*giocatori basket trento nord*/
 ('antonio.verdi@gmail.com'),
 ('manolo.pisani@gmail.com'),
 ('costanzo.greco@gmail.com'),
 ('arcangelo.milanesi@gmail.com'),
 ('emmanuele.cremonesi@gmail.com'),
 ('lorenzo.agenore@gmail.com'),
+/*giocatori pallavolo trento nord*/
 ('fulvio.dellucci@gmail.com'),
 ('oliviero.palermo@gmail.com'),
 ('giovanni.bianchi@gmail.com'),
 ('laura.verdi@gmail.com'),
 ('giuseppe.rossini@gmail.com'),
 ('francesca.ferrari@gmail.com'),
+/*giocatori basket trento sud*/
 ('marco.verdi@gmail.com'),
 ('simone.bianchi@gmail.com'),
 ('luigi.rossi@gmail.com'),
 ('andrea.ferrari@gmail.com'),
 ('paolo.verdi@gmail.com'),
 ('roberto.bianchi@gmail.com'),
+/*giocatori pallavolo trento sud*/
 ('antonio.rossi@gmail.com'),
 ('davide.ferrari@gmail.com'),
 ('riccardo.verdi@gmail.com'),
@@ -144,5 +147,56 @@ INSERT INTO partite (id_squadra_casa, /*id_squadra_trasferta,*/ data_ora_inizio,
 
 INSERT INTO allenamenti(id_squadra, data_ora_inizio, data_ora_fine, prenotazione) VALUES
 (1, '2023-08-14 14:00:00', '2023-08-14 16:00:00', 2);
+
+INSERT INTO tag_rfid (id) VALUES (1), (2), (3), (4), (5), (6);
+
+INSERT INTO giocatori_squadre(email_giocatore, id_squadra, data_inizio, data_fine) VALUES
+('antonio.verdi@gmail.com', 1, '2023-08-01', NULL),
+('manolo.pisani@gmail.com', 1, '2023-08-01', NULL),
+('costanzo.greco@gmail.com', 1, '2023-08-01', NULL),
+('arcangelo.milanesi@gmail.com', 1, '2023-08-01', NULL),
+('emmanuele.cremonesi@gmail.com', 1, '2023-08-01', NULL),
+('lorenzo.agenore@gmail.com', 1, '2023-08-01', NULL),
+('fulvio.dellucci@gmail.com', 2, '2023-07-01', NULL),
+('oliviero.palermo@gmail.com', 2, '2023-07-01', NULL),
+('giovanni.bianchi@gmail.com', 2, '2023-07-01', NULL),
+('laura.verdi@gmail.com', 2, '2023-07-01', NULL),
+('giuseppe.rossini@gmail.com', 2, '2023-07-01', NULL),
+('francesca.ferrari@gmail.com', 2, '2023-07-01', NULL),
+('marco.verdi@gmail.com', 3, '2023-06-01', NULL),
+('simone.bianchi@gmail.com', 3, '2023-06-01', NULL),
+('luigi.rossi@gmail.com', 3, '2023-06-01', NULL),
+('andrea.ferrari@gmail.com', 3, '2023-06-01', NULL),
+('paolo.verdi@gmail.com', 3, '2023-06-01', NULL),
+('roberto.bianchi@gmail.com', 3, '2023-06-01', NULL),
+('antonio.rossi@gmail.com', 4, '2023-06-01', NULL),
+('davide.ferrari@gmail.com', 4, '2023-06-01', NULL),
+('riccardo.verdi@gmail.com', 4, '2023-06-01', NULL),
+('enrico.bianchi@gmail.com', 4, '2023-06-01', NULL),
+('marco.rossi@gmail.com', 4, '2023-06-01', NULL),
+('gabriele.ferrari@gmail.com', 4, '2023-06-01', NULL),
+('michele.verdi@gmail.com', 4, '2023-06-01', NULL),
+('andrea.bianchi@gmail.com', 4, '2023-06-01', NULL),
+('luca.rossi@gmail.com', 4, '2023-06-01', NULL);
+
+INSERT INTO formazioni(id, id_squadra, id_partita) VALUES (1, 1, 1);
+
+INSERT INTO formazioni_giocatori(id_formazione, giocatore, titolare, minuto_ingresso, minuto_uscita, tag_giocatore) VALUES
+(1, 'antonio.verdi@gmail.com', TRUE, NULL, NULL, 1),
+(1, 'manolo.pisani@gmail.com', TRUE, NULL, NULL, 2),
+(1, 'costanzo.greco@gmail.com', TRUE, NULL, NULL, 3),
+(1, 'arcangelo.milanesi@gmail.com', TRUE, NULL, NULL, 4),
+(1, 'emmanuele.cremonesi@gmail.com', TRUE, NULL, '00:15:00', 5),
+(1, 'lorenzo.agenore@gmail.com', FALSE, '00:15:00', NULL, 6);
+
+INSERT INTO telecamere_prenotazioni(telecamera, prenotazione) VALUES (1, 1), (2, 1), (1, 2), (2, 2);
+
+INSERT INTO allenamenti_giocatori(id_allenamento, giocatore, tag_giocatore) VALUES
+(1, 'antonio.verdi@gmail.com', 1),
+(1, 'manolo.pisani@gmail.com', 2),
+(1, 'costanzo.greco@gmail.com', 3),
+(1, 'arcangelo.milanesi@gmail.com', 4),
+(1, 'emmanuele.cremonesi@gmail.com', 5),
+(1, 'lorenzo.agenore@gmail.com', 6);
 
 COMMIT;
