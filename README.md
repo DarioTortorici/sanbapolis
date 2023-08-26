@@ -6,31 +6,18 @@ Internship @ UniTN, business logic development of the management system of the s
 
 ## Prerequisiti
 
-Per utilizzare il sistema bisogna avere apache, una database relazionale sql e composer
+Per utilizzare il sistema bisogna avere apache, una database relazionale sql, composer, un server STMP ed almeno una IP-camera 
 
-## Scaricarlo
+## Scarica
 
 Si può clonare l'intera repository direttamente nella propria cartella apache, solitamente `\var\www\html` oppure `xampp\htdocs` se si utilizza un ambiente in locale tramite xampp.
 
 ``` bash
 git clone https://github.com/SportTech-UniTN/Sanbapolis.git
 ```
-## Testarlo
-Essendo un progetto in evoluzione, potrebbero esserci degli errori presenti nel codice, vi consigliamo di testare voi stessi se nella versione scaricata il codice è consistente
-### Unit Tests
-Nella cartella del progetto eseguite
-``` bash
-vendor/bin/phpunit tests/*
-```
-### Integration Tests
-Nella cartella del progetto eseguite
-``` bash
-vendor/bin/codeception Acceptance
-```
 
-## Impostazioni esterne alla repository
-
-Bisogna apportare alcune aggiunte al vostro sistema per far si che il sistema funzioni correttamente
+## Imposta
+Bisogna apportare alcune aggiunte e/o modifiche al sistema per far si che il vostro funzioni correttamente
 
 ### Chronjob
 
@@ -62,6 +49,22 @@ Per ottenere un chronjob su Windows bisogna impostare un task scheduler nel segu
 ### Database
 
 Popola il tuo database connettendoti al tuo mysql e lanciando gli script presenti nella cartella `db`
+
+### Config File
+Nella cartella `modals` il file `config.php` contiene tutte le variabili da personalizzare per far funzionare il sistema 
+
+## Testa
+Essendo un progetto in evoluzione, potrebbero esserci degli errori presenti nel codice, vi consigliamo di testare voi stessi se nella versione scaricata il codice è consistente oppure controllare che le modifiche in locale apportate non abbiano danneggiato il codice già presente
+### Unit Tests
+Nella cartella del progetto eseguite
+``` bash
+vendor/bin/phpunit tests/*
+```
+### Integration Tests
+Nella cartella del progetto eseguite
+``` bash
+vendor/bin/codeception Acceptance
+```
 
 # API Reference
 
