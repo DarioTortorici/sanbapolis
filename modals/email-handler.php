@@ -6,6 +6,7 @@ use PHPMailer\PHPMailer\Exception;
 // Load Composer's autoloader
 require '../vendor/autoload.php';
 require_once '../authentication/db_connection.php';
+include 'config.php';
 
 if (isset($_POST['invited-email'])) {
     $invitedEmail = $_POST['invited-email'];
@@ -71,7 +72,7 @@ function insertInvitedEmail($userType, $invitedEmail)
  */
 function authEmail($userEmail, $activationCode)
 {
-    $activationLink = 'https://istar.disi.unitn.it/authentication/activation.php?code=' . urlencode($activationCode); // URL della pagina di attivazione con il codice come parametro
+    $activationLink = $domain.'/authentication/activation.php?code=' . urlencode($activationCode); // URL della pagina di attivazione con il codice come parametro
 
     // Crea istanza di PHPMailer
     $mail = new PHPMailer(true);
@@ -79,15 +80,15 @@ function authEmail($userEmail, $activationCode)
     try {
         // Server settings di Sendinblue
         $mail->isSMTP();                                            // Mandato via SMTP
-        $mail->Host       = 'smtp-relay.sendinblue.com';
+        $mail->Host       = $smtpHost;
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'sporttech76@gmail.com';
-        $mail->Password   = 'sGIHcrNLDbfMKAvZ';
+        $mail->Username   = $smtpName;
+        $mail->Password   = $smtpPassword;
         $mail->Port       = 587;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 
         // Recipients
-        $mail->setFrom('sporttech76@gmail.com', 'SportTech');
+        $mail->setFrom($smtpName, 'SportTech');
         $mail->addAddress($userEmail);
 
         // Content
@@ -123,21 +124,21 @@ function inviteCoachByEmail($userEmail, $teamName, $code)
     try {
         // Server settings for Sendinblue
         $mail->isSMTP();                                            // Mandato via SMTP
-        $mail->Host       = 'smtp-relay.sendinblue.com';
+        $mail->Host       = $smtpHost;
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'sporttech76@gmail.com';
-        $mail->Password   = 'sGIHcrNLDbfMKAvZ';
+        $mail->Username   = $smtpName;
+        $mail->Password   = $smtpPassword;
         $mail->Port       = 587;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 
         // Recipients
-        $mail->setFrom('sporttech76@gmail.com', 'SportTech');
+        $mail->setFrom($smtpName, 'SportTech');
         $mail->addAddress($userEmail);
 
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Invito alla Sanbapolis Platform';
-        $invitationLink = 'https://istar.disi.unitn.it/authentication/register.php?userType=allenatore&scoietyCode=' . $code;
+        $invitationLink = $domain.'/authentication/register.php?userType=allenatore&scoietyCode=' . $code;
         $mail->Body    = 'Unisciti a ' . $teamName . ', clicca su <a href="' . $invitationLink . '">questo link</a>';
         $mail->AltBody = 'Unisciti a ' . $teamName . ', copia e incolla il seguente link nel tuo browser: ' . $invitationLink;
 
@@ -168,21 +169,21 @@ function invitePlayerByEmail($userEmail, $teamName, $code)
     try {
         // Server settings di Sendinblue
         $mail->isSMTP();                                            // Mandato via SMTP
-        $mail->Host       = 'smtp-relay.sendinblue.com';
+        $mail->Host       = $smtpHost;
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'sporttech76@gmail.com';
-        $mail->Password   = 'sGIHcrNLDbfMKAvZ';
+        $mail->Username   = $smtpName;
+        $mail->Password   = $smtpPassword;
         $mail->Port       = 587;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 
         // Recipients
-        $mail->setFrom('sporttech76@gmail.com', 'SportTech');
+        $mail->setFrom($smtpName, 'SportTech');
         $mail->addAddress($userEmail);
 
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Invito alla Sanbapolis Platform';
-        $invitationLink = 'https://istar.disi.unitn.it/authentication/register.php?userType=giocatore&teamCode=' . $code;
+        $invitationLink = $domain.'/authentication/register.php?userType=giocatore&teamCode=' . $code;
         $mail->Body    = 'Unisciti a ' . $teamName . ', clicca su <a href="' . $invitationLink . '">questo link</a>';
         $mail->AltBody = 'Unisciti a ' . $teamName . ', copia e incolla il seguente link nel tuo browser: ' . $invitationLink;
 
@@ -217,15 +218,15 @@ function authEvent($manutentore, $author, $startDate, $endDate, $startTime, $end
     try {
         // Server settings di Sendinblue
         $mail->isSMTP();                                            // Mandato via SMTP
-        $mail->Host       = 'smtp-relay.sendinblue.com';
+        $mail->Host       = $smtpHost;
         $mail->SMTPAuth   = true;
-        $mail->Username   = 'sporttech76@gmail.com';
-        $mail->Password   = 'sGIHcrNLDbfMKAvZ';
+        $mail->Username   = $smtpName;
+        $mail->Password   = $smtpPassword;
         $mail->Port       = 587;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 
         // Recipients
-        $mail->setFrom('sporttech76@gmail.com', 'SportTech');
+        $mail->setFrom($smtpName, 'SportTech');
 
         // Aggiungi gli indirizzi email dei manutentori come destinatari
         foreach ($manutentore as $email) {

@@ -1,10 +1,13 @@
 <?php
 
+// Includi il file config.php per accedere alle variabili
+include '../modals/config.php';
+
 // Definizione delle variabili costanti
-define('DB_NAME', 'testdb');
-define('DB_USER', 'phpuser');
-define('DB_PASSWORD', 'Ig86N3tUa9');
-define('DB_HOST', '127.0.0.1');
+define('DB_NAME', $databaseName);
+define('DB_USER', $databaseUser);
+define('DB_PASSWORD', $databasePassword);
+define('DB_HOST', $databaseHost);
 
 try {
     // Creazione della connessione PDO

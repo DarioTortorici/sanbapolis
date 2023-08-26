@@ -1,27 +1,35 @@
-// Variabili per l'autenticazione e le informazioni sulla telecamera
-var username = 'admin';
-var password = '123-iSTAR';
-var cameraip = '10.120.0.1';
-var profile = "profile2";
+// Funzione per ottenere le variabili del server tramite AJAX
+function fetchCameraVariables(callback) {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'config.php', true);
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState === 4 && xhr.status === 200) {
+      var config = JSON.parse(xhr.responseText);
+      callback(config);
+    }
+  };
+  xhr.send();
+}
 
-document.addEventListener('DOMContentLoaded', function () {
-  // Video.js setup
-  var player = videojs('camera1');
+// Funzione per inizializzare il video e avviare ffmpeg
+function initializeVideoAndFFmpeg(config) {
+  var player = videojs('camera1'); // Inizializza il lettore video
 
-  // Chiamata a ffmpegLive()
+  var cameraRTSP = 'rtsp://' + config.username + ':' + config.password + '@' + config.cameraip + '/' + config.profile + '/media.smp';
+
+  // Chiamata a ffmpegLive
   fetch('../../modals/ffmpeg-sender.php', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ cameraRTSP: 'rtsp://' + username + ':' + password + '@' + cameraip + '/profile2/media.smp' })
+    body: JSON.stringify({ cameraRTSP: cameraRTSP })
   })
-    .catch(function (error) {
-      console.error('Errore durante la chiamata a ffmpegLive:', error);
-    });
+  .catch(function (error) {
+    console.error('Errore durante la chiamata a ffmpegLive:', error);
+  });
 
-  // URL del DASH generato da ffmpeg
-  var manifestURL = '../../cameras/live/output.mpd';
+  var manifestURL = '../../cameras/live/output.mpd'; // URL del DASH generato da ffmpeg
 
   // Inizializza il DASH player
   player.src({
@@ -29,8 +37,12 @@ document.addEventListener('DOMContentLoaded', function () {
     type: 'application/dash+xml'
   });
 
-  // Parte il video quando è pronto
+  // Avvia il video quando è pronto
   player.on('loadedmetadata', function () {
     player.play();
   });
-});
+}
+
+// Esegue la chiamata AJAX per ottenere le variabili e inizializza il video
+fetchCameraVariables(initializeVideoAndFFmpeg);
+
