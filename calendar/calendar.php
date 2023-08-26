@@ -16,36 +16,97 @@ if (!isset($_COOKIE['email'])) {
 
 $userType = $user['userType']; // Ottenere il tipo di utente dalla variabile $user['userType']
 
-if ($userType == "allenatore") {
-    // Chiamata alla funzione JavaScript per il calendario degli allenatori
+// Impostazioni predefinite
+$delete = false;
+$modify = false;
+$add = false;
+
+// Mappa il tipo di utente alle azioni e alla chiamata JavaScript
+$actions = array(
+    'allenatore' => array(
+        'fetchFunction' => 'fetchCoachEvents',
+        'args' => '"' . $user['email'] . '"',
+        'add' => true,
+        'delete'=> true,
+    ),
+    'società' => array(
+        'fetchFunction' => 'fetchSocietyEvents',
+        'args' => '"' . $user['email'] . '"',
+        'add' => true,
+        'delete'=> true,
+    ),
+    'manutentore' => array(
+        'fetchFunction' => 'fetchEvents',
+        'args' => '',
+        'modify' => true,
+        'add' => true,
+        'delete'=> true,
+    ),
+    // Tipo di utente non gestito
+    'altro' => array(
+        'fetchFunction' => 'fetchMatches',
+    ),
+);
+
+if (isset($actions[$userType])) {
+    $action = $actions[$userType];
     echo '<script>';
-    echo 'fetchCoachEvents("' . $user['email'] . '");';
+    echo $action['fetchFunction'] . '(' . $action['args'] . ');';
     echo '</script>';
-    $delete = true;
-    $modify = false;
-    $add = true;
-}elseif ($userType == "società") {
-    echo '<script>';
-    echo 'fetchSocietyEvents("' . $user['email'] . '");';
-    echo '</script>';
-} elseif ($userType == "manutentore") {
-    // Chiamata alla funzione JavaScript per il calendario dei manutentori
-    echo '<script>';
-    echo 'fetchEvents();';
-    echo '</script>';
-    $delete = true;
-    $modify = true;
-    $add = true;
-} else {
-    // Chiamata alla funzione JavaScript per il calendario generale
-    echo '<script>';
-    echo 'fetchMatches();';
-    echo '</script>';
-    $delete = false;
-    $modify = false;
-    $add = false;
+
+    $delete = isset($action['delete']) ? $action['delete'] : $delete;
+    $modify = isset($action['modify']) ? $action['modify'] : $modify;
+    $add = isset($action['add']) ? $action['add'] : $add;
 }
 ?>
+
+<style>
+    /* Style for the time inputs */
+    input[type="time"] {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    /* Style for the input fields */
+    input[type="date"] {
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    .day-icon {
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
+    }
+
+    /* Style for the circle icon */
+    .circle-icon {
+        width: 14px;
+        height: 14px;
+        background: url('https://api.iconify.design/cil:circle.svg') no-repeat center center;
+        background-size: cover;
+        display: inline-block;
+        position: relative;
+        top: 5px;
+        /* Adjust the vertical position as needed */
+        left: 5px;
+        /* Adjust the horizontal position as needed */
+    }
+
+    /* Hide the actual checkboxes */
+    .day-checkbox input[type="checkbox"] {
+        display: none;
+    }
+
+    /* Style for the checked icons */
+    .day-checkbox input[type="checkbox"]:checked+.day-icon {
+        filter: grayscale(0%);
+    }
+</style>
 
 <!-- Calendario "FullCalendar" caricato da JavaScript -->
 <div class="container">
@@ -55,7 +116,7 @@ if ($userType == "allenatore") {
 
 <!-- Modale aggiunta nuovo evento -->
 <div id="add-event-modal" class="white-popup-block mfp-hide">
-    <p style="height: 30px; background: darkblue; width: 100%;"></p>
+    <p style="height: 30px; background: #8FB3FF; width: 100%;"></p>
     <h2>Nuovo Evento</h2>
     <div style="min-height: 250px;">
         <form id="save-form">
@@ -163,7 +224,7 @@ if ($userType == "allenatore") {
 
 <!-- Modale modifica evento -->
 <div id="modify-event-modal" class="white-popup-block mfp-hide">
-    <p style="height: 30px; background: darkblue; width: 100%;"></p>
+    <p style="height: 30px; background: #8FB3FF; width: 100%;"></p>
     <h2 id=nome-evento>Nome Evento</h2>
     <div style="min-height: 250px;">
         <form id="edit-form">

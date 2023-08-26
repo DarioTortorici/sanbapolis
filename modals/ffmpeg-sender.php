@@ -3,7 +3,6 @@
 require 'vendor/autoload.php';
 use FFMpeg\FFMpeg;
 use FFMpeg\Format\Video\X264;
-use FFMpeg\Format\Audio\Aac;
 
 //Global variable per aiutare nel refactoring
 $cartellaStorage = "../video_editing/storage_video/";

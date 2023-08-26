@@ -51,7 +51,7 @@ function checkRecordtoStart()
             // FFMpeg: avvia registrazione video per ogni telecamera
             foreach ($cams as $Camerartsp) {
                 $rtsp = 'rtsp://istar:password@' . $Camerartsp . '/profile2/media.smp';
-                $path = ffmpegRec($rtsp, $squadra, $data, $duration);
+                ffmpegRec($rtsp, $squadra, $data, $duration);
             }
 
             // Aggiorna permessi dello staff per ogni allenatore

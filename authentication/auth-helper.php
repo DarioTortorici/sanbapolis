@@ -527,7 +527,6 @@ function getPersonaFromEmail($pdo, $email){
     if ($publishers) {
         foreach ($publishers as $publisher) {
             try{                
-                //$id = $publisher['id'];
                 $email = $publisher['email'];
                 $name = $publisher['nome'];
                 $surname = $publisher['cognome'];

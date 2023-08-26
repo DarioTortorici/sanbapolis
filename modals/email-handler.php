@@ -137,7 +137,7 @@ function inviteCoachByEmail($userEmail, $teamName, $code)
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Invito alla Sanbapolis Platform';
-        $invitationLink = 'https://istar.disi.unitn.it/authentication/register.php?userType=allenatore&teamcode=' . $code;
+        $invitationLink = 'https://istar.disi.unitn.it/authentication/register.php?userType=allenatore&scoietyCode=' . $code;
         $mail->Body    = 'Unisciti a ' . $teamName . ', clicca su <a href="' . $invitationLink . '">questo link</a>';
         $mail->AltBody = 'Unisciti a ' . $teamName . ', copia e incolla il seguente link nel tuo browser: ' . $invitationLink;
 
@@ -182,7 +182,7 @@ function invitePlayerByEmail($userEmail, $teamName, $code)
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Invito alla Sanbapolis Platform';
-        $invitationLink = 'https://istar.disi.unitn.it/authentication/register.php?userType=giocatore&teamcode=' . $code;
+        $invitationLink = 'https://istar.disi.unitn.it/authentication/register.php?userType=giocatore&teamCode=' . $code;
         $mail->Body    = 'Unisciti a ' . $teamName . ', clicca su <a href="' . $invitationLink . '">questo link</a>';
         $mail->AltBody = 'Unisciti a ' . $teamName . ', copia e incolla il seguente link nel tuo browser: ' . $invitationLink;
 

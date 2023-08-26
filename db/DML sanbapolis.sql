@@ -125,12 +125,13 @@ INSERT INTO telecamere(id, indirizzo_ipv4, indirizzo_ipv6) VALUES (1, '127.0.0.1
 INSERT INTO telecamere(id, indirizzo_ipv4, indirizzo_ipv6) VALUES (2, '127.0.0.2', NULL);
 INSERT INTO telecamere(id, indirizzo_ipv4, indirizzo_ipv6) VALUES (3, '127.0.0.3', NULL);
 
-INSERT INTO calendar_events(id, title, start) VALUES (1, "Allenamento 10 Basket", '2023-08-14 10:00:00');
-INSERT INTO calendar_events(id, title, start) VALUES (2 ,"Allenamento 14 Basket", '2023-08-14 14:00:00');
+INSERT INTO `calendar_events` (`id`, `start`, `end`, `startTime`, `endTime`, `startRecur`, `endRecur`, `title`, `url`) VALUES
+(1, '2023-08-14 10:00:00', '2023-08-14 11:00:00', '10:00:00', '11:00:00', '2023-08-14', '2023-08-15', 'Allenamento 10 Basket', NULL),
+(2, '2023-08-14 10:00:00', '2023-08-14 11:00:00', '14:00:00', '15:00:00', '2023-08-14', '2023-08-15', 'Allenamento 15 Pallavolo', NULL);
 
 INSERT INTO prenotazioni(id, autore_prenotazione, data_ora_inizio, data_ora_fine, id_squadra, id_calendar_events, nota) VALUES 
-(1, 'vincenzo.italiano@gmail.com', '2023-08-14 10:00:00', '2023-08-14 12:00:00', 1, 1, NULL),
-(2, 'vincenzo.italiano@gmail.com', '2023-08-14 14:00:00', '2023-08-14 16:00:00', 1, 2, NULL);
+(1, 'vincenzo.italiano@gmail.com', '2023-08-14 10:00:00', '2023-08-14 12:00:00', 1, 1, 'Evento di prova'),
+(2, 'vincenzo.italiano@gmail.com', '2023-08-14 14:00:00', '2023-08-14 16:00:00', 1, 2, 'Evento di prova');
 
 INSERT INTO sessioni_registrazione(id, autore, data_ora_inizio, data_ora_fine, prenotazione) VALUES
 (1, 'vincenzo.italiano@gmail.com', '2023-08-14 10:00:00', '2023-08-14 12:00:00', 1),

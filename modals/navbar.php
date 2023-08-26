@@ -1,18 +1,26 @@
-<!-- PHP session init -->
 <?php
-
-$user = array();
 require(__DIR__ . '/../authentication/db_connection.php');
 include(__DIR__ . '/../authentication/auth-helper.php');
-session_start(); // Avvia la sessione per poter utilizzare $_SESSION
+session_start();
 
+// Verifica se l'email è presente nei cookie
 if (isset($_COOKIE['email'])) {
     $user_email = $_COOKIE['email'];
-    $user = get_user_info($con, $_COOKIE['email']);
-    $person = getPersonaFromEmail($con, $_COOKIE['email']);
+
+    // Ottieni informazioni sull'utente dal database
+    $user = get_user_info($con, $user_email); //Informazioni dettagliate all'interno del database
+    $person = getPersonaFromEmail($con, $user_email); //Soltanto informazioni personali
+
+    // Salva l'oggetto persona nella sessione
     $_SESSION["person"] = serialize($person);
-    if (!$_SESSION['attivato']){
+
+    // Verifica se l'account è stato attivato
+    if (!$_SESSION['attivato']) {
+        if ($user['verificato'] == 1) {
+            $_SESSION['attivato'] = true;
+        }
         header("Location: /modals/suggest.php");
+        exit;
     }
 }
 ?>
@@ -60,7 +68,7 @@ if (isset($_COOKIE['email'])) {
 
                 <ul class="navbar-nav grid gap-1">
                     <?php if (isset($user_email)) : ?>
-                        <a href="../profile/user-dashboard.php"><img class="img rounded-circle" style="width: 20px; height: 20px;" src="<?php echo isset($user['locazione_immagine_profilo']) ? substr($user['locazione_immagine_profilo'], 2) : '../assets/profileimg/beard.png'; ?>" alt=""></a>
+                        <a href="/profile/user-dashboard.php"><img class="img rounded-circle" style="width: 20px; height: 20px;" src="<?php echo isset($user['locazione_immagine_profilo']) ? substr($user['locazione_immagine_profilo'], 2) : '../assets/profileimg/beard.png'; ?>" alt=""></a>
                     <?php else : ?>
                         <li> <a class="btn btn-primary" href="/authentication/login.php" role="button">Accedi</a> </li>
                         <li> <a class="btn btn-primary" href="/authentication/register.php" role="button">Iscriviti</a></li>

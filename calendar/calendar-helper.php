@@ -210,9 +210,6 @@ function edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $ur
     $endRecursive = strtotime($endDate . ' +1 day');
     $endRecur = date('Y-m-d', $endRecursive);
 
-    // Calcolo squadra
-    $squadra = getSquadra($society);
-
     // Se è presente un ID, esegui l'aggiornamento nelle due tabelle
     if ($id) {
         try {
@@ -224,9 +221,9 @@ function edit_training($groupId, $startDate, $endDate, $startTime, $endTime, $ur
             $query->execute([$groupId, $startDate, $endDate, $startTime, $endTime, $startRecur, $endRecur, $url, $id]);
 
             // Aggiorna le informazioni sulla prenotazione
-            $sql = "UPDATE prenotazioni SET `id_squadra`=?, `data_ora_inizio`=?, `data_ora_fine`=?, `nota`=? WHERE id_calendar_events=?";
+            $sql = "UPDATE prenotazioni SET `data_ora_inizio`=?, `data_ora_fine`=?, `nota`=? WHERE id_calendar_events=?";
             $query = $con->prepare($sql);
-            $query->execute([$squadra['id'], $startDate, $endDate, $note, $id]);
+            $query->execute([$startDate, $endDate, $note, $id]);
 
             return $id;
         } catch (PDOException $e) {
@@ -663,7 +660,6 @@ function getEventColor($society)
         $statement->bindParam(':societa', $society);
         $statement->execute();
         $sport = $statement->fetchColumn();
-        
     } catch (PDOException $e) {
         throw new PDOException("Errore durante il recupero della data e dell'ora dell'evento: " . $e->getMessage());
     }
@@ -915,7 +911,7 @@ if (isset($_GET['action'])) {
             'note' => $_POST['note'] ?? null,
         );
 
-        // Controllo campi obbligatori (society e startDate)
+        // Controllo che esistano campi obbligatori (society e startDate)
         if ($data['society'] && $data['startDate']) {
             $id = edit_training($data['groupId'], $data['startDate'], $data['endDate'], $data['startTime'], $data['endTime'], $data['url'], $data['society'], $data['note'], $data['id']);
             echo json_encode(array('status' => 'success', 'id' => $id));

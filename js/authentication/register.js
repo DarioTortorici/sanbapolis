@@ -68,6 +68,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var form = document.getElementById('reg-form');
     var passwordInput = document.getElementById('password');
     var passwordError = document.getElementById('confirm_error');
+    handleUserType();
 
     form.addEventListener('submit', function (event) {
         if (!isPasswordValid(passwordInput.value)) {

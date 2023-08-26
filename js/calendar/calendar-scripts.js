@@ -290,7 +290,6 @@ function Showcameras() {
 /** Aggiorna un evento tramite una richiesta AJAX.
  */
 function editEvent() {
-    var formData = $('#edit-form').serialize();
     // Verifica se i campi richiesti sono stati compilati prima di inviare la richiesta
     var eventId = document.getElementById('event-id').value;
 
@@ -306,7 +305,6 @@ function editEvent() {
             endTime: $('#end-time-edit').val(),
             url: $('#url-edit').val(),
             society: $('#society-edit').val(),
-            coach: $('#coach-edit').val(),
             note: $('#description-edit').val()
         },
         dataType: 'json',
@@ -595,7 +593,7 @@ function toggleCameraOptions(checkbox) {
 
 function confirmSaveEvent(email) {
     // Mostra il popup di conferma
-    if (confirm("Sei sicuro di voler salvare l'evento per l'utente con email " + email + "?")) {
+    if (confirm("Sei sicuro di voler salvare l'evento?")) {
         // Se l'utente ha cliccato su "OK", esegui la funzione saveEvent()
         saveEvent(email);
     }
