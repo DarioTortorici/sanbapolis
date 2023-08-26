@@ -19,8 +19,7 @@ document.getElementById('log-form').addEventListener('submit', function(event) {
 
             if (response.success) {
                 // Credenziali corrette, reindirizza l'utente alla pagina successiva
-                console.log("Reindirizzo");
-                window.location.href = 'http://localhost/profile/user-dashboard.php';
+                window.location.href = '../profile/user-dashboard.php';
             } else {
                 // Credenziali errate, mostra un messaggio di errore
                 showErrorMessage();

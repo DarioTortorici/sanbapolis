@@ -6,7 +6,7 @@ use PHPMailer\PHPMailer\Exception;
 // Load Composer's autoloader
 require '../vendor/autoload.php';
 require_once '../authentication/db_connection.php';
-include 'config.php';
+include './config.php';
 
 if (isset($_POST['invited-email'])) {
     $invitedEmail = $_POST['invited-email'];
@@ -72,7 +72,7 @@ function insertInvitedEmail($userType, $invitedEmail)
  */
 function authEmail($userEmail, $activationCode)
 {
-    $activationLink = $domain.'/authentication/activation.php?code=' . urlencode($activationCode); // URL della pagina di attivazione con il codice come parametro
+    $activationLink = $_SERVER['DOCUMENT_ROOT'].'/authentication/activation.php?code=' . urlencode($activationCode); // URL della pagina di attivazione con il codice come parametro
 
     // Crea istanza di PHPMailer
     $mail = new PHPMailer(true);
@@ -138,7 +138,7 @@ function inviteCoachByEmail($userEmail, $teamName, $code)
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Invito alla Sanbapolis Platform';
-        $invitationLink = $domain.'/authentication/register.php?userType=allenatore&scoietyCode=' . $code;
+        $invitationLink = $_SERVER['DOCUMENT_ROOT'].'/authentication/register.php?userType=allenatore&scoietyCode=' . $code;
         $mail->Body    = 'Unisciti a ' . $teamName . ', clicca su <a href="' . $invitationLink . '">questo link</a>';
         $mail->AltBody = 'Unisciti a ' . $teamName . ', copia e incolla il seguente link nel tuo browser: ' . $invitationLink;
 
@@ -183,7 +183,7 @@ function invitePlayerByEmail($userEmail, $teamName, $code)
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Invito alla Sanbapolis Platform';
-        $invitationLink = $domain.'/authentication/register.php?userType=giocatore&teamCode=' . $code;
+        $invitationLink = $_SERVER['DOCUMENT_ROOT'].'/authentication/register.php?userType=giocatore&teamCode=' . $code;
         $mail->Body    = 'Unisciti a ' . $teamName . ', clicca su <a href="' . $invitationLink . '">questo link</a>';
         $mail->AltBody = 'Unisciti a ' . $teamName . ', copia e incolla il seguente link nel tuo browser: ' . $invitationLink;
 
