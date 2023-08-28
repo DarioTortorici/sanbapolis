@@ -6,7 +6,10 @@ use PHPMailer\PHPMailer\Exception;
 // Load Composer's autoloader
 require '../vendor/autoload.php';
 require_once '../authentication/db_connection.php';
-include './config.php';
+
+global $smtpHost; 
+global $smtpUser;
+global $smtpPassword;
 
 if (isset($_POST['invited-email'])) {
     $invitedEmail = $_POST['invited-email'];

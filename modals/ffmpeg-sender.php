@@ -1,11 +1,11 @@
 <?php
 
-require 'vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 use FFMpeg\FFMpeg;
 use FFMpeg\Format\Video\X264;
 
 //Global variable per aiutare nel refactoring
-$cartellaStorage = "../video_editing/storage_video/";
+$cartellaStorage = "../editing_video/storage_video/";
 
 /**
  * Cattura un flusso RTSP da una fotocamera e lo salva come file multimediale in formato MPD.

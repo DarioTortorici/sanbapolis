@@ -209,7 +209,7 @@ function updateCardVisibility(players) {
  */
 function fetchTeams() {
   jQuery.ajax({
-    url: 'http://localhost/profile/myteam-helper.php?action=get-teams',
+    url: window.location.hostname + '/profile/myteam-helper.php?action=get-teams',
     type: 'GET',
     dataType: 'json',
     success: function (response) {
@@ -231,7 +231,7 @@ function fetchTeams() {
 function fetchTeam(teamId) {
 
   jQuery.ajax({
-    url: 'http://localhost/profile/myteam-helper.php?action=get-team',
+    url: window.location.hostname + '/profile/myteam-helper.php?action=get-team',
     type: 'POST',
     data: { id: teamId },
     dataType: 'json',
@@ -260,7 +260,7 @@ function fetchTeam(teamId) {
 function getSocietyByBoss(boss) {
   return new Promise(function (resolve, reject) {
     $.ajax({
-      url: 'http://localhost/profile/myteam-helper.php',
+      url: window.location.hostname + '/profile/myteam-helper.php',
       method: 'GET',
       data: {
         action: 'get-society-by-boss',
@@ -292,7 +292,7 @@ function getSocietyByBoss(boss) {
 function getTeambyCoach(coach) {
   return new Promise(function (resolve, reject) {
     $.ajax({
-      url: 'http://localhost/profile/myteam-helper.php?action=get-team-by-coach',
+      url: window.location.hostname + '/profile/myteam-helper.php?action=get-team-by-coach',
       method: 'GET',
       data: {
         coach: coach
@@ -321,7 +321,7 @@ function getTeambyCoach(coach) {
  */
 function getPlayersbyTeam(team) {
   $.ajax({
-    url: 'http://localhost/profile/myteam-helper.php?action=get-players-by-team',
+    url: window.location.hostname + '/profile/myteam-helper.php?action=get-players-by-team',
     method: 'GET',
     data: {
       team: team
@@ -347,7 +347,7 @@ function getPlayersbyTeam(team) {
  */
 function getCoachesByBoss(mail) {
   $.ajax({
-    url: 'http://localhost/profile/myteam-helper.php?action=get-coaches-by-boss',
+    url: window.location.hostname + '/profile/myteam-helper.php?action=get-coaches-by-boss',
     method: 'GET',
     data: {
       boss_email: mail
@@ -375,7 +375,7 @@ function deletefromDBPlayer(buttonElement) {
   // risalgo alla email del giocatore dal titolo della card
   var email = buttonElement.parentNode.querySelector('.card-title').innerText;
   $.ajax({
-    url: 'http://localhost/profile/myteam-helper.php?action=delete-player',
+    url: window.location.hostname + '/profile/myteam-helper.php?action=delete-player',
     method: 'POST',
     data: {
       email: email
@@ -405,7 +405,7 @@ function deleteStaff(buttonElement, managerMail) {
   // risalgo alla email del giocatore dal titolo della card
   var email = buttonElement.parentNode.querySelector('.card-title').innerText;
   $.ajax({
-    url: 'http://localhost/profile/myteam-helper.php?action=delete-staff',
+    url: window.location.hostname + '/profile/myteam-helper.php?action=delete-staff',
     method: 'POST',
     data: {
       email: email,

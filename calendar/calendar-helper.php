@@ -76,18 +76,18 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
         $daysOfWeek = null;
     }
 
-    $interactive = true;
+    $interactive = 1;
     $className = null;
 
     //disabilitata per aggiungere la gestione della chiamata al db per modificare i valori
-    $editable = true;
-    $startEditable = false;
-    $durationEditable = false;
+    $editable = 1;
+    $startEditable = 0;
+    $durationEditable = 1;
 
-    $display = true;
+    $display = 1;
 
     // nella palestra non possono esserci eventi contemporanei
-    $overlap = false;
+    $overlap = 0;
 
     //$color settato a null perch modifichiamo bordi e background in base al tipo di evento
     $color = null;
@@ -109,6 +109,7 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
         $title = $society;
         $borderColor = $backgroundColor;
     }
+
 
     $sql = "INSERT INTO calendar_events (`groupId`,`allDay`,`start`,`end`,`daysOfWeek`, `startTime`, `endTime`,`startRecur`, `endRecur`, `title`, `url`,
         `interactive`, `className`, `editable`, `startEditable`, `durationEditable`, `display`, `overlap`, `color`, `backgroundColor`, `borderColor`, `textColor`)
@@ -817,33 +818,50 @@ if (isset($_GET['action'])) {
     $action = $_GET['action'];
 
     if ($action == 'save-event') { // salvataggio di un evento
-        $data = array(
-            // Tabella calendar_events
-            'groupId' => $_POST['groupId'] ?? null,
-            'allDay' => $_POST['allDay'] ?? null,
-            'startDate' => $_POST['start-date'] ?? null,
-            'endDate' => $_POST['end-date'] ?? null,
-            'daysOfWeek' => json_encode($_POST['daysOfWeek'] ?? null),
-            'startTime' => $_POST['startTime'] ?? null,
-            'endTime' => $_POST['endTime'] ?? null,
-            'startRecur' => $_POST['startRecur'] ?? null,
-            'endRecur' => $_POST['endRecur'] ?? null,
-            'url' => $_POST['url'] ?? null,
-            // Tabella prenotazioni
-            'society' => $_POST['society'] ?? null,
-            'note' => $_POST['description'] ?? null,
-            'eventType' => $_POST['event_type'] ?? null,
-            // Tabella telecamere
-            'cameras' => json_encode($_POST['camera'] ?? null),
-            'author' => $_POST['author'] ?? null,
-        );
-        // Controllo che esistano campi obbligatori (society e startDate)
-        if ($data['society'] && $data['startDate']) {
-            $id = save_event($data['groupId'], $data['allDay'], $data['startDate'], $data['endDate'], $data['daysOfWeek'], $data['startTime'], $data['endTime'], $data['startRecur'], $data['endRecur'], $data['url'], $data['society'], $data['note'], $data['eventType'], $data['cameras'], $data['author']);
-            $response = array('status' => 'success', 'id' => $id);
-        } else {
-            $response = array('status' => 'error', 'message' => 'Missing required fields');
+        try {
+            $data = [
+                // Tabella calendar_events
+                'groupId' => $_POST['groupId'] ?? null,
+                'allDay' => $_POST['allDay'] ?? null,
+                'startDate' => $_POST['start-date'] ?? null,
+                'endDate' => $_POST['end-date'] ?? null,
+                'daysOfWeek' => json_encode($_POST['daysOfWeek'] ?? null),
+                'startTime' => $_POST['startTime'] ?? null,
+                'endTime' => $_POST['endTime'] ?? null,
+                'startRecur' => $_POST['startRecur'] ?? null,
+                'endRecur' => $_POST['endRecur'] ?? null,
+                'url' => $_POST['url'] ?? null,
+
+                // Tabella prenotazioni
+                'society' => $_POST['society'] ?? null,
+                'note' => $_POST['description'] ?? null,
+                'eventType' => $_POST['event_type'] ?? null,
+
+                // Tabella telecamere
+                'cameras' => json_encode($_POST['camera'] ?? null),
+                'author' => $_POST['author'] ?? null,
+            ];
+
+            // Converti gli elementi vuoti in null, necessario per alcuni webserver
+            foreach ($data as $key => $value) {
+                if ($value === '') {
+                    $data[$key] = null;
+                }
+            }
+
+            // Controllo che esistano campi obbligatori (society e startDate)
+            if ($data['society'] && $data['startDate']) {
+                $id = save_event($data['groupId'], $data['allDay'], $data['startDate'], $data['endDate'], $data['daysOfWeek'], $data['startTime'], $data['endTime'], $data['startRecur'], $data['endRecur'], $data['url'], $data['society'], $data['note'], $data['eventType'], $data['cameras'], $data['author']);
+                $response = array('status' => 'success', 'id' => $id);
+            } else {
+                $response = array('status' => 'error', 'message' => 'Missing required fields');
+            }
+        } catch (Exception $e) {
+            // Stampa l'errore nel log del server e/o visualizzalo nel browser
+            print_r('Errore: ' . $e->getMessage());
+            $response = array('status' => 'error', 'message' => 'An error occurred. Please check the server logs for more information.');
         }
+
         header('Content-Type: application/json');
         echo json_encode($response);
     } elseif ($action == 'get-events') { // recupero tutti gli eventi da calendar_event
@@ -911,6 +929,13 @@ if (isset($_GET['action'])) {
             'note' => $_POST['note'] ?? null,
         );
 
+        // Converti gli elementi vuoti in null, necessario per alcuni webserver
+        foreach ($data as $key => $value) {
+            if ($value === '') {
+                $data[$key] = null;
+            }
+        }
+            
         // Controllo che esistano campi obbligatori (society e startDate)
         if ($data['society'] && $data['startDate']) {
             $id = edit_training($data['groupId'], $data['startDate'], $data['endDate'], $data['startTime'], $data['endTime'], $data['url'], $data['society'], $data['note'], $data['id']);

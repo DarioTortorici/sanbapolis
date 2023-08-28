@@ -76,62 +76,61 @@ function checkRecordtoStart()
  */
 function checkRecordtoEnd()
 {
-    $con = get_connection();
+    try {
+        $con = get_connection();
 
-    // Query per recuperare le prenotazioni scadute e le relative telecamere
-    $sql = "SELECT p.*, GROUP_CONCAT(tp.telecamera) as telecamere, COUNT(*) as count 
-        FROM prenotazioni as p 
-        INNER JOIN telecamere_prenotazioni as tp ON tp.prenotazione = p.id 
-        WHERE p.data_ora_fine <= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
-        GROUP BY p.id";
-    $query = $con->prepare($sql);
-    $query->execute();
-    $result = $query->fetchAll(PDO::FETCH_ASSOC);
-
-    foreach ($result as $row) {
-        // Estrai le informazioni dalla riga risultante
-        $count = $row['count'];
-        $squadra = $row['id_squadra'];
-        $cams = $row['telecamere']; // $cams conterrà un elenco di telecamere separate da virgole
-        $data = $row['data_ora_inizio'];
-        $idCalendar = $row['id_calendar_events'];
-    }
-
-    if ($count > 0) {
-        // Recupera gli allenatori associati alla squadra
-        $sql = "SELECT email_allenatore FROM allenatori_squadre WHERE id_squadra = :squadra";
-        $query = $con->prepare($sql);
-        $query->bindParam(':squadra', $squadra);
-        $query->execute();
-        $coaches = $query->fetchAll(PDO::FETCH_COLUMN); // Utilizziamo FETCH_COLUMN per ottenere solo la colonna 'email_allenatore'
-
-        // Recupera gli indirizzi RTSP delle telecamere selezionate [TO DO]
-        $cameraRTSP = $cams; // Simuliamo $cams come array di indirizzi RTSP delle telecamere
-
-        // Aggiorna i permessi dello staff
-        foreach ($coaches as $coach) {
-            $sql = "UPDATE allenatori SET privilegi_cam = 0 WHERE email = :allenatore";
-            $query = $con->prepare($sql);
-            $query->bindParam(':allenatore', $coach);
-            $query->execute();
-        }
+        $sql = "SELECT p.id, p.id_squadra, p.data_ora_inizio, p.id_calendar_events,
+            GROUP_CONCAT(tp.telecamera) as telecamere, COUNT(*) as count 
+            FROM prenotazioni as p 
+            INNER JOIN telecamere_prenotazioni as tp ON tp.prenotazione = p.id 
+            WHERE p.data_ora_fine <= DATE_SUB(NOW(), INTERVAL 5 MINUTE)
+            GROUP BY p.id";
         
-        $path = "../video_editing/storage_video/". $squadra . '/' . $data . '/';
-        // Aggiorna l'URL nel calendario dell'evento con la pagina per visualizzare i file
-        $watchCams = "/editing_video/video_list.php?video_location=./storage_video/" . $path . "&register_date=" . $data;
-        $sql = "UPDATE calendar_events SET url = :dir WHERE id = :idCalendar";
         $query = $con->prepare($sql);
-        $query->bindParam(':dir', $watchCams);
-        $query->bindParam(':idCalendar', $idCalendar);
         $query->execute();
+        $result = $query->fetchAll(PDO::FETCH_ASSOC);
 
-        // Registra i file video nella tabella 'video'
-        $query = "INSERT INTO video (locazione) VALUES (:dir)";
-        $stmt = $con->prepare($query);
-        $stmt->bindParam(':dir', $path);
-        $stmt->execute();
+        foreach ($result as $row) {
+            $count = $row['count'];
+            $squadra = $row['id_squadra'];
+            $cams = explode(',', $row['telecamere']); // Converte l'elenco in un array di telecamere
+            $data = $row['data_ora_inizio'];
+            $idCalendar = $row['id_calendar_events'];
+
+            if ($count > 0) {
+                $sql = "SELECT email_allenatore FROM allenatori_squadre WHERE id_squadra = :squadra";
+                $query = $con->prepare($sql);
+                $query->bindParam(':squadra', $squadra);
+                $query->execute();
+                $coaches = $query->fetchAll(PDO::FETCH_COLUMN);
+
+                foreach ($coaches as $coach) {
+                    $sql = "UPDATE allenatori SET privilegi_cam = 0 WHERE email = :allenatore";
+                    $query = $con->prepare($sql);
+                    $query->bindParam(':allenatore', $coach);
+                    $query->execute();
+                }
+
+                $path = "../video_editing/storage_video/" . $squadra . '/' . $data . '/';
+                $watchCams = "/editing_video/video_list.php?video_location=./storage_video/" . $path . "&register_date=" . $data;
+
+                $sql = "UPDATE calendar_events SET url = :dir WHERE id = :idCalendar";
+                $query = $con->prepare($sql);
+                $query->bindParam(':dir', $watchCams);
+                $query->bindParam(':idCalendar', $idCalendar);
+                $query->execute();
+
+                $query = "INSERT INTO video (locazione) VALUES (:dir)";
+                $stmt = $con->prepare($query);
+                $stmt->bindParam(':dir', $path);
+                $stmt->execute();
+            }
+        }
+    } catch (PDOException $e) {
+        echo "Errore nel database: " . $e->getMessage();
     }
 }
+
 
 /**
  * Calcola la differenza in secondi tra due date.

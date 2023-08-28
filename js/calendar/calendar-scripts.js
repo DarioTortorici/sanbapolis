@@ -13,7 +13,7 @@ var calendar = null;
  */
 function fetchEvents() {
     jQuery.ajax({
-        url: 'http://localhost/calendar/calendar-helper.php?action=get-events',
+        url: window.location.hostname + '/calendar/calendar-helper.php?action=get-events',
         type: 'GET',
         dataType: 'json',
         success: function (response) {
@@ -35,7 +35,7 @@ function fetchEvents() {
  */
 function fetchMatches() {
     jQuery.ajax({
-        url: 'http://localhost/calendar/calendar-helper.php?action=get-matches',
+        url: window.location.hostname + '/calendar/calendar-helper.php?action=get-matches',
         type: 'GET',
         dataType: 'json',
         success: function (response) {
@@ -57,7 +57,7 @@ function fetchMatches() {
  */
 function fetchCoachEvents(coach) {
     // Effettua una richiesta AJAX per ottenere gli eventi dell'allenatore
-    jQuery.get('http://localhost/calendar/calendar-helper.php?action=get-coach-event', {
+    jQuery.get(window.location.hostname + '/calendar/calendar-helper.php?action=get-coach-event', {
         coach: coach
     })
         .done(function (event) {
@@ -80,7 +80,7 @@ function fetchCoachEvents(coach) {
  */
 function fetchSocietyEvents(responsabile) {
     // Effettua una richiesta AJAX per ottenere gli eventi dell'allenatore
-    jQuery.get('http://localhost/calendar/calendar-helper.php?action=get-society-event', {
+    jQuery.get(window.location.hostname + '/calendar/calendar-helper.php?action=get-society-event', {
         responsabile: responsabile
     })
         .done(function (event) {
@@ -107,7 +107,7 @@ function saveEvent(email) {
     // Verifica se i campi richiesti sono stati compilati prima di inviare la richiesta
     if (validateForm()) {
         $.ajax({
-            url: 'http://localhost/calendar/calendar-helper.php?action=save-event',
+            url: window.location.hostname + '/calendar/calendar-helper.php?action=save-event',
             type: 'POST',
             data: formData,
             dataType: 'json'
@@ -115,12 +115,12 @@ function saveEvent(email) {
             .done(function (response) {
                 if (response.status === 'success') {
                     $.ajax({ //getUserType che non funziona altrimenti
-                        url: 'http://localhost/calendar/calendar-helper.php?action=get-user-type',
+                        url: window.location.hostname + '/calendar/calendar-helper.php?action=get-user-type',
                         type: 'POST',
                         data: { email: email },
                         dataType: 'text',
                         success: function (userType) {
-                            if (userType === '"manutentore"') { //Essendo la risposa in datatype text è "manutentore" da cercare
+                            if (userType.includes('manutentore')) { // Includes perché per strane ragioni ci sono spazi
                                 fetchEvents();
                             } else {
                                 fetchCoachEvents(email);
@@ -153,12 +153,12 @@ function saveEvent(email) {
  */
 function getUserType(email) {
     $.ajax({
-        url: 'http://localhost/calendar/calendar-helper.php?action=get-user-type',
+        url: window.location.hostname + '/calendar/calendar-helper.php?action=get-user-type',
         type: 'POST',
         data: { email: email },
         dataType: 'text',
         success: function (userType) {
-            if (userType === '"manutentore"') { //Essendo la risposa in datatype text è "manutentore" da cercare
+            if (userType.includes('manutentore')) { // Includes perché per strane ragioni ci sono spazi
                 fetchEvents();
             } else {
                 fetchCoachEvents(email);
@@ -181,11 +181,11 @@ function getUserType(email) {
  */
 function showGoal(id) {
     // get evento dal server
-    jQuery.get('http://localhost/calendar/calendar-helper.php?action=get-event', {
+    jQuery.get(window.location.hostname + '/calendar/calendar-helper.php?action=get-event', {
         id: id
     }, function (event) {
         // Effettua la richiesta per ottenere la nota
-        jQuery.get('http://localhost/calendar/calendar-helper.php?action=get-note', {
+        jQuery.get(window.location.hostname + '/calendar/calendar-helper.php?action=get-note', {
             id: id
         }, function (note) {
             // Aggiorna con i dettagli appena ricevuti il modal show-event-modal
@@ -213,7 +213,7 @@ function deleteEvent() {
     calendar.getEventById(eventId).remove();
 
     jQuery.ajax({
-        url: 'http://localhost/calendar/calendar-helper.php?action=delete-event',
+        url: window.location.hostname + '/calendar/calendar-helper.php?action=delete-event',
         type: 'POST',
         data: { id: eventId },
         dataType: 'json',
@@ -235,11 +235,11 @@ function ShowForEditEvent() {
 
     var id = document.getElementById('event-id').value;
     // get evento dal server
-    jQuery.get('http://localhost/calendar/calendar-helper.php?action=get-event', {
+    jQuery.get(window.location.hostname + '/calendar/calendar-helper.php?action=get-event', {
         id: id
     }, function (event) {
         // Effettua la richiesta per ottenere la nota
-        jQuery.get('http://localhost/calendar/calendar-helper.php?action=get-event-info', {
+        jQuery.get(window.location.hostname + '/calendar/calendar-helper.php?action=get-event-info', {
             id: id
         }, function (info) {
 
@@ -266,7 +266,7 @@ function Showcameras() {
     var id = document.getElementById('event-id').value;
 
     jQuery.ajax({
-        url: 'http://localhost/calendar/calendar-helper.php?action=get-cams',
+        url: window.location.hostname + '/calendar/calendar-helper.php?action=get-cams',
         type: 'GET',
         dataType: 'json',
         data: { id: id },
@@ -294,7 +294,7 @@ function editEvent() {
     var eventId = document.getElementById('event-id').value;
 
     jQuery.ajax({
-        url: 'http://localhost/calendar/calendar-helper.php?action=edit-event',
+        url: window.location.hostname + '/calendar/calendar-helper.php?action=edit-event',
         type: 'POST',
         data: {
             id: eventId,
@@ -335,7 +335,7 @@ function saveCameras() {
 
     // Effettua la chiamata AJAX per salvare le telecamere
     jQuery.ajax({
-        url: 'http://localhost/calendar/calendar-helper.php?action=save-cams',
+        url: window.location.hostname + '/calendar/calendar-helper.php?action=save-cams',
         type: 'POST',
         data: {
             id: eventId,
@@ -715,7 +715,7 @@ function getUserType() {
     return new Promise(function (resolve, reject) {
         // Effettua una chiamata AJAX per ottenere il tipo di utente dell'utente corrente
         jQuery.ajax({
-            url: 'http://localhost/calendar/calendar-helper.php?action=get-user-type',
+            url: window.location.hostname + '/calendar/calendar-helper.php?action=get-user-type',
             type: 'POST',
             dataType: 'json',
             success: function (response) {

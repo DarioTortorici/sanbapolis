@@ -19,8 +19,10 @@ if (isset($_COOKIE['email'])) {
         if ($user['verificato'] == 1) {
             $_SESSION['attivato'] = true;
         }
-        header("Location: /modals/suggest.php");
+        else{
+            header("Location: /modals/suggest.php");
         exit;
+        }
     }
 }
 ?>

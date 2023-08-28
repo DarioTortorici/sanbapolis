@@ -82,10 +82,10 @@ if ($userType === "allenatore") {
     }
 }
 
-// Verifica la presenza di altri campi dati comuni a tutti i tipi di utente
-$dataNascita = $_POST['dataNascita'];
-$citta = $_POST['citta'];
-$telefono = $_POST['telefono'];
+// Verifica la presenza di altri campi dati comuni a tutti i tipi di utente, altrimenti impostati a null
+$dataNascita = !empty($_POST['dataNascita']) ? $_POST['dataNascita'] : null;
+$citta = !empty($_POST['citta']) ? $_POST['citta'] : null;
+$telefono = !empty($_POST['telefono']) ? $_POST['telefono'] : null;
 $profileImage = upload_profile("../assets/profileimg/", $_FILES['profileUpload']);
 
 $societyCode = $_POST['societyCode'];
@@ -102,8 +102,8 @@ if (empty($errors)) {
     $_SESSION['token'] = $activationCode;
     try {
         // Crea una query
-        $query = "INSERT INTO persone (nome, cognome, email, data_nascita, citta, indirizzo, telefono, digest_password, locazione_immagine_profilo, data_ora_registrazione)";
-        $query .= " VALUES (:firstName, :lastName, :email, :dataNascita, :citta, :indirizzo, :telefono, :password, :profileImage, NOW())";
+        $query = "INSERT INTO persone (nome, cognome, email, data_nascita, citta, indirizzo, telefono, digest_password, locazione_immagine_profilo, data_ora_registrazione, verificato)";
+        $query .= " VALUES (:firstName, :lastName, :email, :dataNascita, :citta, :indirizzo, :telefono, :password, :profileImage, NOW(), 0)";
 
         // Prepara la dichiarazione
         $stmt = $con->prepare($query);

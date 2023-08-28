@@ -2,7 +2,7 @@
 
 // Includi il file header.php
 include('../modals/header.php');
-include "auth-helper.php";
+require "auth-helper.php";
 ?>
 
 <?php

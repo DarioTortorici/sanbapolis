@@ -1,6 +1,6 @@
 <?php
 require_once('db_connection.php');
-include_once '/xampp/htdocs/classes/Person.php';
+require_once $_SERVER['DOCUMENT_ROOT'].'/classes/Person.php';
 
 /**
  * Convalida un valore di testo di input.

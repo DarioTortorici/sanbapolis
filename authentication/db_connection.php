@@ -1,7 +1,7 @@
 <?php
 
 // Includi il file config.php per accedere alle variabili
-include $_SERVER['DOCUMENT_ROOT'].'/modals/config.php';
+require __DIR__.'/../modals/config.php';
 
 // Definizione delle variabili costanti
 define('DB_NAME', $databaseName);
