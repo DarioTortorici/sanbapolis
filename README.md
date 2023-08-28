@@ -19,6 +19,52 @@ git clone https://github.com/SportTech-UniTN/Sanbapolis.git
 ## Imposta
 Bisogna apportare alcune aggiunte e/o modifiche al sistema per far si che il vostro funzioni correttamente
 
+### Installazioni sul server
+Nonostante siano già presenti all'interno delle cartelle del progetto è importante installare sul proprio sistema composer e ffmpeg.
+
+#### Composer
+     ```
+     sudo apt-get install composer
+     ```
+
+#### FFmpeg
+   - **Ubuntu (apt)**:
+     ```
+     sudo apt-get install ffmpeg
+     ```
+
+   - **Fedora (dnf)**:
+     ```
+     sudo dnf install ffmpeg
+     ```
+
+   - **Homebrew (MacOS)**:
+     ```
+     brew install ffmpeg
+     ```
+
+
+   Dopo aver completato il processo di installazione, verifica che FFmpeg sia stato installato correttamente eseguendo il comando `ffmpeg -version` nel terminale.
+
+``` bash
+crontab -e
+```
+### Permessi
+Per ragioni di sicurezza il webserver non può leggere o scrivere di default sulle cartelle del progetto.
+Utilizza il comando chown per cambiare il proprietario della cartella in www-data (Apache web server). Ecco il comando da eseguire:
+
+``` bash
+sudo chown www-data:www-data /assets/profileImg/
+sudo chown www-data:www-data /editing_video/storage_video/
+```
+
+Impostiamo adesso i permessi
+
+``` bash
+sudo chmod 755 /assets/profileImg/
+sudo chmod 755 /editing_video/storage_video/
+```
+
 ### Chronjob
 
 #### Unix o MacOS
@@ -48,7 +94,8 @@ Per ottenere un chronjob su Windows bisogna impostare un task scheduler nel segu
 
 ### Database
 
-Popola il tuo database connettendoti al tuo mysql e lanciando gli script presenti nella cartella `db`
+Popola il tuo database connettendoti al tuo mysql e lanciando gli script presenti nella cartella `db`.
+Importante: Si prega di prestare attenzione al fatto che non tutte le informazioni nel database sono prepopolabili automaticamente. Per esempio, è fondamentale assicurarsi che nella tabella "telecamere" siano correttamente inseriti gli indirizzi IP delle tue telecamere. Affinché l'intero sistema funzioni in modo ottimale, ti consigliamo di rivedere attentamente ciascuna tabella e le relative relazioni.
 
 ### Config File
 Nella cartella `modals` il file `config.php` contiene tutte le variabili da personalizzare per far funzionare il sistema 
