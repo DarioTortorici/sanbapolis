@@ -704,7 +704,7 @@ function getPlaylist($videoUrl)
 
     $sql = "SELECT *
             FROM video
-            WHERE sessione = (SELECT id FROM sessioni_registrazione WHERE video = ?)";
+            WHERE sessione = (SELECT sessione FROM video WHERE locazione = ?)";
     $query = $con->prepare($sql);
     $query->execute([$videoUrl]);
     $publishers = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -745,10 +745,10 @@ function getRecordingDate($videoUrl)
 {
     $con = get_connection();
 
-    $sql = "SELECT sr.data_ora_inizio
-            FROM sessioni_registrazione sr
-            INNER JOIN video v ON sr.video = v.locazione
-            WHERE sr.video = ?";
+    $sql = "SELECT sr.data_ora_inizio 
+    FROM sessioni_registrazione sr 
+    INNER JOIN video v ON sr.id = v.sessione 
+    WHERE v.locazione = ?";
     $query = $con->prepare($sql);
     $query->execute([$videoUrl]);
     $data_ora_inizio = $query->fetchColumn();
