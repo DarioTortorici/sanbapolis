@@ -13,6 +13,7 @@ $video_location = $_GET['video'] ?? '';  // Ottiene il percorso del video dalla 
 
 if (!empty($video_location)) {  // Controlla se il percorso del video non è vuoto.
     $video = getVideoFromPath($pdo, $video_location);  // Ottiene l'oggetto Video utilizzando il percorso fornito.
+    print_r($video);
     $_SESSION['video'] = serialize($video);  // Serializza e memorizza l'oggetto Video nella sessione.
     $filename = basename($video->getPath(), '.mp4');  // Estrae il nome del file video senza l'estensione.
     $recording_date = $_GET['recording_date'] ?? getRecordingDate($video->getPath());  // Ottiene la data di registrazione dal parametro o dal file video.
@@ -45,49 +46,56 @@ if (isset($_GET['update']) && $_GET['update'] == 1) {
         </video>
     </div>
 
-    <!-- Playlist -->
-    <div id="playlist" class="playlist">
-        <ul id="video-list" class="list-group">
-            <!-- Form to delete multiple videos -->
-            <form action="<?php echo VIDEO_MANAGER; ?>?operation=multiple_video_delete" method="post" onsubmit="confirm('Sicuro di eliminare i video selezionati?')">
-                <?php
-                try {
-                    $videos = getPlaylist($video->getPath());
+   <!-- Playlist -->
+<div id="playlist" class="playlist">
+    <ul id="video-list" class="list-group">
+        <!-- Form to delete multiple videos -->
+        <form action="<?php echo VIDEO_MANAGER; ?>?operation=multiple_video_delete" method="post" onsubmit="return confirm('Sicuro di eliminare i video selezionati?')">
+            <?php
+            try {
+                $videos = getPlaylist($video->getPath());
 
-                    // Display playlist as a table
-                    echo '<table class="table table-striped table-hover">';
-                    echo '<thead>
-                            <tr>
-                                <th></th>
-                                <th id="playlist-date">' . $recording_date . '</th>
-                            </tr>
-                          </thead>';
+                // Display playlist as a table
+                echo '<table class="table table-striped table-hover">';
+                echo '<thead>
+                        <tr>
+                            <th></th>
+                            <th id="playlist-date">' . $recording_date . '</th>
+                            <th>Download</th>
+                        </tr>
+                      </thead>';
 
-                    // Iterate through videos and create rows
-                    foreach ($videos as $el) {
-                        $link = "../" . $el->getPath();
-                        echo <<<END
-                            <tr class='clickable-row'>
-                                <td>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="{$el->getId()}" name="id[]" value="{$el->getId()}">
-                                    </div>
-                                </td>        
-                                <td data-href='$link'>{$el->getName()}</td>
-                            </tr>
-                    END;
-                    }
-
-                    echo '</table>';
-                } catch (Exception $e) {
-                    echo 'Eccezione: ', $e->getMessage(), "\n";
+                // Iterate through videos and create rows
+                foreach ($videos as $el) {
+                    $link = "../" . $el->getPath();
+                    echo <<<END
+                        <tr class='clickable-row'>
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="{$el->getId()}" name="id[]" value="{$el->getId()}">
+                                </div>
+                            </td>        
+                            <td data-href='$link'>{$el->getName()}</td>
+                            <td>
+                                <a href="$link" download class="btn btn-success btn-sm">Scarica</a>
+                            </td>
+                        </tr>
+                END;
                 }
 
-                ?>
+                echo '</table>';
+            } catch (Exception $e) {
+                echo 'Eccezione: ', $e->getMessage(), "\n";
+            }
+
+            ?>
+            <div class="mt-3">
                 <input type="submit" class="btn btn-danger" value="Elimina">
-            </form>
-        </ul>
-    </div>
+            </div>
+        </form>
+    </ul>
+</div>
+
 </div>
 
 <!-- Pulsantiera -->
@@ -149,6 +157,7 @@ if (isset($_GET['update']) && $_GET['update'] == 1) {
     </table>
 </div>
 
+<!-- Screenshot List -->
 <div id="screen_area" class="grid-container">
     <?php
     $screenshots = getScreenshotsFromVideo($pdo, $video->getPath());
@@ -156,21 +165,31 @@ if (isset($_GET['update']) && $_GET['update'] == 1) {
         foreach ($screenshots as $el) {
             $img_name = substr($el->getPath(), strpos($el->getPath(), "/") + 1);
             echo <<< END
-                        <div class="grid-item">
-                            <a href="screen_details.php?id={$el->getId()}">
-                                <img id="{$el->getId()}" src="../{$el->getPath()}" alt="$img_name" width="426" height="240">
-                            </a>
-                            <br>
-                            <a href="screen_details.php?id={$el->getId()}&timing_video="">
-                    END;
+                <div class="grid-item">
+                    <a href="../screenshots/screen_details.php?id={$el->getId()}">
+                        <img id="{$el->getId()}" src="../{$el->getPath()}" alt="$img_name" width="426" height="240">
+                    </a>
+                    <br>
+                    <a href="../screenshots/screen_details.php?id={$el->getId()}&timing_video=">
+            END;
             echo ($el->getName() == null) ? $img_name : $el->getName();
-            echo "</a>\n\t</div>\n";
+            echo "</a>\n\t";
+            
+            // Aggiungi il link di download
+            echo <<< DOWNLOAD
+                <div>
+                    <a href="../{$el->getPath()}" download class="btn btn-success btn-sm mt-2">Scarica</a>
+                </div>
+            DOWNLOAD;
+            
+            echo "</div>\n";
         }
     } catch (Exception $e) {
         echo 'Eccezione: ',  $e->getMessage(), "\n";
     }
     ?>
 </div>
+
 
 <div hidden id="snackbar">Esiste già un segnaposto con quel minutaggio</div>
 
