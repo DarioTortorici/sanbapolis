@@ -423,7 +423,7 @@ function loadCalendar(data) {
             });
         },
         eventClick: function (info) {
-            if (window.location.href != "http://localhost/cameras/video_storage.php") {
+            if (window.location.href != domain + "/cameras/video_storage.php") {
                 info.jsEvent.preventDefault();
                 var currentEvent = info.event.id;
                 showGoal(currentEvent); // Triggera modal per visualizzare informazioni evento

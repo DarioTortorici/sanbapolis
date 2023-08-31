@@ -126,8 +126,8 @@ INSERT INTO telecamere(id, indirizzo_ipv4, indirizzo_ipv6) VALUES (2, '127.0.0.2
 INSERT INTO telecamere(id, indirizzo_ipv4, indirizzo_ipv6) VALUES (3, '127.0.0.3', NULL);
 
 INSERT INTO `calendar_events` (`id`, `start`, `end`, `startTime`, `endTime`, `startRecur`, `endRecur`, `title`, `url`) VALUES
-(1, '2023-08-14 10:00:00', '2023-08-14 11:00:00', '10:00:00', '11:00:00', '2023-08-14', '2023-08-15', 'Allenamento 10 Basket', NULL),
-(2, '2023-08-14 10:00:00', '2023-08-14 11:00:00', '14:00:00', '15:00:00', '2023-08-14', '2023-08-15', 'Allenamento 15 Pallavolo', NULL);
+(1, '2023-08-14 10:00:00', '2023-08-14 11:00:00', '10:00:00', '11:00:00', '2023-08-14', '2023-08-15', 'Allenamento 10 Basket','../editing/editing_video.php?video=./storage_video/basket_test_1.mp4'),
+(2, '2023-08-14 10:00:00', '2023-08-14 11:00:00', '14:00:00', '15:00:00', '2023-08-14', '2023-08-15', 'Allenamento 15 Pallavolo', '../editing/editing_video.php?video=./storage_video/volley_test_1.mp4' );
 
 INSERT INTO prenotazioni(id, autore_prenotazione, data_ora_inizio, data_ora_fine, id_squadra, id_calendar_events, nota) VALUES 
 (1, 'vincenzo.italiano@gmail.com', '2023-08-14 10:00:00', '2023-08-14 12:00:00', 1, 1, 'Evento di prova'),
