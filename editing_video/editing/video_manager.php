@@ -14,7 +14,8 @@ if(isset($_GET["operation"])){
     switch($_GET["operation"]){
         case "select_video":
             select($pdo);
-            header("Location: ".VIDEO_DETAILS);
+            header("Location: ".EDITING_VIDEO);
+            exit();
             break;
         case "new_video":
             break;  
