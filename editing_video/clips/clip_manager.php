@@ -16,8 +16,13 @@ if (isset($_GET["operation"])) {
         case "new_clip":
             if (isset($_POST["start_timing_trim"]) && isset($_POST["end_timing_trim"])) {
                 $clip = newClip($pdo, $video, $person);
-                header("Location ../editing/editing_video.php?update=1");
-                }
+                //header("Location ../editing/editing_video.php?update=1");
+                /*se voglio mandare l'utente ai dettagli della clip estratta
+                if(isset($clip)){
+                    $clip = getVideoFromPath($pdo, $clip->getPath()); //mi serve estrarre l'id che il db ha assegnato alla nuova clip
+                    header("Location: ../editing/video_manager.php?operation=select_video&id={$clip->getId()}");
+                }*/
+            }
             break;
         case "multiple_clip_delete":
             if (isset($_POST["id"])) {
@@ -67,7 +72,8 @@ function newClip($pdo, $video, $person) {
         basename($clip_name, ".mp4"),
         "Clip del video {$video->getPath()}",
         $person->getEmail(),
-        $video->getSession()
+        $video->getSession(),
+        $video->getCamera(),
     );
 
     insertNewClip($pdo, $clip, $video->getPath());  // Inserisce la nuova clip nel database.

@@ -3,9 +3,9 @@
 $domain = "https://example.com";
 
 // Dichiarazione delle variabili del database
-$databaseName = 'your_database';
-$databaseUser = 'your_username';
-$databasePassword = 'your_password';
+$databaseName = 'sanbapolis';
+$databaseUser = 'root';
+$databasePassword = '';
 $databaseHost = 'localhost';
 
 // Dichiarazione delle variabili SMTP

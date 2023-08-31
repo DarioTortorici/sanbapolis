@@ -7,17 +7,18 @@ class Video {
     private $author;
     private $note;
     private $session;
+    private $camera;
 
-    public function __construct($id, $path, $name, $note, $author, $session) {
+    public function __construct($id, $path, $name, $note, $author, $session, $camera) {
         $this->id = $id;
         $this->path = $path;
         $this->name = $name;
         $this->note = $note;
         $this->author = $author;
         $this->session = $session;
+        $this->camera = $camera;
     }
 
-    
     /**
      * Get the value of id
      */
@@ -122,6 +123,24 @@ class Video {
     public function setSession($session): self
     {
         $this->session = $session;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of camera
+     */
+    public function getCamera()
+    {
+        return $this->camera;
+    }
+
+    /**
+     * Set the value of camera
+     */
+    public function setCamera($camera): self
+    {
+        $this->camera = $camera;
 
         return $this;
     }

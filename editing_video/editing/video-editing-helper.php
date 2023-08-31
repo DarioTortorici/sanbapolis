@@ -385,11 +385,10 @@ function deleteScreenFromId($pdo, $id)
  * @param Video $video Istanza della classe Video, che contiene i valori da inserie
  * @return bool true se l'inserimento ha successo, altrimenti false
  */
-function insertNewVideo($pdo, $video)
-{
+function insertNewVideo($pdo, $video){
     $ris = null;
-    try {
-        $query = 'INSERT INTO video(locazione, nome, autore, nota, sessione) VALUES (:locazione, :nome, :autore, :nota, :sessione)';
+    try{
+        $query = 'INSERT INTO video(locazione, nome, autore, nota, sessione, telecamera) VALUES (:locazione, :nome, :autore, :nota, :sessione, :telecamera)';
         $statement = $pdo->prepare($query);
         $ris = $statement->execute([
             ':locazione' => $video->getPath(),
@@ -397,10 +396,9 @@ function insertNewVideo($pdo, $video)
             ':autore' => $video->getAuthor(),
             ':nota' => $video->getNote(),
             ':sessione' => $video->getSession(),
+            ':telecamera' => $video->getCamera(),
         ]);
-    } catch (Exception $e) {
-        echo "Eccezione:" . $e->getMessage();
-    }
+    } catch (Exception $e){echo "Eccezione:" . $e->getMessage();}
 
     return $ris;
 }
@@ -451,7 +449,8 @@ function getClipsFromVideo($pdo, $path_video)
                 $author = $publisher['autore'];
                 $note = $publisher['nota'];
                 $session = $publisher['sessione'];
-                $video = new Video($id, $path, $name, $note, $author, $session);
+                $camera = $publisher['telecamera'];
+                $video = new Video($id, $path, $name, $note, $author, $session, $camera);
                 array_push($videos, $video);
             } catch (Exception $e) {
                 echo 'Eccezione: ',  $e->getMessage(), "\n";
@@ -495,7 +494,8 @@ function getVideoFromId($pdo, $id)
                 $author = $publisher['autore'];
                 $note = $publisher['nota'];
                 $session = $publisher['sessione'];
-                $video = new Video($id, $path, $name, $note, $author, $session);
+                $camera = $publisher['telecamera'];
+                $video = new Video($id, $path, $name, $note, $author, $session, $camera);
             } catch (Exception $e) {
                 echo 'Eccezione: ',  $e->getMessage(), "\n";
             }
@@ -525,7 +525,8 @@ function getVideoFromPath($pdo, $path)
                 $author = $publisher['autore'];
                 $note = $publisher['nota'];
                 $session = $publisher['sessione'];
-                $video = new Video($id, $path, $name, $note, $author, $session);
+                $camera = $publisher['telecamera'];
+                $video = new Video($id, $path, $name, $note, $author, $session, $camera);
             } catch (Exception $e) {
                 echo 'Eccezione: ',  $e->getMessage(), "\n";
             }
@@ -557,7 +558,8 @@ function getVideosFromSession($pdo, $email, $session)
                 $author = $publisher['autore'];
                 $note = $publisher['nota'];
                 $session = $publisher['sessione'];
-                $video = new Video($id, $path, $name, $note, $author, $session);
+                $camera = $publisher['telecamera'];
+                $video = new Video($id, $path, $name, $note, $author, $session, $camera);
                 array_push($videos, $video);
             } catch (Exception $e) {
                 echo 'Eccezione: ',  $e->getMessage(), "\n";
@@ -589,7 +591,8 @@ function getVideosFromUser($pdo, $email)
                 $author = $publisher['autore'];
                 $note = $publisher['nota'];
                 $session = $publisher['sessione'];
-                $video = new Video($id, $path, $name, $note, $author, $session);
+                $camera = $publisher['telecamera'];
+                $video = new Video($id, $path, $name, $note, $author, $session, $camera);
                 array_push($videos, $video);
             } catch (Exception $e) {
                 echo 'Eccezione: ',  $e->getMessage(), "\n";
@@ -720,7 +723,8 @@ function getPlaylist($videoUrl)
                 $session = $publisher['sessione'];
 
                 // Creazione di un oggetto Video e aggiunta all'array dei video.
-                $video = new Video($id, $path, $name, $note, $author, $session);
+                $camera = $publisher['telecamera'];
+                $video = new Video($id, $path, $name, $note, $author, $session, $camera);
                 array_push($videos, $video);
             } catch (Exception $e) {
                 // In caso di eccezione, stampa il messaggio dell'eccezione.
