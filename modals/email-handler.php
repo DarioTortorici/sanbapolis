@@ -1,28 +1,32 @@
 <?php
-
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-// Load Composer's autoloader
+// Carica l'autoloader di Composer
 require '../vendor/autoload.php';
+
+// Includi i file necessari
 require_once '../authentication/db_connection.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/modals/config.php';
 
-global $smtpHost; 
-global $smtpUser;
-global $smtpPassword;
+// Definisci le costanti SMTP
+define('SMTP_USER', $smtpUser);
+define('SMTP_PASSWORD', $smtpPassword);
+define('SMTP_HOST', $smtpHost);
 
+// Gestisci il POST
 if (isset($_POST['invited-email'])) {
     $invitedEmail = $_POST['invited-email'];
 
     if (isset($_POST['hidden-society-name']) and isset($_POST['hidden-society-code'])) {
         $teamName = $_POST['hidden-society-name'];
         $code = $_POST['hidden-society-code'];
-        insertInvitedEmail("allenatori",$invitedEmail);
+        insertInvitedEmail("allenatori", $invitedEmail);
         inviteCoachByEmail($invitedEmail, $teamName, $code);
     } elseif (isset($_POST['hidden-team-name']) and isset($_POST['hidden-team-code'])) {
         $teamName = $_POST['hidden-team-name'];
         $code = $_POST['hidden-team-code'];
-        insertInvitedEmail("giocatori",$invitedEmail);
+        insertInvitedEmail("giocatori", $invitedEmail);
         invitePlayerByEmail($invitedEmail, $teamName, $code);
     } else {
         echo "Impossibile inviare la mail";
@@ -75,23 +79,23 @@ function insertInvitedEmail($userType, $invitedEmail)
  */
 function authEmail($userEmail, $activationCode)
 {
-    $activationLink = $_SERVER['DOCUMENT_ROOT'].'/authentication/activation.php?code=' . urlencode($activationCode); // URL della pagina di attivazione con il codice come parametro
+    $activationLink = $_SERVER['DOCUMENT_ROOT'] . '/authentication/activation.php?code=' . urlencode($activationCode);
 
     // Crea istanza di PHPMailer
     $mail = new PHPMailer(true);
 
     try {
         // Server settings di Sendinblue
-        $mail->isSMTP();                                            // Mandato via SMTP
-        $mail->Host       = $smtpHost;
+        $mail->isSMTP();
+        $mail->Host       = SMTP_HOST;
         $mail->SMTPAuth   = true;
-        $mail->Username   = $smtpName;
-        $mail->Password   = $smtpPassword;
+        $mail->Username   = SMTP_USER;
+        $mail->Password   = SMTP_PASSWORD;
         $mail->Port       = 587;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 
         // Recipients
-        $mail->setFrom($smtpName, 'SportTech');
+        $mail->setFrom(SMTP_USER, 'SportTech');
         $mail->addAddress($userEmail);
 
         // Content
@@ -103,8 +107,6 @@ function authEmail($userEmail, $activationCode)
         $mail->send();
         // L'email è stata inviata con successo, quindi esegui un reindirizzamento alla dashboard dell'utente.
         header('Location: ../profile/user-dashboard.php');
-        
-
     } catch (Exception $e) {
         // In caso di errore nell'invio dell'email, mostra un messaggio di errore.
         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
@@ -125,31 +127,29 @@ function inviteCoachByEmail($userEmail, $teamName, $code)
     $mail = new PHPMailer(true);
 
     try {
-        // Server settings for Sendinblue
-        $mail->isSMTP();                                            // Mandato via SMTP
-        $mail->Host       = $smtpHost;
+        // Server settings di Sendinblue
+        $mail->isSMTP();
+        $mail->Host       = SMTP_HOST;
         $mail->SMTPAuth   = true;
-        $mail->Username   = $smtpName;
-        $mail->Password   = $smtpPassword;
+        $mail->Username   = SMTP_USER;
+        $mail->Password   = SMTP_PASSWORD;
         $mail->Port       = 587;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 
         // Recipients
-        $mail->setFrom($smtpName, 'SportTech');
+        $mail->setFrom(SMTP_USER, 'SportTech');
         $mail->addAddress($userEmail);
 
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Invito alla Sanbapolis Platform';
-        $invitationLink = $_SERVER['DOCUMENT_ROOT'].'/authentication/register.php?userType=allenatore&scoietyCode=' . $code;
+        $invitationLink = $_SERVER['DOCUMENT_ROOT'] . '/authentication/register.php?userType=allenatore&scoietyCode=' . $code;
         $mail->Body    = 'Unisciti a ' . $teamName . ', clicca su <a href="' . $invitationLink . '">questo link</a>';
         $mail->AltBody = 'Unisciti a ' . $teamName . ', copia e incolla il seguente link nel tuo browser: ' . $invitationLink;
 
         $mail->send();
         // L'email è stata inviata con successo, quindi esegui un reindirizzamento alla pagina precedente.
         header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit(); // Termina l'esecuzione dello script dopo il reindirizzamento.
-
     } catch (Exception $e) {
         // In caso di errore nell'invio dell'email, mostra un messaggio di errore.
         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
@@ -171,30 +171,28 @@ function invitePlayerByEmail($userEmail, $teamName, $code)
 
     try {
         // Server settings di Sendinblue
-        $mail->isSMTP();                                            // Mandato via SMTP
-        $mail->Host       = $smtpHost;
+        $mail->isSMTP();
+        $mail->Host       = SMTP_HOST;
         $mail->SMTPAuth   = true;
-        $mail->Username   = $smtpName;
-        $mail->Password   = $smtpPassword;
+        $mail->Username   = SMTP_USER;
+        $mail->Password   = SMTP_PASSWORD;
         $mail->Port       = 587;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 
         // Recipients
-        $mail->setFrom($smtpName, 'SportTech');
+        $mail->setFrom(SMTP_USER, 'SportTech');
         $mail->addAddress($userEmail);
 
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Invito alla Sanbapolis Platform';
-        $invitationLink = $_SERVER['DOCUMENT_ROOT'].'/authentication/register.php?userType=giocatore&teamCode=' . $code;
+        $invitationLink = $_SERVER['DOCUMENT_ROOT'] . '/authentication/register.php?userType=giocatore&teamCode=' . $code;
         $mail->Body    = 'Unisciti a ' . $teamName . ', clicca su <a href="' . $invitationLink . '">questo link</a>';
         $mail->AltBody = 'Unisciti a ' . $teamName . ', copia e incolla il seguente link nel tuo browser: ' . $invitationLink;
 
         $mail->send();
         // L'email è stata inviata con successo, quindi esegui un reindirizzamento alla pagina precedente.
         header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit(); // Termina l'esecuzione dello script dopo il reindirizzamento.
-
     } catch (Exception $e) {
         // In caso di errore nell'invio dell'email, mostra un messaggio di errore.
         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
@@ -220,16 +218,16 @@ function authEvent($manutentore, $author, $startDate, $endDate, $startTime, $end
 
     try {
         // Server settings di Sendinblue
-        $mail->isSMTP();                                            // Mandato via SMTP
-        $mail->Host       = $smtpHost;
+        $mail->isSMTP();
+        $mail->Host       = SMTP_HOST;
         $mail->SMTPAuth   = true;
-        $mail->Username   = $smtpName;
-        $mail->Password   = $smtpPassword;
+        $mail->Username   = SMTP_USER;
+        $mail->Password   = SMTP_PASSWORD;
         $mail->Port       = 587;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
 
         // Recipients
-        $mail->setFrom($smtpName, 'SportTech');
+        $mail->setFrom(SMTP_USER, 'SportTech');
 
         // Aggiungi gli indirizzi email dei manutentori come destinatari
         foreach ($manutentore as $email) {
@@ -239,7 +237,7 @@ function authEvent($manutentore, $author, $startDate, $endDate, $startTime, $end
                 $mail->addAddress($email);
             }
         }
-        
+
         // Content
         $mail->isHTML(true);
         $mail->Subject = 'Richiesta Evento';
@@ -255,8 +253,6 @@ function authEvent($manutentore, $author, $startDate, $endDate, $startTime, $end
         $mail->send();
         // L'email è stata inviata con successo, quindi esegui un reindirizzamento alla pagina precedente.
         header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit(); // Termina l'esecuzione dello script dopo il reindirizzamento.
-
     } catch (Exception $e) {
         // In caso di errore nell'invio dell'email, mostra un messaggio di errore.
         echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";

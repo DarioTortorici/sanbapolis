@@ -9,19 +9,32 @@ require_once 'error-checker.php';
 
 $pdo = get_connection();
 
-$video_location = $_GET['video'] ?? '';  // Ottiene il percorso del video dalla query string o imposta una stringa vuota se manca.
+// Ottiene il percorso del video dalla query string o imposta una stringa vuota se manca.
+$video_location = $_GET['video'] ?? '';
 
-if (!empty($video_location)) {  // Controlla se il percorso del video non è vuoto.
-    $video = getVideoFromPath($pdo, $video_location);  // Ottiene l'oggetto Video utilizzando il percorso fornito.
-    print_r($video);
+if (!empty($video_location)) {
+    // Se il percorso del video non è vuoto, lo recuperiamo dal database.
+    $video = getVideoFromPath($pdo, $video_location);
     $_SESSION['video'] = serialize($video);  // Serializza e memorizza l'oggetto Video nella sessione.
-    $filename = basename($video->getPath(), '.mp4');  // Estrae il nome del file video senza l'estensione.
-    $recording_date = $_GET['recording_date'] ?? getRecordingDate($video->getPath());  // Ottiene la data di registrazione dal parametro o dal file video.
-} else {  // Se il percorso del video è vuoto, recupera l'oggetto Video dalla sessione.
-    $video = unserialize($_SESSION['video']);  // Deserializza l'oggetto Video dalla sessione.
-    $filename = basename($video->getPath(), '.mp4');  // Estrae il nome del file video senza l'estensione.
-    $recording_date = $_GET['recording_date'] ?? getRecordingDate($video->getPath());  // Ottiene la data di registrazione dal parametro o dal file video.
+
+    // Estrae il nome del file video senza l'estensione.
+    $path = $video->getPath();
+    $filename = basename($path, '.mp4');
+
+    // Ottiene la data di registrazione dal parametro o dal file video.
+    $recording_date = $_GET['recording_date'] ?? getRecordingDate($path);
+} else {
+    // Se il percorso del video è vuoto, recuperiamo l'oggetto Video dalla sessione.
+    $video = unserialize($_SESSION['video']);
+    
+    // Estrae il nome del file video senza l'estensione.
+    $path = $video->getPath();
+    $filename = basename($path, '.mp4');
+    
+    // Ottiene la data di registrazione dal parametro o dal file video.
+    $recording_date = $_GET['recording_date'] ?? getRecordingDate($path);
 }
+
 
 setPreviusPage();
 
@@ -46,18 +59,18 @@ if (isset($_GET['update']) && $_GET['update'] == 1) {
         </video>
     </div>
 
-   <!-- Playlist -->
-<div id="playlist" class="playlist">
-    <ul id="video-list" class="list-group">
-        <!-- Form to delete multiple videos -->
-        <form action="<?php echo VIDEO_MANAGER; ?>?operation=multiple_video_delete" method="post" onsubmit="return confirm('Sicuro di eliminare i video selezionati?')">
-            <?php
-            try {
-                $videos = getPlaylist($video->getPath());
+    <!-- Playlist -->
+    <div id="playlist" class="playlist">
+        <ul id="video-list" class="list-group">
+            <!-- Form to delete multiple videos -->
+            <form action="<?php echo VIDEO_MANAGER; ?>?operation=multiple_video_delete" method="post" onsubmit="return confirm('Sicuro di eliminare i video selezionati?')">
+                <?php
+                try {
+                    $videos = getPlaylist($video->getPath());
 
-                // Display playlist as a table
-                echo '<table class="table table-striped table-hover">';
-                echo '<thead>
+                    // Display playlist as a table
+                    echo '<table class="table table-striped table-hover">';
+                    echo '<thead>
                         <tr>
                             <th></th>
                             <th id="playlist-date">' . $recording_date . '</th>
@@ -65,10 +78,10 @@ if (isset($_GET['update']) && $_GET['update'] == 1) {
                         </tr>
                       </thead>';
 
-                // Iterate through videos and create rows
-                foreach ($videos as $el) {
-                    $link = "../" . $el->getPath();
-                    echo <<<END
+                    // Iterate through videos and create rows
+                    foreach ($videos as $el) {
+                        $link = "../" . $el->getPath();
+                        echo <<<END
                         <tr class='clickable-row'>
                             <td>
                                 <div class="form-check">
@@ -81,20 +94,20 @@ if (isset($_GET['update']) && $_GET['update'] == 1) {
                             </td>
                         </tr>
                 END;
+                    }
+
+                    echo '</table>';
+                } catch (Exception $e) {
+                    echo 'Eccezione: ', $e->getMessage(), "\n";
                 }
 
-                echo '</table>';
-            } catch (Exception $e) {
-                echo 'Eccezione: ', $e->getMessage(), "\n";
-            }
-
-            ?>
-            <div class="mt-3">
-                <input type="submit" class="btn btn-danger" value="Elimina">
-            </div>
-        </form>
-    </ul>
-</div>
+                ?>
+                <div class="mt-3">
+                    <input type="submit" class="btn btn-danger" value="Elimina">
+                </div>
+            </form>
+        </ul>
+    </div>
 
 </div>
 
@@ -174,14 +187,14 @@ if (isset($_GET['update']) && $_GET['update'] == 1) {
             END;
             echo ($el->getName() == null) ? $img_name : $el->getName();
             echo "</a>\n\t";
-            
+
             // Aggiungi il link di download
             echo <<< DOWNLOAD
                 <div>
                     <a href="../{$el->getPath()}" download class="btn btn-success btn-sm mt-2">Scarica</a>
                 </div>
             DOWNLOAD;
-            
+
             echo "</div>\n";
         }
     } catch (Exception $e) {

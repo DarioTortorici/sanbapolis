@@ -25,8 +25,7 @@ if(isset($_GET["operation"])){
                 $timing_screen = getIntTimingScreen($timing_screen_string);
                 getScreen($video->getPath(), $filename, $timing_screen, $timing_screen_string, $pdo);
             } catch (Exception $e) {echo 'Eccezione: ',  $e->getMessage(), "\n";}
-            //header("Location: editing_video.php?timing_screen=$timing_screen");
-            header("Location: " . getPreviusPage(). "?timing_screen=$timing_screen");
+            header("Location: ../editing/editing_video.php?timing_screen=$timing_screen");
             break;
         case "update_screen":
             try{  

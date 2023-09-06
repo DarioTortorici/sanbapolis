@@ -60,17 +60,17 @@ if (!$userType) {
 }
 
 // Verifica la presenza di altri campi dati specifici in base al tipo di utente
-if ($userType === "allenatore") {
+if ($userType == "allenatore") {
     $coachType = validate_input_text($_POST['coachType']);
     if (!$coachType) {
         addError($errors, "Hai dimenticato di selezionare il tipo di allenatore.");
     }
-} elseif ($userType === "giocatore") {
+} elseif ($userType == "giocatore") {
     $teamCode = $_POST['teamCode'];
     if (empty($teamCode) || !validate_team_code($con, $teamCode)) {
         addError($errors, "Il codice squadra non esiste.");
     }
-} elseif ($userType === "società") {
+} elseif ($userType == "società") {
     $p_iva = validate_input_text($_POST['p_iva']);
     $societyName = validate_input_text($_POST['societyName']);
     $address = validate_input_text($_POST['address']);
@@ -134,21 +134,23 @@ if (empty($errors)) {
                     $coachtype = $_POST['coachType'];
                     addCoach($con, $email, $coachtype, $societyCode);
                 } else {
-                    $errors[] = "Il tuo indirizzo mail non risulta tra gli inviti, contatta la tua società per risolvere il problema.";
+                    addError($errors, "Il tuo indirizzo mail non risulta tra gli inviti, contatta la tua società per risolvere il problema.");
                 }
             } elseif ($userType == "giocatore") {
                 if (checkPending($con, "giocatori", $email)) {
                     addPlayer($con, $email, $teamCode);
                 } else {
-                    $errors[] = "Il tuo indirizzo mail non risulta tra gli inviti, contatta il tuo allenatore per risolvere il problema.";
+                    addError($errors,"Il tuo indirizzo mail non risulta tra gli inviti, contatta il tuo allenatore per risolvere il problema.");
                 }
             } elseif ($userType == "società") {
                 $p_iva = $_POST['p_iva'];
                 $societyName = $_POST['societyName'];
                 $address = $_POST['address'];
                 $sport = $_POST['sportType'];
+                addError($errors,"Sono entrato brotha");
                 addCompany($con, $email, $p_iva, $societyName, $sport, $address);
             } else {
+                addError($errors,"Sono fan brotha idk y");
                 addFan($con, $email);
             }
             exit();

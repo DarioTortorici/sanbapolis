@@ -1,6 +1,3 @@
-<!-- Javascripts per gestire la pagina squadra -->
-<script src="../js/teams/myteam-scripts.js"></script>
-
 <!-- PHP session init -->
 <?php
 
@@ -15,6 +12,8 @@ if (!isset($_COOKIE['email'])) {
 
 ?>
 
+<!-- Javascripts per gestire la pagina squadra -->
+<script src="../js/teams/myteam-scripts.js"></script>
 
 <script>
   var societyPromise = getSocietyByBoss("<?php echo $user['email']; ?>");

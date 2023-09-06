@@ -42,6 +42,10 @@ $actions = array(
         'add' => true,
         'delete'=> true,
     ),
+    'tifoso' => array(
+        'args' => '',
+        'fetchFunction' => 'fetchMatches',
+    ),
     // Tipo di utente non gestito
     'altro' => array(
         'fetchFunction' => 'fetchMatches',

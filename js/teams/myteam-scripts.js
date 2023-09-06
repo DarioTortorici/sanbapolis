@@ -8,8 +8,8 @@
 $(document).ready(function() {
   // Aggiungi un gestore di eventi al form quando viene sottomesso
   $('#invite-email-form').submit(function(event) {
-    // Impedisci al form di inviare i dati
-    event.preventDefault();
+    // Impedisci al form di inviare le mail (per testing)
+    //event.preventDefault();
 
     // Mostra l'alert di Bootstrap
     showAlert();
@@ -98,7 +98,7 @@ function updateMyTeampage(team) {
   }
 
   // Trova il primo elemento input con attributo 'name' uguale a 'hidden-title-name'
-  const hiddenTeamInput = document.querySelector("input[name='hidden-title-name']");
+  const hiddenTeamInput = document.querySelector("input[name='hidden-team-name']");
   // Se l'elemento esiste
   if (hiddenTeamInput) {
     // Imposta il valore dell'elemento input con il valore della proprietà 'nome'
@@ -106,7 +106,7 @@ function updateMyTeampage(team) {
   }
 
   // Trova il primo elemento input con attributo 'name' uguale a 'hidden-code'
-  const hiddenCodeInput = document.querySelector("input[name='hidden-code']");
+  const hiddenCodeInput = document.querySelector("input[name='hidden-team-code']");
   // Se l'elemento esiste
   if (hiddenCodeInput) {
     // Imposta il valore dell'elemento input con il valore della proprietà 'codice'
@@ -141,13 +141,13 @@ function updateMyStaffpage(society) {
     }
 
     // Trova il primo elemento input con attributo 'name' uguale a 'hidden-title-name' e imposta il valore con 'nome'
-    const hiddenTeamInput = document.querySelector("input[name='hidden-title-name']");
+    const hiddenTeamInput = document.querySelector("input[name='hidden-society-name']");
     if (hiddenTeamInput) {
       hiddenTeamInput.value = nome;
     }
 
     // Trova il primo elemento input con attributo 'name' uguale a 'hidden-code' e imposta il valore con 'codice'
-    const hiddenCodeInput = document.querySelector("input[name='hidden-code']");
+    const hiddenCodeInput = document.querySelector("input[name='hidden-society-code']");
     if (hiddenCodeInput) {
       hiddenCodeInput.value = codice;
     }
@@ -209,7 +209,7 @@ function updateCardVisibility(players) {
  */
 function fetchTeams() {
   jQuery.ajax({
-    url: window.location.hostname + '/profile/myteam-helper.php?action=get-teams',
+    url:  '/profile/myteam-helper.php?action=get-teams',
     type: 'GET',
     dataType: 'json',
     success: function (response) {
@@ -231,7 +231,7 @@ function fetchTeams() {
 function fetchTeam(teamId) {
 
   jQuery.ajax({
-    url: window.location.hostname + '/profile/myteam-helper.php?action=get-team',
+    url:  '/profile/myteam-helper.php?action=get-team',
     type: 'POST',
     data: { id: teamId },
     dataType: 'json',
@@ -260,7 +260,7 @@ function fetchTeam(teamId) {
 function getSocietyByBoss(boss) {
   return new Promise(function (resolve, reject) {
     $.ajax({
-      url: window.location.hostname + '/profile/myteam-helper.php',
+      url:  '/profile/myteam-helper.php',
       method: 'GET',
       data: {
         action: 'get-society-by-boss',
@@ -292,7 +292,7 @@ function getSocietyByBoss(boss) {
 function getTeambyCoach(coach) {
   return new Promise(function (resolve, reject) {
     $.ajax({
-      url: window.location.hostname + '/profile/myteam-helper.php?action=get-team-by-coach',
+      url:  '/profile/myteam-helper.php?action=get-team-by-coach',
       method: 'GET',
       data: {
         coach: coach
@@ -321,7 +321,7 @@ function getTeambyCoach(coach) {
  */
 function getPlayersbyTeam(team) {
   $.ajax({
-    url: window.location.hostname + '/profile/myteam-helper.php?action=get-players-by-team',
+    url:  '/profile/myteam-helper.php?action=get-players-by-team',
     method: 'GET',
     data: {
       team: team
@@ -347,7 +347,7 @@ function getPlayersbyTeam(team) {
  */
 function getCoachesByBoss(mail) {
   $.ajax({
-    url: window.location.hostname + '/profile/myteam-helper.php?action=get-coaches-by-boss',
+    url:  '/profile/myteam-helper.php?action=get-coaches-by-boss',
     method: 'GET',
     data: {
       boss_email: mail
@@ -375,7 +375,7 @@ function deletefromDBPlayer(buttonElement) {
   // risalgo alla email del giocatore dal titolo della card
   var email = buttonElement.parentNode.querySelector('.card-title').innerText;
   $.ajax({
-    url: window.location.hostname + '/profile/myteam-helper.php?action=delete-player',
+    url:  '/profile/myteam-helper.php?action=delete-player',
     method: 'POST',
     data: {
       email: email
@@ -405,7 +405,7 @@ function deleteStaff(buttonElement, managerMail) {
   // risalgo alla email del giocatore dal titolo della card
   var email = buttonElement.parentNode.querySelector('.card-title').innerText;
   $.ajax({
-    url: window.location.hostname + '/profile/myteam-helper.php?action=delete-staff',
+    url:  '/profile/myteam-helper.php?action=delete-staff',
     method: 'POST',
     data: {
       email: email,

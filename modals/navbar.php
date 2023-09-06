@@ -15,13 +15,12 @@ if (isset($_COOKIE['email'])) {
     $_SESSION["person"] = serialize($person);
 
     // Verifica se l'account è stato attivato
-    if (!$_SESSION['attivato']) {
+    if (!isset($_SESSION['attivato']) || $_SESSION['attivato'] !== true) {
         if ($user['verificato'] == 1) {
             $_SESSION['attivato'] = true;
-        }
-        else{
+        } else {
             header("Location: /modals/suggest.php");
-        exit;
+            exit;
         }
     }
 }
