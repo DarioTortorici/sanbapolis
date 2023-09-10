@@ -125,15 +125,9 @@ INSERT INTO telecamere(id, indirizzo_ipv4, indirizzo_ipv6) VALUES (1, '127.0.0.1
 INSERT INTO telecamere(id, indirizzo_ipv4, indirizzo_ipv6) VALUES (2, '127.0.0.2', NULL);
 INSERT INTO telecamere(id, indirizzo_ipv4, indirizzo_ipv6) VALUES (3, '127.0.0.3', NULL);
 
-<<<<<<< HEAD
 INSERT INTO calendar_events (id, start, end, startTime, endTime, startRecur, endRecur, title, url) VALUES
-(1, '2023-08-14 10:00:00', '2023-08-14 11:00:00', '10:00:00', '11:00:00', '2023-08-14', '2023-08-15', 'Allenamento 10 Basket', 'http://localhost/editing_video/editing/video_manager.php?operation=select_video&id=1'),
-(2, '2023-08-14 10:00:00', '2023-08-14 11:00:00', '14:00:00', '15:00:00', '2023-08-14', '2023-08-15', 'Allenamento 15 Pallavolo', 'http://localhost/editing_video/editing/video_manager.php?operation=select_video&id=2');
-=======
-INSERT INTO `calendar_events` (`id`, `start`, `end`, `startTime`, `endTime`, `startRecur`, `endRecur`, `title`, `url`) VALUES
 (1, '2023-08-14 10:00:00', '2023-08-14 11:00:00', '10:00:00', '11:00:00', '2023-08-14', '2023-08-15', 'Allenamento 10 Basket','../editing/editing_video.php?video=./storage_video/basket_test_1.mp4'),
 (2, '2023-08-14 10:00:00', '2023-08-14 11:00:00', '14:00:00', '15:00:00', '2023-08-14', '2023-08-15', 'Allenamento 15 Pallavolo', '../editing/editing_video.php?video=./storage_video/volley_test_1.mp4' );
->>>>>>> 6b4c99f73938284b00949c1fa08cf43362738aea
 
 INSERT INTO prenotazioni(id, autore_prenotazione, data_ora_inizio, data_ora_fine, id_squadra, id_calendar_events, nota) VALUES 
 (1, 'vincenzo.italiano@gmail.com', '2023-08-14 10:00:00', '2023-08-14 12:00:00', 1, 1, 'Evento di prova'),
@@ -205,5 +199,7 @@ INSERT INTO allenamenti_giocatori(id_allenamento, giocatore, tag_giocatore) VALU
 (1, 'arcangelo.milanesi@gmail.com', 4),
 (1, 'emmanuele.cremonesi@gmail.com', 5),
 (1, 'lorenzo.agenore@gmail.com', 6);
+
+INSERT INTO buckets_influxdb(locazione, nome, token, squadra) VALUES ('http://localhost:8086', 'test', 'UtctBnnDWVHAmkT3VK2pCOnL362JD2w0OQ8ASOwOUOd9DH_wRc6RUzKayJvXmhfrgeREdAXFAUkYi4fxX3mUhg==', 1);
 
 COMMIT;

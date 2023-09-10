@@ -22,9 +22,12 @@ $database = 'get-started';
 $bucket = 'get-started';
 $url = "$INFLUX_HOST/api/v2/write?org=$INFLUX_ORG&bucket=$bucket&precision=s";
 
-$query = "ins,room=Living\ Room temp=21.1,hum=35.9,co=0i 1641024000\nins,room=Kitchen temp=21.0,hum=35.9,co=0i 1641024000\nins,room=Living\ Room temp=21.4,hum=35.9,co=0i 1641027600";
+$query = "test1,room=Living\ Room temp=21.1,hum=35.9,co=0i 1641024000\nins,room=Kitchen temp=21.0,hum=35.9,co=0i 1641024000\nins,room=Living\ Room temp=21.4,hum=35.9,co=0i 1641027600";
+$query .= "\ntest2,room=Living\ Room temp=21.1,hum=35.9,co=0i 1641024000\nins,room=Kitchen temp=21.0,hum=35.9,co=0i 1641024000\nins,room=Living\ Room temp=21.4,hum=35.9,co=0i 1641027600";
 //ora devo occuparmi di creare la query
+//per inserire più points devo concatenare con \n
 
+echo $query;
 
 $header = [
     "Authorization: Token $INFLUX_TOKEN",

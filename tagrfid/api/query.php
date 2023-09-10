@@ -1,4 +1,6 @@
 <?php
+/*LA PAGINA FUNGE SIA DA READ, SIA DA UPDATE POICHè IL TUTTO DIPENDE DAL TESTO DELLA QUERY */
+
 include '../php/Curl.php';
 
 //ad oggi la pagina read funziona solo con la get
