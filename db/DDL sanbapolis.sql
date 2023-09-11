@@ -414,7 +414,10 @@ CREATE TABLE telecamere_video (
 CREATE TABLE buckets_influxdb(
 	locazione VARCHAR(255) NOT NULL,
 	nome VARCHAR(64)  NOT NULL,
-	token VARCHAR(100)  NOT NULL,
+	token VARCHAR(255)  NOT NULL,
+	org VARCHAR(255)  NOT NULL,
+	db VARCHAR(255)  NOT NULL,
+
 	squadra INTEGER NOT NULL,
 
 	CONSTRAINT fk_squadra_bucket FOREIGN KEY (squadra) REFERENCES squadre(id) ON UPDATE CASCADE ON DELETE CASCADE,

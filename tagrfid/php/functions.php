@@ -1,10 +1,10 @@
 <?php
-require_once '../authentication/auth-helper.php';
-require_once '../classes/Person.php';
-require_once '../classes/Team.php';
-require_once '../classes/Session.php';
-require_once '../classes/Reservation.php';
-require_once '../classes/Bucket.php';
+require_once '../../authentication/auth-helper.php';
+require_once '../../classes/Person.php';
+require_once '../../classes/Team.php';
+require_once '../../classes/Session.php';
+require_once '../../classes/Reservation.php';
+require_once '../../classes/Bucket.php';
 
 use InfluxDB2\Point;
 
@@ -28,6 +28,18 @@ function myVarDump($obj, $messaggio = null){
     }
     var_dump($obj);
     echo "<br><br>";
+}
+
+/**
+ * Legge il parametro della $_GET['precision'] il valore passato come precisione del timing per il db
+ * se non è specificato restituisce null
+ * @return string|null la precisione se valida, null altrimenti
+ */
+function getPrecision(){
+	if(isset($_GET['precision'])){
+		$precision = ( ($_GET['precision'] == 's') || ($_GET['precision'] = 'ms') || ($_GET['precision'] = 'ns') ) ? $_GET['precision'] : null;	
+	}
+	return $precision;
 }
 
 /**
@@ -189,7 +201,9 @@ function getBucketFromTeam($pdo, $team){
                 $name = $publisher['nome'];
                 $token = $publisher['token'];
                 $id_team = $publisher['squadra'];
-                $bucket = new Bucket($url, $name, $token, $id_team);
+                $org = $publisher['org'];
+                $db = $publisher['db'];
+                $bucket = new Bucket($url, $name, $token, $id_team, $org, $db);
             } catch (Exception $e) {
                 echo 'Eccezione: ',  $e->getMessage(), "\n";
             }

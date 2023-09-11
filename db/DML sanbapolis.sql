@@ -200,6 +200,7 @@ INSERT INTO allenamenti_giocatori(id_allenamento, giocatore, tag_giocatore) VALU
 (1, 'emmanuele.cremonesi@gmail.com', 5),
 (1, 'lorenzo.agenore@gmail.com', 6);
 
-INSERT INTO buckets_influxdb(locazione, nome, token, squadra) VALUES ('http://localhost:8086', 'test', 'UtctBnnDWVHAmkT3VK2pCOnL362JD2w0OQ8ASOwOUOd9DH_wRc6RUzKayJvXmhfrgeREdAXFAUkYi4fxX3mUhg==', 1);
+INSERT INTO buckets_influxdb(locazione, nome, token, squadra, org, db) VALUES 
+('http://localhost:8086', 'get-started', 'UtctBnnDWVHAmkT3VK2pCOnL362JD2w0OQ8ASOwOUOd9DH_wRc6RUzKayJvXmhfrgeREdAXFAUkYi4fxX3mUhg==', 1, 'sanbapolis', 'get-started');
 
 COMMIT;

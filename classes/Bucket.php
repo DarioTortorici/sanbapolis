@@ -5,15 +5,18 @@ class Bucket{
     private $name;
     private $token;
     private $team;
+    private $org;
+    private $db;
 
-    function __construct($url, $name, $token, $team){
+    function __construct($url, $name, $token, $team, $org, $db){
         $this->url = $url;
         $this->name = $name;
         $this->token = $token;
         $this->team = $team;
+        $this->org = $org;
+        $this->db = $db;
     }
 
-    
     /**
      * Get the value of url
      */
@@ -82,6 +85,42 @@ class Bucket{
     public function setTeam($team): self
     {
         $this->team = $team;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of org
+     */
+    public function getOrg()
+    {
+        return $this->org;
+    }
+
+    /**
+     * Set the value of org
+     */
+    public function setOrg($org): self
+    {
+        $this->org = $org;
+
+        return $this;
+    }
+
+    /**
+     * Get the value of db
+     */
+    public function getDb()
+    {
+        return $this->db;
+    }
+
+    /**
+     * Set the value of db
+     */
+    public function setDb($db): self
+    {
+        $this->db = $db;
 
         return $this;
     }

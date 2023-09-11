@@ -2,42 +2,45 @@
 include '../php/Curl.php';
 include '../php/functions.php';
 
-/*
-curl --request POST \
-"$INFLUX_HOST/api/v2/write?org=$INFLUX_ORG&bucket=get-started&precision=s" \
-  --header "Authorization: Token $INFLUX_TOKEN" \
-  --header "Content-Type: text/plain; charset=utf-8" \
-  --header "Accept: application/json" \
-  --data-binary "
-home,room=Living\ Room temp=21.1,hum=35.9,co=0i 1641024000
-home,room=Kitchen temp=21.0,hum=35.9,co=0i 1641024000
-home,room=Living\ Room temp=21.4,hum=35.9,co=0i 1641027600
-*/
+$pdo = get_connection();
 
-$INFLUX_HOST = "http://localhost:8086";
-$INFLUX_ORG = "sanbapolis";
-$INFLUX_TOKEN = "UtctBnnDWVHAmkT3VK2pCOnL362JD2w0OQ8ASOwOUOd9DH_wRc6RUzKayJvXmhfrgeREdAXFAUkYi4fxX3mUhg==";
+//verifico le credenziali
+$message = array();
+$message['success'] = false;
+if(isset($_GET['session'])){
+    $session_id = intval($_GET['session']);
+    if(isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW'])){
+        $email = $_SERVER['PHP_AUTH_USER'];
+        $password = $_SERVER['PHP_AUTH_PW'];
+        $logged = loginApi($pdo, $email, $password);
+        if($logged){
+            $bucket = getBucketFromSession($pdo, $session_id);
+            if(!($bucket instanceof Bucket)){
+                $message['error'] = $bucket['error'];
+            }else{$message['success'] = true;}
+        } else{$message['error'] = 'wrong credentials';}
+    } else{$message['error'] = 'missing credentials';}
+} else{$message['error'] = 'missing session number';}
 
-$database = 'get-started';
-$bucket = 'get-started';
-$url = "$INFLUX_HOST/api/v2/write?org=$INFLUX_ORG&bucket=$bucket&precision=s";
+if($message['success']){//nel caso che il processo di login sia andato a buon fine
+	$precision = (getPrecision() == null) ? 'ns' : getPrecision();//se il formato di precision non è valido, imposta quello di defalut di influxdb
+	$url = "{$bucket->getUrl()}/api/v2/write?org={$bucket->getOrg()}&bucket={$bucket->getName()}&precision=ns";
 
-$query = "test1,room=Living\ Room temp=21.1,hum=35.9,co=0i 1641024000\nins,room=Kitchen temp=21.0,hum=35.9,co=0i 1641024000\nins,room=Living\ Room temp=21.4,hum=35.9,co=0i 1641027600";
-$query .= "\ntest2,room=Living\ Room temp=21.1,hum=35.9,co=0i 1641024000\nins,room=Kitchen temp=21.0,hum=35.9,co=0i 1641024000\nins,room=Living\ Room temp=21.4,hum=35.9,co=0i 1641027600";
-//ora devo occuparmi di creare la query
-//per inserire più points devo concatenare con \n
+	$query = "test1,room=Living\ Room temp=21.1,hum=35.9,co=0i 1641024000\nins,room=Kitchen temp=21.0,hum=35.9,co=0i 1641024000\nins,room=Living\ Room temp=21.4,hum=35.9,co=0i 1641027600";
+	$query .= "\ntest2,room=Living\ Room temp=21.1,hum=35.9,co=0i 1641024000\nins,room=Kitchen temp=21.0,hum=35.9,co=0i 1641024000\nins,room=Living\ Room temp=21.4,hum=35.9,co=0i 1641027600";
+	//ora devo occuparmi di creare la query
+	//per inserire più points devo concatenare con \n
+	
+	$header = [//header della get
+		"Authorization: Token {$bucket->getToken()}",
+		"Content-Type: text/plain; charset=utf-8",
+		"Accept: application/json"
+	];
 
-echo $query;
+	$curl = new Curl($url, $header, $query, POST);
+	$result = $curl->execCurl();
 
-$header = [
-    "Authorization: Token $INFLUX_TOKEN",
-    "Content-Type: text/plain; charset=utf-8",
-    "Accept: application/json"
-];//header della get
-
-
-
-$curl = new Curl($url, $header, $query, POST);
-$result = $curl->execCurl();
-
-echo $result;
+	echo $result;
+} else{
+	echo json_encode($message);
+}

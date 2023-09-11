@@ -31,7 +31,5 @@ if(isset($_GET['session'])){
     } else{$message['error'] = 'missing credentials';}
 } else{$message['error'] = 'missing session number';}
 
-echo json_encode($message);
-
 include ('../modals/footer.php');
 ?>
