@@ -5,6 +5,24 @@ include '../php/functions.php';
 
 $pdo = get_connection();
 
+//ad oggi la pagina read funziona solo con la get
+/*esempio di richietsa
+curl --get "$INFLUX_HOST/query?org=$INFLUX_ORG&bucket=get-started" \
+  --header "Authorization: Token $INFLUX_TOKEN" \
+  --data-urlencode "db=get-started" \
+  --data-urlencode "rp=autogen" \
+  --data-urlencode "q=SELECT co,hum,temp,room FROM home WHERE time >= '2022-01-01T08:00:00Z' AND time <= '2022-01-01T20:00:00Z'"
+*/
+/*
+$INFLUX_HOST = "http://localhost:8086";
+$INFLUX_ORG = "sanbapolis";
+$INFLUX_TOKEN = "UtctBnnDWVHAmkT3VK2pCOnL362JD2w0OQ8ASOwOUOd9DH_wRc6RUzKayJvXmhfrgeREdAXFAUkYi4fxX3mUhg==";
+$database = 'get-started';
+$bucket = 'get-started';
+*/
+
+
+
 //verifico le credenziali
 $message = array();
 $message['success'] = false;
@@ -26,17 +44,18 @@ if(isset($_GET['session'])){
 if($message['success']){
 	$url = "{$bucket->getUrl()}/query?org={$bucket->getOrg()}&bucket={$bucket->getName()}";
 
-	$query = file_get_contents('php://input');
-	if($query != ''){//DA VEDERE
-		$header = [//header della get
-			"Authorization: Token {$bucket->getToken()}",
-			"Content-Type: application/vnd.flux; charset=utf-8",
-			"Accept: application/csv"
-		];		
+	if(isset($_GET['query'])){
+		$query = $_GET['query'];//query da inoltrare alle api di influxdb 
+		$header = ["Authorization: Token {$bucket->getToken()}"];//header della get
+		$params = array(//parametri della get
+			'db' => $bucket->getDb(),
+			'rp' => 'autogen',
+			'q' => $query
+		);
 		
-		$curl = new Curl($url, $header, $query, POST);//inoltro la richiesta alle api di influxdb
+		$curl = new Curl($url, $header, $params, GET);//inoltro la richiesta alle api di influxdb
 		$result = $curl->execCurl();
-		
+
 		$message['results'] = $result;
 		echo json_encode($message);
 	}
@@ -48,4 +67,5 @@ if($message['success']){
 } else {
 	echo json_encode($message);
 }
+
 ?>

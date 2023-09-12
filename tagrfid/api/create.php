@@ -1,4 +1,7 @@
 <?php
+use InfluxDB2\Point;
+include '../vendor/autoload.php';
+
 include '../php/Curl.php';
 include '../php/functions.php';
 
@@ -26,11 +29,23 @@ if($message['success']){//nel caso che il processo di login sia andato a buon fi
 	$precision = (getPrecision() == null) ? 'ns' : getPrecision();//se il formato di precision non è valido, imposta quello di defalut di influxdb
 	$url = "{$bucket->getUrl()}/api/v2/write?org={$bucket->getOrg()}&bucket={$bucket->getName()}&precision=ns";
 
-	$query = "test1,room=Living\ Room temp=21.1,hum=35.9,co=0i 1641024000\nins,room=Kitchen temp=21.0,hum=35.9,co=0i 1641024000\nins,room=Living\ Room temp=21.4,hum=35.9,co=0i 1641027600";
-	$query .= "\ntest2,room=Living\ Room temp=21.1,hum=35.9,co=0i 1641024000\nins,room=Kitchen temp=21.0,hum=35.9,co=0i 1641024000\nins,room=Living\ Room temp=21.4,hum=35.9,co=0i 1641027600";
-	//ora devo occuparmi di creare la query
-	//per inserire più points devo concatenare con \n
-	
+	if(isset($_POST['filename'])){
+		if(isset($_POST['measurment'])){
+			$filename = $_POST['filename'];
+			$measurment = $_POST['measurment'];
+
+			$points = getPointsFromCsv($measurment, $session_id, "../csv/$filename");
+			$query = "";
+			foreach($points as $el){
+				$query .= $el->toLineProtocol() . "\n";
+				//echo $el->toLineProtocol() . "<br>";
+			}
+		} else {$message['error'] = 'missing measurment name';}
+	} else {$message['error'] = 'missing filename';}
+
+	$f = fopen("C:/Users/ale/Desktop/tmp.txt", "w");
+	//fwrite($f, $query);
+
 	$header = [//header della get
 		"Authorization: Token {$bucket->getToken()}",
 		"Content-Type: text/plain; charset=utf-8",

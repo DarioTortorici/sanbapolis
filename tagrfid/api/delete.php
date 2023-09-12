@@ -18,11 +18,6 @@ curl --request POST https://us-west-2-1.aws.cloud2.influxdata.com/api/v2/delete?
   }'
 
 */
-/*$INFLUX_HOST = "http://localhost:8086";
-$INFLUX_ORG = "sanbapolis";
-$INFLUX_TOKEN = "UtctBnnDWVHAmkT3VK2pCOnL362JD2w0OQ8ASOwOUOd9DH_wRc6RUzKayJvXmhfrgeREdAXFAUkYi4fxX3mUhg==";
-$database = 'get-started';
-$bucket = 'get-started';*/
 
 //verifico le credenziali
 $message = array();

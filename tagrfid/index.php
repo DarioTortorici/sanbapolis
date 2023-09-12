@@ -1,10 +1,8 @@
 <?php
+use InfluxDB2\Point;
+include './vendor/autoload.php';
+
 include ('../modals/header.php');
-
-include './php/Curl.php';
-include './php/functions.php';
-
-$pdo = get_connection();
 ?>
 
 <div>
@@ -14,22 +12,34 @@ $pdo = get_connection();
 </div>
 
 <?php
-$message = array();
-$message['success'] = false;
-if(isset($_GET['session'])){
-    $session_id = intval($_GET['session']);
-    if(isset($_SERVER['PHP_AUTH_USER']) && isset($_SERVER['PHP_AUTH_PW'])){
-        $email = $_SERVER['PHP_AUTH_USER'];
-        $password = $_SERVER['PHP_AUTH_PW'];
-        $logged = loginApi($pdo, $email, $password);
-        if($logged){
-            $bucket = getBucketFromSession($pdo, $session_id);
-            if(!($bucket instanceof Bucket)){
-                $message['error'] = $bucket['error'];
-            }else{$message['success'] = true;}
-        } else{$message['error'] = 'wrong credentials';}
-    } else{$message['error'] = 'missing credentials';}
-} else{$message['error'] = 'missing session number';}
+    $path_csv = './csv/example.csv';
+    $measurment_name = 'sanba';
+    $session_number = 1;
+
+    $points = null;
+    $file = fopen($path_csv, 'r');
+    if ($file != false){
+        $points = array();
+        $columns = fgetcsv($file);
+        while (($buffer = fgetcsv($file)) !== false) {
+            
+            $point = new Point($measurment_name);
+
+            $point->addTag($columns[1], $buffer[1]);
+            $point->addTag("session", $session_number);//numero della sessione di registrazione
+            
+            $point->addField($columns[3], $buffer[3]);
+            $point->addField($columns[4], $buffer[4]);
+            $point->addField($columns[5], $buffer[5]);
+
+            $point->time(strtotime($buffer[2]));//converto la data in timestamp prima di inserirla in $point
+
+            $points[] = $point;
+        }
+    }
+    fclose($file);
+
+
 
 include ('../modals/footer.php');
 ?>

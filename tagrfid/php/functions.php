@@ -237,3 +237,37 @@ function getBucketFromSession($pdo, $session_id){
 
     return $message;
 }
+
+/**
+ * la funzione legge il file csv specificato e restituisce un array di istranze della classe Point
+ * che rappresentano le righe del file csv
+ * @param string $measurment_name il nome della misura che si andrà a salvare 
+ * @param string $path_csv il percorso al file csv cercato
+ * @param integer $session_number il numero della sessione di registrazione
+ * @return array $points l'array di Point che rappresentano le linee del csv; ritorna null il caso di errori
+ */
+function getPointsFromCsv($measurment_name, $session_number, $path_csv){
+    $points = null;
+    $file = fopen($path_csv, 'r');
+    if ($file != false){
+        $points = array();
+
+        $columns = fgetcsv($file);
+        while (($buffer = fgetcsv($file)) !== false) {    
+            $point = new Point($measurment_name);
+
+            $point->addTag($columns[1], $buffer[1]);
+            $point->addTag("session", $session_number);//numero della sessione di registrazione
+            
+            $point->addField($columns[3], $buffer[3]);
+            $point->addField($columns[4], $buffer[4]);
+            $point->addField($columns[5], $buffer[5]);
+
+            //$point->time(strtotime($buffer[2]));//converto la data in timestamp prima di inserirla in $point
+
+            $points[] = $point;
+        }
+    }
+    fclose($file);
+    return $points;
+}
