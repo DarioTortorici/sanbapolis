@@ -44,13 +44,13 @@ if($message['success']){//nel caso che il processo di login sia andato a buon fi
 			foreach($points as $el){
 				$query .= $el->toLineProtocol() . "\n";
 			}
+			
+			$curl = new Curl($url, $header, $query, POST);
+			$result = $curl->execCurl();
+			echo $result;
 		} else {$message['error'] = 'missing measurment name';}
 	} else {$message['error'] = 'missing filename';}
 
-	$curl = new Curl($url, $header, $query, POST);
-	$result = $curl->execCurl();
-
-	echo $result;
 } else{
 	echo json_encode($message);
 }
