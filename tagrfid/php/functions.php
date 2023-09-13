@@ -33,11 +33,11 @@ function myVarDump($obj, $messaggio = null){
 /**
  * Legge il parametro della $_GET['precision'] il valore passato come precisione del timing per il db
  * se non è specificato restituisce null
- * @return string|null la precisione se valida, null altrimenti
+ * @return string la precisione se valida, 'ns' altrimenti (la precisione di default di influxdb)
  */
 function getPrecision(){
 	if(isset($_GET['precision'])){
-		$precision = ( ($_GET['precision'] == 's') || ($_GET['precision'] = 'ms') || ($_GET['precision'] = 'ns') ) ? $_GET['precision'] : null;	
+		$precision = ( ($_GET['precision'] == 's') || ($_GET['precision'] = 'ms') || ($_GET['precision'] = 'ns') ) ? $_GET['precision'] : 'ns';
 	}
 	return $precision;
 }
@@ -263,7 +263,8 @@ function getPointsFromCsv($measurment_name, $session_number, $path_csv){
             $point->addField($columns[4], $buffer[4]);
             $point->addField($columns[5], $buffer[5]);
 
-            //$point->time(strtotime($buffer[2]));//converto la data in timestamp prima di inserirla in $point
+            $point->time(strtotime($buffer[2]));//converto la data in timestamp prima di inserirla in $point
+            //$point->time($buffer[2]);
 
             $points[] = $point;
         }

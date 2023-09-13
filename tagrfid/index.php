@@ -12,34 +12,18 @@ include ('../modals/header.php');
 </div>
 
 <?php
-    $path_csv = './csv/example.csv';
-    $measurment_name = 'sanba';
-    $session_number = 1;
 
-    $points = null;
-    $file = fopen($path_csv, 'r');
-    if ($file != false){
-        $points = array();
-        $columns = fgetcsv($file);
-        while (($buffer = fgetcsv($file)) !== false) {
-            
-            $point = new Point($measurment_name);
+$f = fopen("C:/Users/ale/Desktop/data.json","r");
+$s = fread($f, filesize("C:/Users/ale/Desktop/data.json"));
+$ris = json_decode($s, true);
+$data = json_decode($ris['results'], true);
+$data = $data['results'];
+$data = $data[0];
+$data = $data['series'];
 
-            $point->addTag($columns[1], $buffer[1]);
-            $point->addTag("session", $session_number);//numero della sessione di registrazione
-            
-            $point->addField($columns[3], $buffer[3]);
-            $point->addField($columns[4], $buffer[4]);
-            $point->addField($columns[5], $buffer[5]);
-
-            $point->time(strtotime($buffer[2]));//converto la data in timestamp prima di inserirla in $point
-
-            $points[] = $point;
-        }
-    }
-    fclose($file);
-
-
+foreach($data as $el){
+    var_dump($el);
+}
 
 include ('../modals/footer.php');
 ?>

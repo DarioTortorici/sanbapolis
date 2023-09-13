@@ -40,9 +40,7 @@ if(isset($_GET['session'])){
 if($message['success']){
 	$url = "{$bucket->getUrl()}/api/v2/delete?org={$bucket->getOrg()}&bucket={$bucket->getName()}";
 	
-	$query = '{"start": "2022-01-19T00:16:01.059Z", "stop": "2022-01-19T00:16:01.059Z", "predicate": "_measurement=\"test2\""}';
-	//dovrebbe funzionare perchè non da errore, ma non elimina il valore nel db
-	//forse sbglio a specificare la data
+	$query = file_get_contents('php://input');//esteaggo il body della richiesta
 
 	$header = [//header della get
 		"Authorization: Token {$bucket->getToken()}",

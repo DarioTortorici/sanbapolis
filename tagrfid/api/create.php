@@ -26,8 +26,13 @@ if(isset($_GET['session'])){
 } else{$message['error'] = 'missing session number';}
 
 if($message['success']){//nel caso che il processo di login sia andato a buon fine
-	$precision = (getPrecision() == null) ? 'ns' : getPrecision();//se il formato di precision non è valido, imposta quello di defalut di influxdb
-	$url = "{$bucket->getUrl()}/api/v2/write?org={$bucket->getOrg()}&bucket={$bucket->getName()}&precision=ns";
+	$precision = getPrecision();
+	$url = "{$bucket->getUrl()}/api/v2/write?org={$bucket->getOrg()}&bucket={$bucket->getName()}&precision=$precision";
+	$header = [//header della get
+		"Authorization: Token {$bucket->getToken()}",
+		"Content-Type: text/plain; charset=utf-8",
+		"Accept: application/json"
+	];
 
 	if(isset($_POST['filename'])){
 		if(isset($_POST['measurment'])){
@@ -38,19 +43,9 @@ if($message['success']){//nel caso che il processo di login sia andato a buon fi
 			$query = "";
 			foreach($points as $el){
 				$query .= $el->toLineProtocol() . "\n";
-				//echo $el->toLineProtocol() . "<br>";
 			}
 		} else {$message['error'] = 'missing measurment name';}
 	} else {$message['error'] = 'missing filename';}
-
-	$f = fopen("C:/Users/ale/Desktop/tmp.txt", "w");
-	//fwrite($f, $query);
-
-	$header = [//header della get
-		"Authorization: Token {$bucket->getToken()}",
-		"Content-Type: text/plain; charset=utf-8",
-		"Accept: application/json"
-	];
 
 	$curl = new Curl($url, $header, $query, POST);
 	$result = $curl->execCurl();

@@ -21,8 +21,6 @@ $database = 'get-started';
 $bucket = 'get-started';
 */
 
-
-
 //verifico le credenziali
 $message = array();
 $message['success'] = false;

@@ -24,15 +24,16 @@ if(isset($_GET['session'])){
 } else {$message['error'] = 'missing session number';}
 
 if($message['success']){
-	$url = "{$bucket->getUrl()}/query?org={$bucket->getOrg()}&bucket={$bucket->getName()}";
+	$url = "{$bucket->getUrl()}/api/v2/query?org={$bucket->getOrg()}&bucket={$bucket->getName()}";
 
-	$query = file_get_contents('php://input');
-	if($query != ''){//DA VEDERE
+	$query = file_get_contents('php://input');//esteaggo il body della richiesta
+
+	if($query != ''){
 		$header = [//header della get
 			"Authorization: Token {$bucket->getToken()}",
-			"Content-Type: application/vnd.flux; charset=utf-8",
+			"Content-Type: application/vnd.flux",
 			"Accept: application/csv"
-		];		
+		];
 		
 		$curl = new Curl($url, $header, $query, POST);//inoltro la richiesta alle api di influxdb
 		$result = $curl->execCurl();
