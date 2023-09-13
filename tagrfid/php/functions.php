@@ -31,8 +31,8 @@ function myVarDump($obj, $messaggio = null){
 }
 
 /**
- * Legge il parametro della $_GET['precision'] il valore passato come precisione del timing per il db
- * se non è specificato restituisce null
+ * Legge il parametro della $_GET['precision'] il valore passato come precisione del timing per il db;
+ * se non è specificato restituisce il valore di default di influxdb
  * @return string la precisione se valida, 'ns' altrimenti (la precisione di default di influxdb)
  */
 function getPrecision(){
@@ -57,7 +57,7 @@ function getFileLines($path_file){
 }
 
 /**
- * Controlla che le credenziali inviate tramite Http Basic access authentication siano corrette
+ * Controlla che le credenziali specificate siano corrette
  * @param PDO $pdo La connessione al db
  * @param string $email
  * @param string $password
@@ -184,7 +184,7 @@ function getReservationFromId($pdo, $id){
 }
 
 /**
- * Restituisce un'stza della classe Bucket che rappresenta un bucket del database influxdb
+ * Restituisce un'istanzaza della classe Bucket che rappresenta un bucket del database influxdb
  * @param PDO La connessione al db
  * @param integer l'id della squadra specificata
  * @return Bucket il bucket cercato, altrimenti null
