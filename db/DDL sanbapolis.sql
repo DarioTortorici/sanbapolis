@@ -294,9 +294,10 @@ CREATE TABLE partite (
 	CONSTRAINT fk_prenotazione_partita FOREIGN KEY (prenotazione) REFERENCES prenotazioni(id) ON UPDATE CASCADE ON DELETE CASCADE,
 
 
-	UNIQUE(id_squadra_casa, /*id_squadra_trasferta,*/ data_ora_inizio),
+	/*UNIQUE(id_squadra_casa, data_ora_inizio),*/
+	UNIQUE (prenotazione),
+	
 	PRIMARY KEY (id)
-
 );
 
 CREATE TABLE allenamenti ( 
@@ -309,7 +310,8 @@ CREATE TABLE allenamenti (
 	CONSTRAINT fk_allenamento_squadra FOREIGN KEY (id_squadra) REFERENCES squadre(id) ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT fk_prenotazione_allenamento FOREIGN KEY (prenotazione) REFERENCES prenotazioni(id) ON UPDATE CASCADE ON DELETE CASCADE,
 
-	UNIQUE (id_squadra, data_ora_inizio),
+	/*UNIQUE (id_squadra, data_ora_inizio),*/
+	UNIQUE (prenotazione),
 	PRIMARY KEY(id)
 );
 

@@ -138,10 +138,10 @@ INSERT INTO sessioni_registrazione(id, autore, data_ora_inizio, data_ora_fine, p
 (2, 'vincenzo.italiano@gmail.com', '2023-08-14 14:00:00', '2023-08-14 16:00:00', 2);
 
 INSERT INTO video(locazione, nome, autore, nota, sessione, telecamera) VALUES 
-('video/basket_test_1.mp4', 'Test Basket', 'vincenzo.italiano@gmail.com', NULL, 1, 1),
-('video/volley_test_1.mp4', 'Test Volley', 'vincenzo.italiano@gmail.com', NULL, 2, 1),
-('video/test_inquadratura_1.mp4', 'Test Inquadratura 1', 'vincenzo.italiano@gmail.com', NULL, 1, 1),
-('video/test_inquadratura_2.mp4', 'Test Inquadratura 2', 'vincenzo.italiano@gmail.com', NULL, 1, 2);
+('storage_video/basket_test_1.mp4', 'Test Basket', 'vincenzo.italiano@gmail.com', NULL, 1, 1),
+('storage_video/volley_test_1.mp4', 'Test Volley', 'vincenzo.italiano@gmail.com', NULL, 2, 1),
+('storage_video/test_inquadratura_1.mp4', 'Test Inquadratura 1', 'vincenzo.italiano@gmail.com', NULL, 1, 1),
+('storage_video/test_inquadratura_2.mp4', 'Test Inquadratura 2', 'vincenzo.italiano@gmail.com', NULL, 1, 2);
 
 INSERT INTO partite (id_squadra_casa, /*id_squadra_trasferta,*/ data_ora_inizio, data_ora_fine, sport, prenotazione) VALUES
 (1, /*3,--vedi ddl*/ '2023-08-14 10:00:00', '2023-08-14 12:00:00', 'Basket', 1);
@@ -201,6 +201,7 @@ INSERT INTO allenamenti_giocatori(id_allenamento, giocatore, tag_giocatore) VALU
 (1, 'lorenzo.agenore@gmail.com', 6);
 
 INSERT INTO buckets_influxdb(locazione, nome, token, squadra, org, db) VALUES 
-('http://localhost:8086', 'get-started', 'UtctBnnDWVHAmkT3VK2pCOnL362JD2w0OQ8ASOwOUOd9DH_wRc6RUzKayJvXmhfrgeREdAXFAUkYi4fxX3mUhg==', 1, 'sanbapolis', 'get-started');
+/*('http://localhost:8086', 'get-started', 'UtctBnnDWVHAmkT3VK2pCOnL362JD2w0OQ8ASOwOUOd9DH_wRc6RUzKayJvXmhfrgeREdAXFAUkYi4fxX3mUhg==', 1, 'sanbapolis', 'get-started'); per versione in locale ale*/
+('http://istar.disi.unitn.it:8086', 'basket_club_trento_nord', '5eGQW5bKNtkZod2i53ziIpeb0r3Or_66XLc40keH4WP1t16bQy_yKZFnGHc_povSS3dYHwQXiNO-CRBcciq-Og==', 1, 'sanbapolis', 'basket_club_trento_nord');
 
 COMMIT;
