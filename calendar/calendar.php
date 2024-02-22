@@ -146,22 +146,18 @@ if (isset($actions[$userType])) {
                 <label for="camera-checkbox">Seleziona telecamere</label>
             </div>
             <div id="camera-options" style="display: none;">
-                <label>
-                    <input type="checkbox" name="camera[]" value="1">
-                    Camera 1
-                </label>
-                <label>
-                    <input type="checkbox" name="camera[]" value="2">
-                    Camera 2
-                </label>
-                <label>
-                    <input type="checkbox" name="camera[]" value="3">
-                    Camera 3
-                </label>
-                <label>
-                    <input type="checkbox" name="camera[]" value="4">
-                    Camera 4
-                </label>
+                <label> <input type="checkbox" name="camera[]" value="1"> Camera 1 </label>
+                <label> <input type="checkbox" name="camera[]" value="2"> Camera 2 </label>
+                <label> <input type="checkbox" name="camera[]" value="3"> Camera 3 </label>
+                <label> <input type="checkbox" name="camera[]" value="4"> Camera 4 </label>
+                <label> <input type="checkbox" name="camera[]" value="5"> Camera 5 </label>
+                <label> <input type="checkbox" name="camera[]" value="6"> Camera 6 </label>
+                <label> <input type="checkbox" name="camera[]" value="7"> Camera 7 </label>
+                <label> <input type="checkbox" name="camera[]" value="8"> Camera 8 </label>
+                <label> <input type="checkbox" name="camera[]" value="9"> Camera 9 </label>
+                <label> <input type="checkbox" name="camera[]" value="10"> Camera 10 </label>
+                <label> <input type="checkbox" name="camera[]" value="11"> Camera 11 </label>
+                <label> <input type="checkbox" name="camera[]" value="12"> Camera 12 </label>
             </div>
 
             <!-- Ripetizione settimanale -->
@@ -263,22 +259,18 @@ if (isset($actions[$userType])) {
         <p type="text" id="id-cams" style="display: none;"> id </p>
         <h2>Seleziona le telecamere da attivare:</h2>
         <form id="cameraForm">
-            <label>
-                <input type="checkbox" name="camera[]" value="1">
-                Camera 1
-            </label>
-            <label>
-                <input type="checkbox" name="camera[]" value="2">
-                Camera 2
-            </label>
-            <label>
-                <input type="checkbox" name="camera[]" value="3">
-                Camera 3
-            </label>
-            <label>
-                <input type="checkbox" name="camera[]" value="4">
-                Camera 4
-            </label>
+            <label> <input type="checkbox" name="camera[]" value="1"> Camera 1 </label>
+            <label> <input type="checkbox" name="camera[]" value="2"> Camera 2 </label>
+            <label> <input type="checkbox" name="camera[]" value="3"> Camera 3 </label>
+            <label> <input type="checkbox" name="camera[]" value="4"> Camera 4 </label>
+            <label> <input type="checkbox" name="camera[]" value="5"> Camera 5 </label>
+            <label> <input type="checkbox" name="camera[]" value="6"> Camera 6 </label>
+            <label> <input type="checkbox" name="camera[]" value="7"> Camera 7 </label>
+            <label> <input type="checkbox" name="camera[]" value="8"> Camera 8 </label>
+            <label> <input type="checkbox" name="camera[]" value="9"> Camera 9 </label>
+            <label> <input type="checkbox" name="camera[]" value="10"> Camera 10 </label>
+            <label> <input type="checkbox" name="camera[]" value="11"> Camera 11 </label>
+            <label> <input type="checkbox" name="camera[]" value="12"> Camera 12 </label>
             <button type="submit" onclick="saveCameras()">Attiva</button>
         </form>
     </div>
