@@ -25,6 +25,13 @@ $video_ids = [
 
 $date = date('Y-m-d', time());
 $hour = date('H:i:s', time());
+
+// Aggiusto l'orario (commenta le due righe sotto se stai provando in local)
+$hour_fixed = strtotime($hour) + 60*60;
+$hour = date('H:i:s', $hour_fixed);
+
+$complete_date = $date . " " . $hour;
+
 ?>
 
 <style>
@@ -65,12 +72,19 @@ $hour = date('H:i:s', time());
         // Ottengo i secondi precisi in cui devo far iniziare lo streaming (&start=)
         // Dovrei fare la sottrazione dell'ora corrente con l'ora di inizio, e convertirla in secondi
         // (controllo che non ecceda l'ora di fine)
-        $start_streaming_time = $curr_date_data[0]->startTime;
-        $end_streaming_time = $curr_date_data[0]->endTime;
-        $curr_time_to_start = curStreamingStart($start_streaming_time, $hour, $end_streaming_time);
+        $start_streaming_time_complete = $curr_date_data[0]->startRecur . " " . $curr_date_data[0]->startTime;
+        $end_streaming_time_complete = $curr_date_data[0]->endRecur . " " . $curr_date_data[0]->endTime;
+
+        $data_inizio = new DateTime($start_streaming_time_complete);
+        $data_corrente = new DateTime($complete_date);
+        $data_fine = new DateTime($end_streaming_time_complete);
+
+        $start_at = curStreamingStart($data_inizio, $data_corrente, $data_fine);
+
+        echo $start_at;
 
         // Controllo se sono fuori range di tempo.
-        if (isset($curr_time_to_start) && $curr_time_to_start !== '') {
+        if (isset($start_at) && $start_at !== '') {
 
           // Ottengo le telecamere dell'evento corrente
           $curr_cameras_data = json_decode(getCameras($curr_date_data[0]->id));
@@ -79,7 +93,7 @@ $hour = date('H:i:s', time());
           for ($x = 0; $x < count($curr_cameras_data); $x++) {
             echo '<div class="video-item">';
             echo '<div class="video-title">Camera ' . $curr_cameras_data[$x]->telecamera . '</div>';
-            echo '<iframe width="560" height="315" src="https://www.youtube.com/embed/' . $video_ids[0] . $curr_time_to_start .'&autoplay=1" frameborder="0" allowfullscreen></iframe>';
+            echo '<iframe width="560" height="315" src="https://www.youtube.com/embed/' . $video_ids[0] . $start_at .'&autoplay=1" frameborder="0" allowfullscreen></iframe>';
             echo '</div>';
           }
         }

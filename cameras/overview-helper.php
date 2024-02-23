@@ -18,7 +18,7 @@ function getCurrentEvent($date,$hour)
     $con = get_connection();
 
     try {
-        $query = "SELECT id, startRecur, startTime, endTime FROM calendar_events WHERE startRecur = :startRecur AND startTime <= :curhour AND endTime > :curhour limit 1";
+        $query = "SELECT id, startRecur, endRecur, startTime, endTime FROM calendar_events WHERE startRecur = :startRecur AND startTime <= :curhour AND endTime > :curhour limit 1";
         $statement = $con->prepare($query);
         $statement->bindParam(':startRecur', $date);
         $statement->bindParam(':curhour', $hour);
@@ -73,11 +73,11 @@ function getCameras($id)
  * @param string $curr_streaming_time Indica l'orario corrente con cui ho iniziato a vedere la stream
  * @param string $end_streaming_time Indica l'orario di fine
  */
-function curStreamingStart($start_streaming_time, $curr_streaming_time, $end_streaming_time)
+function curStreamingStart($data_inizio, $data_corrente, $data_fine)
 {
-    $start = strtotime($start_streaming_time);
-    $curr = strtotime($curr_streaming_time);
-    $end = strtotime($end_streaming_time);
+    $start = $data_inizio->getTimestamp();
+    $curr = $data_corrente->getTimestamp();
+    $end = $data_fine->getTimestamp();
 
     // Controllo se lo stream è già iniziato e se sono in range
     if (($curr >= $start) && ($curr < $end)) {
