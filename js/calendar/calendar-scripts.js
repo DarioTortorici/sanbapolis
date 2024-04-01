@@ -587,7 +587,7 @@ function toggleWeeklyRepeat(checkbox) {
  * @param {HTMLElement} checkbox - L'elemento della casella di controllo che attiva la scelta delle telecamere.
 */
 function toggleCameraOptions(checkbox) {
-    var cameraOptions = document.getElementById("camera-options");
+    var cameraOptions = document.getElementById("map_container");
     if (checkbox.checked) {
         cameraOptions.style.display = "block";
     } else {

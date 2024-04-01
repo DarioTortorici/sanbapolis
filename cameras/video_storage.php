@@ -13,21 +13,53 @@ if (!isset($_COOKIE['email'])) {
   exit();
 }
 
-if ($user['userType'] == "allenatore") {
-    // Chiamata alla funzione JavaScript per il calendario degli allenatori
+$userType = $user['userType']; // Ottenere il tipo di utente dalla variabile $user['userType']
+
+// Impostazioni predefinite
+$delete = false;
+$modify = false;
+$add = false;
+
+// Mappa il tipo di utente alle azioni e alla chiamata JavaScript
+$actions = array(
+    'allenatore' => array(
+        'fetchFunction' => 'fetchCoachEvents',
+        'args' => '"' . $user['email'] . '"',
+        'add' => true,
+        'delete'=> true,
+    ),
+    'società' => array(
+        'fetchFunction' => 'fetchSocietyEvents',
+        'args' => '"' . $user['email'] . '"',
+        'add' => true,
+        'delete'=> true,
+    ),
+    'manutentore' => array(
+        'fetchFunction' => 'fetchEvents',
+        'args' => '',
+        'modify' => true,
+        'add' => true,
+        'delete'=> true,
+    ),
+    'tifoso' => array(
+        'args' => '',
+        'fetchFunction' => 'fetchMatches',
+    ),
+    // Tipo di utente non gestito
+    'altro' => array(
+        'fetchFunction' => 'fetchMatches',
+    ),
+);
+
+if (isset($actions[$userType])) {
+    $action = $actions[$userType];
     echo '<script>';
-    echo 'fetchCoachEvents("' . $user['email'] . '");';
+    echo $action['fetchFunction'] . '(' . $action['args'] . ');';
     echo '</script>';
-} elseif ($user['userType'] == "manutentore") {
-    // Chiamata alla funzione JavaScript per il calendario dei manutentori
-    echo '<script>';
-    echo 'fetchEvents();';
-    echo '</script>';
-} else {
-    // Chiamata alla funzione JavaScript per il calendario generale
-    echo '<script>';
-    echo 'fetchMatches();';
-    echo '</script>';
+
+    $delete = isset($action['delete']) ? $action['delete'] : $delete;
+    $modify = isset($action['modify']) ? $action['modify'] : $modify;
+    $add = isset($action['add']) ? $action['add'] : $add;
 }
 ?>
 

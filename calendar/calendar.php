@@ -145,6 +145,8 @@ if (isset($actions[$userType])) {
                 <input type="checkbox" id="camera-checkbox" name="camera-checkbox" onchange="toggleCameraOptions(this)" />
                 <label for="camera-checkbox">Seleziona telecamere</label>
             </div>
+
+            <!-- Per comodità, questo dovrà rimanere nascosto-->
             <div id="camera-options" style="display: none;">
                 <label> <input type="checkbox" name="camera[]" value="1"> Camera 1 </label>
                 <label> <input type="checkbox" name="camera[]" value="2"> Camera 2 </label>
@@ -158,6 +160,134 @@ if (isset($actions[$userType])) {
                 <label> <input type="checkbox" name="camera[]" value="10"> Camera 10 </label>
                 <label> <input type="checkbox" name="camera[]" value="11"> Camera 11 </label>
                 <label> <input type="checkbox" name="camera[]" value="12"> Camera 12 </label>
+            </div>
+
+            <!-- Mappa per la scelta delle telecamere -->
+            <div id="map_container" style="position: relative; display: none;">
+                <img src="/assets/images/basketball-court-floor.png" usemap="#camera_map" width="100%"/>
+                <div class="circle" style="top: 23px; left: 48px; pointer-events: none;"></div>     <!-- 1 -->
+                <div class="circle" style="top: 168px; left: 48px; pointer-events: none;"></div>    <!-- 2 -->
+                <div class="circle" style="top: 315px; left: 48px; pointer-events: none;"></div>    <!-- 3 -->
+
+                <div class="circle" style="top: 23px; left: 196px; pointer-events: none;"></div>     <!-- 4 -->
+                <div class="circle" style="top: 169px; left: 196px; pointer-events: none;"></div>    <!-- 5 -->
+                <div class="circle" style="top: 315px; left: 196px; pointer-events: none;"></div>    <!-- 6 -->
+
+                <div class="circle" style="top: 23px; left: 343px; pointer-events: none;"></div>     <!-- 7 -->
+                <div class="circle" style="top: 169px; left: 343px; pointer-events: none;"></div>    <!-- 8 -->
+                <div class="circle" style="top: 315px; left: 343px; pointer-events: none;"></div>    <!-- 9 -->
+
+                <div class="circle" style="top: 23px; left: 492px; pointer-events: none;"></div>     <!-- 10 -->
+                <div class="circle" style="top: 169px; left: 492px; pointer-events: none;"></div>    <!-- 11 -->
+                <div class="circle" style="top: 315px; left: 492px; pointer-events: none;"></div>    <!-- 12 -->
+            </div>
+
+            <map name="camera_map">
+                <area class="cam_1" shape="circle" coords="66,33,50" href="">       <!-- 1 -->
+                <area class="cam_2" shape="circle" coords="66,188,50" href="">      <!-- 2 -->
+                <area class="cam_3" shape="circle" coords="66,342,50" href="">      <!-- 3 -->
+                <area class="cam_4" shape="circle" coords="220,33,50" href="">      <!-- 4 -->
+                <area class="cam_5" shape="circle" coords="220,188,50" href="">     <!-- 5 -->
+                <area class="cam_6" shape="circle" coords="220,342,50" href="">     <!-- 6 -->
+                <area class="cam_7" shape="circle" coords="381,33,50" href="">      <!-- 7 -->
+                <area class="cam_8" shape="circle" coords="381,188,50" href="">     <!-- 8 -->
+                <area class="cam_9" shape="circle" coords="381,342,50" href="">     <!-- 9 -->
+                <area class="cam_10" shape="circle" coords="530,33,50" href="">     <!-- 10 -->
+                <area class="cam_11" shape="circle" coords="530,188,50" href="">    <!-- 11 -->
+                <area class="cam_12" shape="circle" coords="530,342,50" href="">    <!-- 12 -->
+            </map>
+
+            <script>
+                $(".cam_1").on("click", function(e){
+                    e.preventDefault();
+                    var checkboxes = document.querySelectorAll('input[type=checkbox][value="1"]');
+                    var circles = document.getElementsByClassName('circle');
+                    checkboxes[0].checked = !checkboxes[0].checked;
+                    if (circles[0].style.backgroundColor == "") {circles[0].style.backgroundColor = "green";} else {circles[0].style.backgroundColor = "";}
+                });
+                $(".cam_2").on("click", function(e){
+                    e.preventDefault();
+                    var checkboxes = document.querySelectorAll('input[type=checkbox][value="2"]');
+                    var circles = document.getElementsByClassName('circle');
+                    checkboxes[0].checked = !checkboxes[0].checked;
+                    if (circles[1].style.backgroundColor == "") {circles[1].style.backgroundColor = "green";} else {circles[1].style.backgroundColor = "";}
+                });
+                $(".cam_3").on("click", function(e){
+                    e.preventDefault();
+                    var checkboxes = document.querySelectorAll('input[type=checkbox][value="3"]');
+                    var circles = document.getElementsByClassName('circle');
+                    checkboxes[0].checked = !checkboxes[0].checked;
+                    if (circles[2].style.backgroundColor == "") {circles[2].style.backgroundColor = "green";} else {circles[2].style.backgroundColor = "";}
+                });
+                $(".cam_4").on("click", function(e){
+                    e.preventDefault();
+                    var checkboxes = document.querySelectorAll('input[type=checkbox][value="4"]');
+                    var circles = document.getElementsByClassName('circle');
+                    checkboxes[0].checked = !checkboxes[0].checked;
+                    if (circles[3].style.backgroundColor == "") {circles[3].style.backgroundColor = "green";} else {circles[3].style.backgroundColor = "";}
+                });
+                $(".cam_5").on("click", function(e){
+                    e.preventDefault();
+                    var checkboxes = document.querySelectorAll('input[type=checkbox][value="5"]');
+                    var circles = document.getElementsByClassName('circle');
+                    checkboxes[0].checked = !checkboxes[0].checked;
+                    if (circles[4].style.backgroundColor == "") {circles[4].style.backgroundColor = "green";} else {circles[4].style.backgroundColor = "";}
+                });
+                $(".cam_6").on("click", function(e){
+                    e.preventDefault();
+                    var checkboxes = document.querySelectorAll('input[type=checkbox][value="6"]');
+                    var circles = document.getElementsByClassName('circle');
+                    checkboxes[0].checked = !checkboxes[0].checked;
+                    if (circles[5].style.backgroundColor == "") {circles[5].style.backgroundColor = "green";} else {circles[5].style.backgroundColor = "";}
+                });
+                $(".cam_7").on("click", function(e){
+                    e.preventDefault();
+                    var checkboxes = document.querySelectorAll('input[type=checkbox][value="7"]');
+                    var circles = document.getElementsByClassName('circle');
+                    checkboxes[0].checked = !checkboxes[0].checked;
+                    if (circles[6].style.backgroundColor == "") {circles[6].style.backgroundColor = "green";} else {circles[6].style.backgroundColor = "";}
+                });
+                $(".cam_8").on("click", function(e){
+                    e.preventDefault();
+                    var checkboxes = document.querySelectorAll('input[type=checkbox][value="8"]');
+                    var circles = document.getElementsByClassName('circle');
+                    checkboxes[0].checked = !checkboxes[0].checked;
+                    if (circles[7].style.backgroundColor == "") {circles[7].style.backgroundColor = "green";} else {circles[7].style.backgroundColor = "";}
+                });
+                $(".cam_9").on("click", function(e){
+                    e.preventDefault();
+                    var checkboxes = document.querySelectorAll('input[type=checkbox][value="9"]');
+                    var circles = document.getElementsByClassName('circle');
+                    checkboxes[0].checked = !checkboxes[0].checked;
+                    if (circles[8].style.backgroundColor == "") {circles[8].style.backgroundColor = "green";} else {circles[8].style.backgroundColor = "";}
+                });
+                $(".cam_10").on("click", function(e){
+                    e.preventDefault();
+                    var checkboxes = document.querySelectorAll('input[type=checkbox][value="10"]');
+                    var circles = document.getElementsByClassName('circle');
+                    checkboxes[0].checked = !checkboxes[0].checked;
+                    if (circles[9].style.backgroundColor == "") {circles[9].style.backgroundColor = "green";} else {circles[9].style.backgroundColor = "";}
+                });
+                $(".cam_11").on("click", function(e){
+                    e.preventDefault();
+                    var checkboxes = document.querySelectorAll('input[type=checkbox][value="11"]');
+                    var circles = document.getElementsByClassName('circle');
+                    checkboxes[0].checked = !checkboxes[0].checked;
+                    if (circles[10].style.backgroundColor == "") {circles[10].style.backgroundColor = "green";} else {circles[10].style.backgroundColor = "";}
+                });
+                $(".cam_12").on("click", function(e){
+                    e.preventDefault();
+                    var checkboxes = document.querySelectorAll('input[type=checkbox][value="12"]');
+                    var circles = document.getElementsByClassName('circle');
+                    checkboxes[0].checked = !checkboxes[0].checked;
+                    if (circles[11].style.backgroundColor == "") {circles[11].style.backgroundColor = "green";} else {circles[11].style.backgroundColor = "";}
+                });
+            </script>
+
+            <!-- Scelta per i dati di posizionamento -->
+            <div>
+                <input type="checkbox" id="datapos-checkbox" name="datapos-checkbox"/>
+                <label for="datapos-checkbox">Registra i dati di posizionamento</label>
             </div>
 
             <!-- Ripetizione settimanale -->
@@ -181,7 +311,7 @@ if (isset($actions[$userType])) {
             <div id="moreOptions" style="display: none;">
                 Note:<br>
                 <textarea cols="55" rows="5" name="description" placeholder="Note"></textarea><br>
-                Url: <input type="text" name="url" placeholder="Url"><br>
+                Url: <input type="text" name="url" placeholder="Url" value="/editing_video/editing/editing_video.php?video=storage_video/volley_test_2.mp4"><br>
                 GroupId: <input type="value" name="groupId" placeholder="GroupId"><br>
                 Tutto il giorno: <input type="checkbox" name="allDay" placeholder="allday"><br>
             </div>

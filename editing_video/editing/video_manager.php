@@ -29,7 +29,8 @@ if(isset($_GET["operation"])){
             break;
         case "multiple_video_delete":
             multipleDelete($pdo);
-            header("Location: " . getPreviusPage() . "?videos_deleted=true");
+            datiposDelete($pdo);
+            header("Location: " . getPreviusPage());
             break;
         default:
 			break;
@@ -122,14 +123,35 @@ function delete($pdo, $video) {
 function multipleDelete($pdo) {
     foreach ($_POST["id"] as $el) {
         try {
+
             $video = getVideoFromId($pdo, $el);  // Ottiene l'oggetto Video corrispondente all'ID.
             
             // Elimina il file dal sistema di file utilizzando il percorso.
-            if (deleteFile("../{$video->getPath()}")) {
-                deleteVideoFromId($pdo, $el);  // Rimuove il video dal database.
-            }
+            // if (deleteFile("../{$video->getPath()}")) { deleteVideoFromId($pdo, $el);  // Rimuove il video dal database.}
+
+            // Simulo la rimozione, togliendo la voce dal db
+            $sql = "DELETE FROM video WHERE id=?";
+            $query = $pdo->prepare($sql);
+            $query->execute([$el]);
+
         } catch (Exception $e) {
             echo 'Eccezione: ', $e->getMessage(), "\n";  // Gestisce eventuali eccezioni.
         }
+    }
+}
+
+/**
+ * Eliminazione del file contenente i dati di posizionamento dei giocatori.
+ */
+function datiposDelete($pdo) {
+    if (isset($_POST["datapos"])) {
+        $prenotazione_id = $_POST["datapos"];
+    }
+    try {
+        $sql = "UPDATE dati_posizionamento_prenotazioni SET datipos=0 WHERE prenotazione=?";
+        $query = $pdo->prepare($sql);
+        $query->execute([$prenotazione_id]);
+    } catch (Exception $e) {
+        echo 'Eccezione: ', $e->getMessage(), "\n";  // Gestisce eventuali eccezioni.
     }
 }

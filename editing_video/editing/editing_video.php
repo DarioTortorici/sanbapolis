@@ -13,6 +13,7 @@ $pdo = get_connection();
 $video_location = $_GET['video'] ?? '';
 
 if (!empty($video_location)) {
+
     // Se il percorso del video non è vuoto, lo recuperiamo dal database.
     $video = getVideoFromPath($pdo, $video_location);
     $_SESSION['video'] = serialize($video);  // Serializza e memorizza l'oggetto Video nella sessione.
@@ -23,18 +24,36 @@ if (!empty($video_location)) {
 
     // Ottiene la data di registrazione dal parametro o dal file video.
     $recording_date = $_GET['recording_date'] ?? getRecordingDate($path);
+
+    // Ottiene la data di fine registrazione del parametro o dal file video.
+    $end_recording_date = $_GET['recording_date'] ?? getEndRecordingDate($path);
+
+    // Ottengo l'id della sessione di registrazione
+    $sessione_id = getSessionFromVideo($path);
 } else {
     // Se il percorso del video è vuoto, recuperiamo l'oggetto Video dalla sessione.
     $video = unserialize($_SESSION['video']);
-    
+
     // Estrae il nome del file video senza l'estensione.
     $path = $video->getPath();
     $filename = basename($path, '.mp4');
-    
+
     // Ottiene la data di registrazione dal parametro o dal file video.
     $recording_date = $_GET['recording_date'] ?? getRecordingDate($path);
+
+    // Ottiene la data di fine registrazione del parametro o dal file video.
+    $end_recording_date = $_GET['recording_date'] ?? getEndRecordingDate($path);
+
+    // Ottengo l'id della sessione di registrazione
+    $sessione_id = getSessionFromVideo($path);
 }
 
+// Aggiunge una "_" al posto dello spazio, quando vado a scaricare il file
+$recording_date_for_download = preg_replace('/\s+/', '_', $recording_date);
+$end_recording_date_for_download = preg_replace('/\s+/', '_', $end_recording_date);
+
+// Check per la registrazione dei dati
+$check_datipos = getCheckDatiPos($pdo, $sessione_id);
 
 setPreviusPage();
 
@@ -87,7 +106,7 @@ if (isset($_GET['update']) && $_GET['update'] == 1) {
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="{$el->getId()}" name="id[]" value="{$el->getId()}">
                                 </div>
-                            </td>        
+                            </td>
                             <td data-href='$link'>{$el->getName()}</td>
                             <td>
                                 <a href="$link" download class="btn btn-success btn-sm">Scarica</a>
@@ -96,7 +115,27 @@ if (isset($_GET['update']) && $_GET['update'] == 1) {
                 END;
                     }
 
+                    // Aggiungo la voce per scaricare i dati di posizionamento dei giocatori
+                    if ($check_datipos==1) {
+
+                        $prenotazione_id = getIdFromSession($pdo,$sessione_id);
+                        $link_datapos = '../storage_datapos/example.csv';
+                        echo '
+                            <tr class="clickable-row">
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="datapos" name="datapos" value="'.$prenotazione_id.'">
+                                    </div>
+                                </td>
+                                <td data-href="'.$link_datapos.'">Dati di posizionamento</td>
+                                <td>
+                                    <a href="'.$link_datapos.'" download="dati-posizionamento-sessione('.$sessione_id.')_'.$recording_date_for_download.'_'.$end_recording_date_for_download.'" class="btn btn-success btn-sm">Scarica</a>
+                                </td>
+                            </tr>';
+                    }              
+
                     echo '</table>';
+                     
                 } catch (Exception $e) {
                     echo 'Eccezione: ', $e->getMessage(), "\n";
                 }
@@ -271,14 +310,18 @@ if (isset($_GET['update']) && $_GET['update'] == 1) {
                                     <div class="form-group">
                                         <label for="video_name">Nome:</label>
                                         <input type="text" class="form-control" name="video_name" id="video_name" value="<?php if ($video != null) {
-                                                                                                                                echo $video->getName();
-                                                                                                                            } ?>">
+
+                            echo $video->getName();
+
+                        } ?>">
                                     </div>
                                     <div class="form-group">
                                         <label for="video_note">Descrizione:</label>
                                         <textarea class="form-control" name="video_note" id="video_note" rows="3"><?php if ($video != null) {
-                                                                                                                        echo $video->getNote();
-                                                                                                                    } ?></textarea>
+
+                    echo $video->getNote();
+
+                } ?></textarea>
                                     </div>
                                     <button type="submit" class="btn btn-primary">Salva</button>
                                     <button type="submit" class="btn btn-danger" formaction="<?php echo VIDEO_MANAGER ?>?operation=delete_video">Elimina Video</button>
@@ -430,8 +473,7 @@ if (isset($_GET['update']) && $_GET['update'] == 1) {
                                 $pdo = get_connection();
 
                                 try {
-                                    $screenahots = getScreenshotsFromVideo($pdo, $video->getPath());
-                                    foreach ($screenahots as $el) {
+                                    $screenahots = getScreenshotsFromVideo($pdo, $video->getPath());                                    foreach ($screenahots as $el) {
                                         echo <<<END
                     <tr class='clickable-row'>
                         <td><input type="checkbox" id="{$el->getId()}" name="id[]" value="{$el->getId()}"></td>

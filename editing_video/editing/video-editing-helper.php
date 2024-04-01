@@ -482,7 +482,7 @@ function deleteVideoFromId($pdo, $id)
 function getVideoFromId($pdo, $id)
 {
     $video = null;
-    $query = "SELECT * FROM video WHERE id = $id";
+    $query = "SELECT * FROM video WHERE id = $id LIMIT 1";
     $statement = $pdo->query($query);
     $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
     if ($publishers) {
@@ -513,7 +513,7 @@ function getVideoFromId($pdo, $id)
 function getVideoFromPath($pdo, $path)
 {
     $video = null;
-    $query = "SELECT * FROM video WHERE locazione = '$path'";
+    $query = "SELECT * FROM video WHERE locazione = '$path' LIMIT 1";
     $statement = $pdo->query($query);
     $publishers = $statement->fetchAll(PDO::FETCH_ASSOC);
     if ($publishers) {
@@ -707,7 +707,7 @@ function getPlaylist($videoUrl)
 
     $sql = "SELECT *
             FROM video
-            WHERE sessione = (SELECT sessione FROM video WHERE locazione = ?)";
+            WHERE sessione = (SELECT sessione FROM video WHERE locazione = ? LIMIT 1)";
     $query = $con->prepare($sql);
     $query->execute([$videoUrl]);
     $publishers = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -758,4 +758,75 @@ function getRecordingDate($videoUrl)
     $data_ora_inizio = $query->fetchColumn();
 
     return $data_ora_inizio;
+}
+
+/**
+ * Ottiene la data e l'ora di fine registrazione di un video.
+ *
+ * Questa funzione accetta l'URL di un video e restituisce la data e l'ora di inizio della registrazione
+ * associata a quel video. La funzione si basa su un database di sessioni di registrazione e video.
+ *
+ * @param string $videoUrl L'URL del video di cui si desidera ottenere la data e l'ora di fine registrazione.
+ * @return string|false La data e l'ora di fine registrazione o false se si verificano errori.
+ */
+function getEndRecordingDate($videoUrl)
+{
+    $con = get_connection();
+
+    $sql = "SELECT sr.data_ora_fine 
+    FROM sessioni_registrazione sr 
+    INNER JOIN video v ON sr.id = v.sessione 
+    WHERE v.locazione = ? LIMIT 1";
+    $query = $con->prepare($sql);
+    $query->execute([$videoUrl]);
+    $data_ora_inizio = $query->fetchColumn();
+
+    return $data_ora_inizio;
+}
+
+/** Restitiusce la sessione in base al video
+ * @param string $videoUrl L'URL del video di cui si desidera ottenere la sessione
+ * @return Session la sessione
+ */
+function getSessionFromVideo($videoUrl)
+{
+    $con = get_connection();
+
+    $sql = "SELECT sessione FROM video WHERE locazione=? LIMIT 1";
+    $query = $con->prepare($sql);
+    $query->execute([$videoUrl]);
+    $sessione_id = $query->fetchColumn();
+
+    return $sessione_id;
+}
+
+/** Restitiusce 0 o 1 se una prenotazione ha la registrazione dei dati attiva
+ * @param string $id L'ID della prenotazione
+ * @return Session la sessione
+ */
+function getCheckDatiPos($pdo, $sessione_id)
+{
+    $sql = "SELECT datipos FROM dati_posizionamento_prenotazioni WHERE prenotazione=(
+            SELECT id_calendar_events FROM prenotazioni WHERE id=(
+            SELECT prenotazione FROM sessioni_registrazione WHERE id=? ))";
+
+    $query = $pdo->prepare($sql);
+    $query->execute([$sessione_id]);
+    $dati_check = $query->fetchColumn();
+
+    return $dati_check;
+}
+
+/**
+ * Ritorna l'id della prenotazione partendo dalla sessione di registrazione
+ */
+function getIdFromSession($pdo,$sessione_id) {
+    $sql = "SELECT id_calendar_events FROM prenotazioni WHERE id=(
+            SELECT prenotazione FROM sessioni_registrazione WHERE id=? )";
+
+    $query = $pdo->prepare($sql);
+    $query->execute([$sessione_id]);
+    $prenotazione_id = $query->fetchColumn();
+
+    return $prenotazione_id;
 }

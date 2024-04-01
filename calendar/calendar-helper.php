@@ -47,7 +47,7 @@ function is_ajax_request()
  *
  * @return int L'ID dell'evento creato nel calendario.
  */
-function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $note, $eventType, $cameras, $author)
+function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $startTime, $endTime, $startRecur, $endRecur, $url, $society, $note, $eventType, $dataposCheck, $cameras, $author)
 {
     // missing premium parameter `resourceEditable`=?, `resourceId`=?, `resourceIds`=?
 
@@ -99,6 +99,10 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
         $cameras = "[]";
     }
 
+    // Controllo del check per la registrazione dei dati di posizionamento dei giocatori
+    $dataposCheckBoolean = ($dataposCheck === 'on') ? 1 : 0;
+    print_r($dataposCheckBoolean);
+
     $squadra = getSquadra($society);
 
     $eventTypeBoolean = ($eventType === 'match') ? 1 : 0;
@@ -130,6 +134,19 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
 
     // Salva le informazioni della telecamera
     save_cameras($cameras, $calendar_id);
+
+    // Salva il check della registrazione dei dati di posizionamento dei giocatori
+    save_datapos($dataposCheckBoolean, $calendar_id);
+
+    // Salva la sessione di registrazione
+    save_sessione_rec($author, $data_ora_inizio, $data_ora_fine, $calendar_id);
+
+    echo 'CALENDAR_ID: '.$calendar_id;
+
+    // Salva le telecamere per la sessione
+    $video_url = "storage_video/volley_test_2.mp4";
+    $nome = "Test Volley 2";
+    save_cameras_in_video($note, $author, $nome, $cameras, $calendar_id, $video_url);
 
     if ($eventTypeBoolean) { // Partita
         $sport = getSportbyTeam($squadra);
@@ -276,6 +293,190 @@ function save_cameras($cameras, $id)
         }
     } catch (PDOException $e) {
         throw new PDOException("Errore durante il salvataggio delle telecamere: " . $e->getMessage());
+    }
+}
+
+/**
+ * Salva le telecamere selezionate nel database per un determinato evento (all'interno della tabella video).
+ */
+function save_cameras_in_video($note, $autore, $nome, $cameras, $prenotazioni_id, $video_url) {
+
+    $con = get_connection();
+
+    try {
+        if ($prenotazioni_id) {
+
+            // Ottengo l'id della sessione di registrazione
+            $sql = "SELECT id FROM sessioni_registrazione WHERE prenotazione=(SELECT id FROM prenotazioni WHERE id_calendar_events=?)";
+            $query = $con->prepare($sql);
+            $query->execute([$prenotazioni_id]);
+            $sessione_id = $query->fetchColumn();
+
+            echo 'QUI = '.$sessione_id;
+
+            // Elimina le telecamere esistenti associate alla prenotazione
+            delete_cameras_in_video($sessione_id);
+
+            // Converti le telecamere in un array di interi
+            $cams_array = is_array($cameras) ? array_map('intval', $cameras) : json_decode($cameras, true);
+            print_r($cams_array);
+
+            // Inserisci le nuove telecamere associate alla sessione o modifica se già presenti
+            $sql = "INSERT INTO video (locazione, nome, autore, nota, sessione, telecamera) VALUES (?,?,?,?,?,?)";
+            $query = $con->prepare($sql);
+            foreach ($cams_array as $camera) {
+                $query->execute([$video_url,$nome." [".$camera."]",$autore,$note,$sessione_id,$camera]);
+            }
+
+        } else {
+            throw new PDOException("Errore, nessun ID specificato.");
+        }
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il salvataggio delle telecamere della sessione: " . $e->getMessage());
+    }
+
+}
+
+/**
+ * Elimina le telecamere associate a una sessione di registrazione
+ */
+function delete_cameras_in_video($prenotazioni_id) {
+
+    $con = get_connection();
+
+    try {
+        if ($prenotazioni_id) {
+
+            // Ottengo l'id della sessione di registrazione
+            $sql = "DELETE FROM video WHERE sessione=?";
+            $query = $con->prepare($sql);
+            $query->execute([$prenotazioni_id]);
+
+        } else {
+            throw new PDOException("Errore, nessun ID specificato.");
+        }
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il salvataggio delle telecamere della sessione: " . $e->getMessage());
+    }
+
+}
+
+/**
+ * Salva la sessione di registrazione
+ * 
+ * @param string $author L'autore della prenotazione.
+ * @param string $data_ora_inizio La data e ora di inizio della prenotazione nel formato "Y-m-d H:i:s".
+ * @param string $data_ora_fine La data e ora di fine della prenotazione nel formato "Y-m-d H:i:s".
+ * @param int $calendar_id L'ID dell'evento nel calendario associato alla prenotazione.
+ */
+function save_sessione_rec($autore, $data_ora_inizio, $data_ora_fine, $prenotazioni_id) {
+
+    $con = get_connection();
+
+    try {
+        if ($prenotazioni_id) {
+            // Ottieni l'ID della prenotazione associata all'evento
+            $sql = "SELECT id FROM prenotazioni WHERE id_calendar_events=?";
+            $query = $con->prepare($sql);
+            $query->execute([$prenotazioni_id]);
+            $prenotazioni_id = $query->fetchColumn();
+
+            // Elimina il check esistente associato alla prenotazione
+            delete_sessione_rec($prenotazioni_id);
+
+            // Inserisci i dati della prenotazione
+            $sql = "INSERT INTO sessioni_registrazione (`autore`, `data_ora_inizio`, `data_ora_fine`, `prenotazione`) VALUES (?, ?, ?, ?)";
+            $query = $con->prepare($sql);
+            $query->execute([$autore, $data_ora_inizio, $data_ora_fine, $prenotazioni_id]);
+
+            return $con->lastInsertId();
+        } else {
+            throw new PDOException("Errore, nessun ID specificato.");
+        }
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il salvataggio della sessione: " . $e->getMessage());
+    }
+
+}
+
+/**
+ * Elimina la sessione di registrazione
+ * 
+ * @param int $prenotazioni_id L'ID della prenotazione di cui eliminare la sessione di registrazione
+ */
+function delete_sessione_rec($prenotazioni_id) {
+
+    $con = get_connection();
+
+    try {
+        if ($prenotazioni_id) {
+            $sql = "DELETE FROM sessioni_registrazione WHERE prenotazione=?";
+            $query = $con->prepare($sql);
+            $query->execute([$prenotazioni_id]);
+        } else {
+            throw new PDOException("Errore, nessun ID specificato.");
+        }
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante l'eliminazione della sessione: " . $e->getMessage());
+    }
+}
+
+/**
+ * Salva la scelta se registrare i dati di posizionamento dei giocatori
+ * 
+ * @param int $datapos_check valore del check  dei dati di posizionamento
+ * @param int $id L'id dell'evento a cui associare il check dei dati di posizionamento
+ */
+function save_datapos($datapos_check, $id) {
+
+    $con = get_connection();
+
+    try {
+        if ($id) {
+            // Ottieni l'ID della prenotazione associata all'evento
+            $sql = "SELECT id FROM prenotazioni WHERE id_calendar_events=?";
+            $query = $con->prepare($sql);
+            $query->execute([$id]);
+            $prenotazioni_id = $query->fetchColumn();
+
+            // Elimina il check esistente associato alla prenotazione
+            delete_datapos($prenotazioni_id);
+
+            // Inserisci il check associato alla prenotazione
+            $sql = "INSERT INTO dati_posizionamento_prenotazioni (datipos, prenotazione) VALUES (:datipos, :prenotazione)";
+            $query = $con->prepare($sql);
+            $query->bindParam(':datipos', $datapos_check);
+            $query->bindParam(':prenotazione', $id);
+            $query->execute();
+
+            return $id;
+        } else {
+            throw new PDOException("Errore, nessun ID specificato.");
+        }
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante il salvataggio del check dei dati di posizionamento: " . $e->getMessage());
+    }
+}
+
+/**
+ * Elimina il check per registrare i dati di posizionamento dei giocatori
+ * 
+ * @param int $prenotazioni_id L'ID della prenotazione di cui eliminare il check
+ */
+function delete_datapos($prenotazioni_id) {
+
+    $con = get_connection();
+
+    try {
+        if ($prenotazioni_id) {
+            $sql = "DELETE FROM dati_posizionamento_prenotazioni WHERE prenotazione=?";
+            $query = $con->prepare($sql);
+            $query->execute([$prenotazioni_id]);
+        } else {
+            throw new PDOException("Errore, nessun ID specificato.");
+        }
+    } catch (PDOException $e) {
+        throw new PDOException("Errore durante l'eliminazione del check dei dati di posizionamento: " . $e->getMessage());
     }
 }
 
@@ -837,6 +1038,9 @@ if (isset($_GET['action'])) {
                 'note' => $_POST['description'] ?? null,
                 'eventType' => $_POST['event_type'] ?? null,
 
+                // Tabella check della registrazione dei dati di posizionamento dei giocaotir
+                'dataposCheck' => $_POST['datapos-checkbox'] ?? null,
+
                 // Tabella telecamere
                 'cameras' => json_encode($_POST['camera'] ?? null),
                 'author' => $_POST['author'] ?? null,
@@ -844,6 +1048,7 @@ if (isset($_GET['action'])) {
 
             // Converti gli elementi vuoti in null, necessario per alcuni webserver
             foreach ($data as $key => $value) {
+                print_r('FIELD= ' . $data[$key] . ' ');
                 if ($value === '') {
                     $data[$key] = null;
                 }
@@ -851,7 +1056,7 @@ if (isset($_GET['action'])) {
 
             // Controllo che esistano campi obbligatori (society e startDate)
             if ($data['society'] && $data['startDate']) {
-                $id = save_event($data['groupId'], $data['allDay'], $data['startDate'], $data['endDate'], $data['daysOfWeek'], $data['startTime'], $data['endTime'], $data['startRecur'], $data['endRecur'], $data['url'], $data['society'], $data['note'], $data['eventType'], $data['cameras'], $data['author']);
+                $id = save_event($data['groupId'], $data['allDay'], $data['startDate'], $data['endDate'], $data['daysOfWeek'], $data['startTime'], $data['endTime'], $data['startRecur'], $data['endRecur'], $data['url'], $data['society'], $data['note'], $data['eventType'], $data['dataposCheck'], $data['cameras'], $data['author']);
                 $response = array('status' => 'success', 'id' => $id);
             } else {
                 $response = array('status' => 'error', 'message' => 'Missing required fields');

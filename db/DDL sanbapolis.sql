@@ -427,4 +427,20 @@ CREATE TABLE buckets_influxdb(
 	PRIMARY KEY (locazione)
 );
 
+--
+-- Struttura della tabella `dati_posizionamento_prenotazioni`
+--
+
+CREATE TABLE `dati_posizionamento_prenotazioni` (
+  `datipos` tinyint(1) DEFAULT NULL,
+  `prenotazione` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Indici per le tabelle `dati_posizionamento_prenotazioni`
+--
+ALTER TABLE `dati_posizionamento_prenotazioni`
+  ADD PRIMARY KEY (`prenotazione`),
+  ADD KEY `prenotazione` (`prenotazione`);
+
 COMMIT;

@@ -15,7 +15,7 @@
 /*register and login*/
 #register, #login-form {
     padding: 5% 0;
-    background: url("https://i.imgur.com/oOH1kYH.png") no-repeat;
+    background: url("../assets/images/login_background.png") no-repeat;
     background-size: cover;
 }
 

@@ -81,8 +81,6 @@ $complete_date = $date . " " . $hour;
 
         $start_at = curStreamingStart($data_inizio, $data_corrente, $data_fine);
 
-        echo $start_at;
-
         // Controllo se sono fuori range di tempo.
         if (isset($start_at) && $start_at !== '') {
 
