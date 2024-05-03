@@ -142,6 +142,7 @@ function saveEvent(email) {
             .fail(function (xhr, status, error) {
                 console.log(xhr.responseText);
             });
+
     } else {
         $('#error-message').show();
     }
@@ -333,7 +334,7 @@ function saveCameras() {
     var eventId = document.getElementById('id-cams').innerText;
 
     // Ottieni le telecamere selezionate come un array
-    var selectedCameras = $('input[name="camera[]"]:checked').map(function () {
+    var selectedCameras = $('input[name="new_camera[]"]:checked').map(function () {
         return $(this).val();
     }).get();
 
@@ -531,7 +532,7 @@ function updateAddcameras(response, id) {
     });
 
     // Seleziona le checkbox corrispondenti alle telecamere preselezionate
-    var checkboxes = document.querySelectorAll('input[type="checkbox"][name="camera[]"]');
+    var checkboxes = document.querySelectorAll('input[type="checkbox"][name="new_camera[]"]');
     checkboxes.forEach(function (checkbox) {
         if (selectedCameras.includes(checkbox.value)) {
             checkbox.checked = true;
@@ -550,7 +551,7 @@ function updateAddcameras(response, id) {
  * @returns {boolean} True se il modulo è valido, altrimenti false.
  */
 function validateForm() {
-    var requiredFields = ['society', 'start-date'];
+    var requiredFields = ["society", "start-date", "startTime", "endTime"];
 
     for (var i = 0; i < requiredFields.length; i++) {
         var field = document.querySelector('[name="' + requiredFields[i] + '"]');
@@ -590,6 +591,15 @@ function toggleCameraOptions(checkbox) {
     var cameraOptions = document.getElementById("map_container");
     if (checkbox.checked) {
         cameraOptions.style.display = "block";
+
+        // Resetto selezione "visiva" delle telecamere
+        var circles = document.getElementsByClassName("circle");
+        var numberOfCircles = document.getElementsByClassName("circle").length;
+
+        for (var i = 0; i < numberOfCircles; i++) {
+          circles[i].style.backgroundColor = "";
+        }
+        
     } else {
         cameraOptions.style.display = "none";
     }
@@ -676,16 +686,24 @@ function formatTime(time) {
  * @param {string} currentDate - La data corrente da utilizzare come valore predefinito per la data di inizio del nuovo obiettivo.
  */
 function createCalendarEvent(currentDate) {
-    $('#save-form').trigger('reset');
-    $('#save-form input[name=id]').val("");
-    $('#sd').val(currentDate);
-    $.magnificPopup.open({
-        items: {
-            src: "#add-event-modal"
-        },
-        type: 'inline',
-        enableEscapekey: false
-    }, 0);
+  $("#save-form").trigger("reset");
+  $("#save-form input[name=id]").val("");
+  $("#sd").val(currentDate);
+
+  // "Nascondo" la mappa delle telecamere
+  var cameraOptions = document.getElementById("map_container");
+  cameraOptions.style.display = "none";
+
+  $.magnificPopup.open(
+    {
+      items: {
+        src: "#add-event-modal",
+      },
+      type: "inline",
+      enableEscapekey: false,
+    },
+    0
+  );
 }
 
 // ...
@@ -697,7 +715,6 @@ function createCalendarEvent(currentDate) {
  */
 function handleDateClick(date) {
     var clickedDate = date.dateStr;
-
 
     $('#start-date').val(clickedDate);
     $('#end-date').val(clickedDate);
@@ -735,3 +752,19 @@ function getUserType() {
     });
 }
 
+/**
+ * TEST: ottengo il JSON di risposta da un indirizzo remoto
+ */
+function getEndpointStatus() {
+    const settings = {
+      async: true,
+      crossDomain: true,
+      url: "http://10.218.20.28:7000/",
+      method: "GET",
+      headers: {},
+    };
+
+    $.ajax(settings).done(function (response) {
+      console.log(response);
+    });
+}

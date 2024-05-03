@@ -120,10 +120,20 @@ if (isset($actions[$userType])) {
 
 <!-- Modale aggiunta nuovo evento -->
 <div id="add-event-modal" class="white-popup-block mfp-hide">
+
     <p style="height: 30px; background: #8FB3FF; width: 100%;"></p>
     <h2>Nuovo Evento</h2>
     <div style="min-height: 250px;">
         <form id="save-form">
+
+            <script>
+                
+                // TEST:    ottengo il JSON di risposta da un indirizzo remoto
+                //          la prova in locale non funziona
+                getEndpointStatus();
+                
+            </script>
+
             <input type="hidden" name="id" />
             Societa:
             <select name="society" required>
@@ -160,41 +170,49 @@ if (isset($actions[$userType])) {
                 <label> <input type="checkbox" name="camera[]" value="10"> Camera 10 </label>
                 <label> <input type="checkbox" name="camera[]" value="11"> Camera 11 </label>
                 <label> <input type="checkbox" name="camera[]" value="12"> Camera 12 </label>
+                <label> <input type="checkbox" name="camera[]" value="13"> Camera 13 </label>
             </div>
 
-            <!-- Mappa per la scelta delle telecamere -->
+            <!-- Mappa per la scelta delle telecamere: mostra i cerchi colorati -->
             <div id="map_container" style="position: relative; display: none;">
                 <img src="/assets/images/basketball-court-floor.png" usemap="#camera_map" width="100%"/>
-                <div class="circle" style="top: 23px; left: 48px; pointer-events: none;"></div>     <!-- 1 -->
-                <div class="circle" style="top: 168px; left: 48px; pointer-events: none;"></div>    <!-- 2 -->
-                <div class="circle" style="top: 315px; left: 48px; pointer-events: none;"></div>    <!-- 3 -->
+                <div class="circle" style="top: 23px; left: 25px; pointer-events: none;"></div>     <!-- 1 -->
+                <div class="circle" style="top: 167px; left: 25px; pointer-events: none;"></div>    <!-- 2 -->
+                <div class="circle" style="top: 316px; left: 25px; pointer-events: none;"></div>    <!-- 3 -->
 
-                <div class="circle" style="top: 23px; left: 196px; pointer-events: none;"></div>     <!-- 4 -->
-                <div class="circle" style="top: 169px; left: 196px; pointer-events: none;"></div>    <!-- 5 -->
-                <div class="circle" style="top: 315px; left: 196px; pointer-events: none;"></div>    <!-- 6 -->
+                <div class="circle" style="top: 23px; left: 172px; pointer-events: none;"></div>     <!-- 4 -->
+                <div class="circle" style="top: 169px; left: 172px; pointer-events: none;"></div>    <!-- 5 -->
+                <div class="circle" style="top: 314px; left: 172px; pointer-events: none;"></div>    <!-- 6 -->
 
-                <div class="circle" style="top: 23px; left: 343px; pointer-events: none;"></div>     <!-- 7 -->
-                <div class="circle" style="top: 169px; left: 343px; pointer-events: none;"></div>    <!-- 8 -->
-                <div class="circle" style="top: 315px; left: 343px; pointer-events: none;"></div>    <!-- 9 -->
+                <div class="circle" style="top: 169px; left: 271px; pointer-events: none;"></div>     <!-- 7 -->
 
-                <div class="circle" style="top: 23px; left: 492px; pointer-events: none;"></div>     <!-- 10 -->
-                <div class="circle" style="top: 169px; left: 492px; pointer-events: none;"></div>    <!-- 11 -->
-                <div class="circle" style="top: 315px; left: 492px; pointer-events: none;"></div>    <!-- 12 -->
+                <div class="circle" style="top: 23px; left: 369px; pointer-events: none;"></div>    <!-- 8 -->
+                <div class="circle" style="top: 169px; left: 369px; pointer-events: none;"></div>    <!-- 9 -->
+                <div class="circle" style="top: 314px; left: 369px; pointer-events: none;"></div>     <!-- 10 -->
+
+                <div class="circle" style="top: 23px; left: 515px; pointer-events: none;"></div>    <!-- 11 -->
+                <div class="circle" style="top: 169px; left: 515px; pointer-events: none;"></div>    <!-- 12 -->
+                <div class="circle" style="top: 314px; left: 515px; pointer-events: none;"></div>    <!-- 13 -->
             </div>
 
             <map name="camera_map">
-                <area class="cam_1" shape="circle" coords="66,33,50" href="">       <!-- 1 -->
-                <area class="cam_2" shape="circle" coords="66,188,50" href="">      <!-- 2 -->
-                <area class="cam_3" shape="circle" coords="66,342,50" href="">      <!-- 3 -->
-                <area class="cam_4" shape="circle" coords="220,33,50" href="">      <!-- 4 -->
-                <area class="cam_5" shape="circle" coords="220,188,50" href="">     <!-- 5 -->
-                <area class="cam_6" shape="circle" coords="220,342,50" href="">     <!-- 6 -->
-                <area class="cam_7" shape="circle" coords="381,33,50" href="">      <!-- 7 -->
-                <area class="cam_8" shape="circle" coords="381,188,50" href="">     <!-- 8 -->
-                <area class="cam_9" shape="circle" coords="381,342,50" href="">     <!-- 9 -->
-                <area class="cam_10" shape="circle" coords="530,33,50" href="">     <!-- 10 -->
-                <area class="cam_11" shape="circle" coords="530,188,50" href="">    <!-- 11 -->
-                <area class="cam_12" shape="circle" coords="530,342,50" href="">    <!-- 12 -->
+                <area class="cam_1" shape="circle" coords="54,45,30" href="">       <!-- 1 -->
+                <area class="cam_2" shape="circle" coords="54,188,30" href="">      <!-- 2 -->
+                <area class="cam_3" shape="circle" coords="54,338,30" href="">      <!-- 3 -->
+
+                <area class="cam_4" shape="circle" coords="201,45,30" href="">      <!-- 4 -->
+                <area class="cam_5" shape="circle" coords="201,189,30" href="">     <!-- 5 -->
+                <area class="cam_6" shape="circle" coords="201,338,30" href="">     <!-- 6 -->
+
+                <area class="cam_7" shape="circle" coords="300,191,30" href="">      <!-- 7 -->
+
+                <area class="cam_8" shape="circle" coords="398,45,30" href="">     <!-- 8 -->
+                <area class="cam_9" shape="circle" coords="398,189,30" href="">     <!-- 9 -->
+                <area class="cam_10" shape="circle" coords="398,338,30" href="">     <!-- 10 -->
+
+                <area class="cam_11" shape="circle" coords="544,45,30" href="">    <!-- 11 -->
+                <area class="cam_12" shape="circle" coords="544,189,30" href="">    <!-- 12 -->
+                <area class="cam_13" shape="circle" coords="544,338,30" href="">    <!-- 13 -->
             </map>
 
             <script>
@@ -281,6 +299,13 @@ if (isset($actions[$userType])) {
                     var circles = document.getElementsByClassName('circle');
                     checkboxes[0].checked = !checkboxes[0].checked;
                     if (circles[11].style.backgroundColor == "") {circles[11].style.backgroundColor = "green";} else {circles[11].style.backgroundColor = "";}
+                });
+                $(".cam_13").on("click", function(e){
+                    e.preventDefault();
+                    var checkboxes = document.querySelectorAll('input[type=checkbox][value="13"]');
+                    var circles = document.getElementsByClassName('circle');
+                    checkboxes[0].checked = !checkboxes[0].checked;
+                    if (circles[12].style.backgroundColor == "") {circles[12].style.backgroundColor = "green";} else {circles[12].style.backgroundColor = "";}
                 });
             </script>
 
@@ -389,18 +414,19 @@ if (isset($actions[$userType])) {
         <p type="text" id="id-cams" style="display: none;"> id </p>
         <h2>Seleziona le telecamere da attivare:</h2>
         <form id="cameraForm">
-            <label> <input type="checkbox" name="camera[]" value="1"> Camera 1 </label>
-            <label> <input type="checkbox" name="camera[]" value="2"> Camera 2 </label>
-            <label> <input type="checkbox" name="camera[]" value="3"> Camera 3 </label>
-            <label> <input type="checkbox" name="camera[]" value="4"> Camera 4 </label>
-            <label> <input type="checkbox" name="camera[]" value="5"> Camera 5 </label>
-            <label> <input type="checkbox" name="camera[]" value="6"> Camera 6 </label>
-            <label> <input type="checkbox" name="camera[]" value="7"> Camera 7 </label>
-            <label> <input type="checkbox" name="camera[]" value="8"> Camera 8 </label>
-            <label> <input type="checkbox" name="camera[]" value="9"> Camera 9 </label>
-            <label> <input type="checkbox" name="camera[]" value="10"> Camera 10 </label>
-            <label> <input type="checkbox" name="camera[]" value="11"> Camera 11 </label>
-            <label> <input type="checkbox" name="camera[]" value="12"> Camera 12 </label>
+            <label> <input type="checkbox" name="new_camera[]" value="1"> Camera 1 </label>
+            <label> <input type="checkbox" name="new_camera[]" value="2"> Camera 2 </label>
+            <label> <input type="checkbox" name="new_camera[]" value="3"> Camera 3 </label>
+            <label> <input type="checkbox" name="new_camera[]" value="4"> Camera 4 </label>
+            <label> <input type="checkbox" name="new_camera[]" value="5"> Camera 5 </label>
+            <label> <input type="checkbox" name="new_camera[]" value="6"> Camera 6 </label>
+            <label> <input type="checkbox" name="new_camera[]" value="7"> Camera 7 </label>
+            <label> <input type="checkbox" name="new_camera[]" value="8"> Camera 8 </label>
+            <label> <input type="checkbox" name="new_camera[]" value="9"> Camera 9 </label>
+            <label> <input type="checkbox" name="new_camera[]" value="10"> Camera 10 </label>
+            <label> <input type="checkbox" name="new_camera[]" value="11"> Camera 11 </label>
+            <label> <input type="checkbox" name="new_camera[]" value="12"> Camera 12 </label>
+            <label> <input type="checkbox" name="new_camera[]" value="13"> Camera 13 </label>
             <button type="submit" onclick="saveCameras()">Attiva</button>
         </form>
     </div>
