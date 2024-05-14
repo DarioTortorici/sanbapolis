@@ -136,6 +136,9 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
     save_cameras($cameras, $calendar_id);
 
     // Salva il check della registrazione dei dati di posizionamento dei giocatori
+    //
+    // [ISSUE]  Serve implementare un meccanismo che invii i comandi all'orario specificato.
+    //          Per il momento, invia entrambi i comandi (START e STOP)
     save_datapos($dataposCheckBoolean, $calendar_id);
 
     // Salva la sessione di registrazione
@@ -448,6 +451,13 @@ function save_datapos($datapos_check, $id) {
             $query->bindParam(':datipos', $datapos_check);
             $query->bindParam(':prenotazione', $id);
             $query->execute();
+
+            // Endpoint Remoto
+            echo '$prenotazioni_id: '.$prenotazioni_id;
+            postStartSessionRecording(true, $prenotazioni_id);
+            echo 'Start Recording Sent';
+            postEndSessionRecording(true, $prenotazioni_id);
+            echo 'End Recording Sent';
 
             return $id;
         } else {
@@ -1038,7 +1048,7 @@ if (isset($_GET['action'])) {
                 'note' => $_POST['description'] ?? null,
                 'eventType' => $_POST['event_type'] ?? null,
 
-                // Tabella check della registrazione dei dati di posizionamento dei giocaotir
+                // Tabella check della registrazione dei dati di posizionamento dei giocatori
                 'dataposCheck' => $_POST['datapos-checkbox'] ?? null,
 
                 // Tabella telecamere
@@ -1191,5 +1201,164 @@ if (isset($_GET['action'])) {
         echo json_encode($response);
     } else {
         // Parametro 'action' mancante
+    }
+}
+
+/**
+ * Funzione che ottiene lo status dell'endpoint che contiene i dati dell'IoT
+ */
+function getEndpointStatus() {
+    $curl = curl_init();
+
+    curl_setopt_array($curl, [
+        CURLOPT_PORT => "7000",
+        CURLOPT_URL => "http://10.218.20.28:7000/?=",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "GET",
+        CURLOPT_POSTFIELDS => "",
+    ]);
+
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+        return "cURL Error #:" . $err;
+    } else {
+        return $response;
+    }
+}
+
+/**
+ * Funzione che ottiene la lista dei file che possono essere scaricati
+ */
+function getEndpointDownloadList() {
+    $curl = curl_init();
+
+    curl_setopt_array($curl, [
+        CURLOPT_PORT => "7000",
+        CURLOPT_URL => "http://10.218.20.28:7000/done",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "GET",
+        CURLOPT_POSTFIELDS => "",
+    ]);
+
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+        return "cURL Error #:" . $err;
+    } else {
+        return $response;
+    }
+}
+
+/**
+ * Funzione che fa iniziare la registrazione della sessione
+ */
+function postStartSessionRecording($isTest, $sessione_id) {
+    $curl = curl_init();
+
+    curl_setopt_array($curl, [
+        CURLOPT_PORT => "7000",
+        CURLOPT_URL => "http://10.218.20.28:7000/start?=",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "POST",
+        CURLOPT_POSTFIELDS => "{\n\t\"session_id\": \"test-sessione_".$sessione_id."\",\n\t\"test\": ".$isTest."\n}",
+        CURLOPT_HTTPHEADER => [
+            "Content-Type: application/json"
+        ],
+    ]);
+
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+        return "cURL Error #:" . $err;
+    } else {
+        return $response;
+    }
+}
+
+/**
+ * Funzione che ferma la registrazione della sessione
+ */
+function postEndSessionRecording($isTest, $sessione_id) {
+    $curl = curl_init();
+
+    curl_setopt_array($curl, [
+        CURLOPT_PORT => "7000",
+        CURLOPT_URL => "http://10.218.20.28:7000/stop?=",
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "POST",
+        CURLOPT_POSTFIELDS => "{\n\t\"session_id\": \"test-sessione_".$sessione_id."\",\n\t\"test\": ".$isTest."\n}",
+        CURLOPT_HTTPHEADER => [
+            "Content-Type: application/json"
+        ],
+    ]);
+
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+        return "cURL Error #:" . $err;
+    } else {
+        return $response;
+    }
+}
+
+/**
+ * Funzione che cancella la sessione passata per parametro
+ */
+function deleteSessionRecording($session) {
+    $curl = curl_init();
+
+    curl_setopt_array($curl, [
+        CURLOPT_PORT => "7000",
+        CURLOPT_URL => "http://10.218.20.28:7000/done/".$session,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => "",
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => "DELETE",
+        CURLOPT_POSTFIELDS => "",
+        CURLOPT_HTTPHEADER => [
+            "Content-Type: application/json"
+        ],
+    ]);
+
+    $response = curl_exec($curl);
+    $err = curl_error($curl);
+
+    curl_close($curl);
+
+    if ($err) {
+        return "cURL Error #:" . $err;
+    } else {
+        return $response;
     }
 }

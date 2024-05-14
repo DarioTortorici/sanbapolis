@@ -62,6 +62,27 @@ if (isset($actions[$userType])) {
     $modify = isset($action['modify']) ? $action['modify'] : $modify;
     $add = isset($action['add']) ? $action['add'] : $add;
 }
+
+////////////////////////////////////////////////////////////////////
+
+// IoT Debug
+// Il nome della sessione NON deve contenere ".csv"
+$serverStatus = getEndpointStatus();
+$serverDownloadList = getEndpointDownloadList();
+$dummy_session = "prova_TEST";
+$dummy_isTest = true;
+
+// echo $serverStatus;
+// echo $serverDownloadList;
+
+// echo postStartSessionRecording($dummy_session, $dummy_isTest);
+
+// echo postEndSessionRecording($dummy_session, $dummy_isTest);
+
+// echo deleteSessionRecording($dummy_session);
+
+////////////////////////////////////////////////////////////////////
+
 ?>
 
 <style>
@@ -125,14 +146,6 @@ if (isset($actions[$userType])) {
     <h2>Nuovo Evento</h2>
     <div style="min-height: 250px;">
         <form id="save-form">
-
-            <script>
-                
-                // TEST:    ottengo il JSON di risposta da un indirizzo remoto
-                //          la prova in locale non funziona
-                getEndpointStatus();
-                
-            </script>
 
             <input type="hidden" name="id" />
             Societa:

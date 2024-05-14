@@ -751,20 +751,3 @@ function getUserType() {
         });
     });
 }
-
-/**
- * TEST: ottengo il JSON di risposta da un indirizzo remoto
- */
-function getEndpointStatus() {
-    const settings = {
-      async: true,
-      crossDomain: true,
-      url: "http://10.218.20.28:7000/",
-      method: "GET",
-      headers: {},
-    };
-
-    $.ajax(settings).done(function (response) {
-      console.log(response);
-    });
-}
