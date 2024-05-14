@@ -140,6 +140,7 @@ function save_event($groupId, $allDay, $startDate, $endDate, $daysOfWeek, $start
     // [ISSUE]  Serve implementare un meccanismo che invii i comandi all'orario specificato.
     //          Per il momento, invia entrambi i comandi (START e STOP)
     save_datapos($dataposCheckBoolean, $calendar_id);
+    print_r($dataposCheckBoolean);
 
     // Salva la sessione di registrazione
     save_sessione_rec($author, $data_ora_inizio, $data_ora_fine, $calendar_id);
@@ -453,11 +454,14 @@ function save_datapos($datapos_check, $id) {
             $query->execute();
 
             // Endpoint Remoto
-            echo '$prenotazioni_id: '.$prenotazioni_id;
-            postStartSessionRecording(true, $prenotazioni_id);
-            echo 'Start Recording Sent';
-            postEndSessionRecording(true, $prenotazioni_id);
-            echo 'End Recording Sent';
+            if ($datapos_check == "1") {
+                echo '$prenotazioni_id: '.$prenotazioni_id;
+                postStartSessionRecording(true, $prenotazioni_id);
+                echo 'Start Recording Sent';
+                postEndSessionRecording(true, $prenotazioni_id);
+                echo 'End Recording Sent';
+            }
+            
 
             return $id;
         } else {
